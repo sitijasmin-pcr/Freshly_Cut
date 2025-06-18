@@ -22,7 +22,7 @@ const menuItems = [
   { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
-  { name: 'Shift', icon: <AiFillSchedule />, path: '/shiftManagement' },
+  { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
 ];
 
@@ -38,7 +38,7 @@ const Sidebar = () => {
 
   return (
     <aside className="bg-white w-64 h-screen shadow-lg px-4 py-6 hidden md:block">
-      <div className="text-xl font-bold mb-8 text-orange-700">Tomoro Coffee</div>
+      <div className="text-xl font-bold mb-8 text-orange-700"><img className= "px-8" src="https://images.seeklogo.com/logo-png/51/1/tomoro-coffee-logo-png_seeklogo-513701.png" alt="" /></div>
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link
