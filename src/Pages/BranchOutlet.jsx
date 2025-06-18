@@ -1,7 +1,7 @@
 import React from "react";
 
 const outlets = [
-  { name: "Tomoro Coffee Pekanbaru" },
+  { name: "Tomoro Coffee Riau" },
   { name: "Tomoro Coffee Hangtuah" },
   { name: "Tomoro Coffee Sembilang" },
   { name: "Tomoro Coffee Gobah" },
