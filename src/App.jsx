@@ -13,9 +13,14 @@ import Produk from './Pages/Produk'
 import SalesManagement from './Pages/SalesManagement'
 import ProdukTerlaris from './Pages/ProdukTerlaris'
 import Penjualan from './Pages/Penjualan'
+<<<<<<< HEAD
+import BranchOutlet from './Pages/BranchOutlet'
+=======
+>>>>>>> ac0620258e4f6d54ff4bbf764b13103c930625b5
 import Feedback from './Pages/Feedback'
 import BranchOutlet from './Pages/BranchOutlet';
 import ShiftManagement from "./Pages/ShiftManagement";
+
 
 
 
