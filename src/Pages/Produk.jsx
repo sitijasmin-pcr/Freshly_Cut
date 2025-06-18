@@ -6,9 +6,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState({
     id: "",
     name: "",
-    brand: "",
     category: "",
-    gender: "",
     description: "",
     images: [],
     sizes: [],
@@ -22,10 +20,8 @@ export default function ProductPage() {
     const dummyProducts = [
       {
         id: "P001",
-        name: "Sneakers Alpha",
-        brand: "Nike",
+        name: "Sneakers",
         category: "roti",
-        gender: "Men",
         description: "High-quality sports sneakers",
         images: ["https://via.placeholder.com/100x100.png?text=Alpha"],
         sizes: ["6", "7", "8"],
@@ -35,9 +31,7 @@ export default function ProductPage() {
       {
         id: "P002",
         name: "Classic Heels",
-        brand: "Zara",
         category: "minuman coffee",
-        gender: "Women",
         description: "Elegant and comfortable heels",
         images: ["https://via.placeholder.com/100x100.png?text=Heels"],
         sizes: ["5", "6.5"],
@@ -47,9 +41,7 @@ export default function ProductPage() {
       {
         id: "P003",
         name: "Cool Drink",
-        brand: "Coca Cola",
         category: "minuman non-coffee",
-        gender: "Unisex",
         description: "Refreshing beverage",
         images: ["https://via.placeholder.com/100x100.png?text=Drink"],
         sizes: ["M"],
@@ -76,7 +68,7 @@ export default function ProductPage() {
   };
 
   const handleSave = () => {
-    if (!product.name || !product.brand || !product.price)
+    if (!product.name || !product.price)
       return alert("Please fill required fields");
 
     if (editingIndex !== null) {
@@ -105,9 +97,8 @@ export default function ProductPage() {
     setProduct({
       id: "",
       name: "",
-      brand: "",
       category: "",
-      gender: "",
+      // gender: "",
       description: "",
       images: [],
       sizes: [],
@@ -154,9 +145,8 @@ export default function ProductPage() {
             <th className="px-4 py-2">ID</th>
             <th className="px-4 py-2">Image</th>
             <th className="px-4 py-2">Product</th>
-            <th className="px-4 py-2">Brand</th>
             <th className="px-4 py-2">Category</th>
-            <th className="px-4 py-2">Gender</th>
+            {/* <th className="px-4 py-2">Gender</th> */}
             <th className="px-4 py-2">Price</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
@@ -173,9 +163,8 @@ export default function ProductPage() {
                 )}
               </td>
               <td className="px-4 py-2">{item.name}</td>
-              <td className="px-4 py-2">{item.brand}</td>
               <td className="px-4 py-2">{item.category}</td>
-              <td className="px-4 py-2">{item.gender}</td>
+              {/* <td className="px-4 py-2">{item.gender}</td> */}
               <td className="px-4 py-2">${item.price}</td>
               <td className="px-4 py-2 flex gap-2">
                 <button
@@ -217,26 +206,19 @@ export default function ProductPage() {
             className="border p-2 rounded w-full mb-3"
           />
           <input
-            name="brand"
-            placeholder="Brand"
-            value={product.brand}
-            onChange={handleInputChange}
-            className="border p-2 rounded w-full mb-3"
-          />
-          <input
             name="category"
             placeholder="Category"
             value={product.category}
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-3"
           />
-          <input
+          {/* <input
             name="gender"
             placeholder="Gender"
             value={product.gender}
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-3"
-          />
+          /> */}
           <textarea
             name="description"
             placeholder="Description (max 100 chars)"

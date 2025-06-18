@@ -35,7 +35,7 @@ function App() {
           <Route path="/produkTerlaris" element={<ProdukTerlaris />}/>
           <Route path="/sales" element={<SalesManagement />}/>   
           <Route path="/branch" element={<BranchOutlet />} />
-          <Route path="/shiftManagement" element={<ShiftManagement />} />
+          <Route path="/shift" element={<ShiftManagement />} />
           <Route path="/feedback" element={<Feedback />}/>
         </Route>
       </Routes>
