@@ -13,11 +13,10 @@ import Produk from './Pages/Produk'
 import SalesManagement from './Pages/SalesManagement'
 import ProdukTerlaris from './Pages/ProdukTerlaris'
 import Penjualan from './Pages/Penjualan'
-import Branch from './Pages/BranchOutlet'
-import Shift from './Pages/ShiftManagement'
 import BranchOutlet from './Pages/BranchOutlet'
 import Feedback from './Pages/Feedback'
 import ShiftManagement from './Pages/ShiftManagement'
+
 
 
 function App() {

@@ -1,209 +1,285 @@
-import React, { useState, useEffect } from 'react';
-import { UserPlus, Repeat, Trash2, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Pencil, Trash2 } from 'lucide-react';
 
 const initialEmployees = [
-  { id: 1, name: 'Budi', shift: 'Pagi' },
-  { id: 2, name: 'Sari', shift: 'Siang' },
-  { id: 3, name: 'Amin', shift: 'Malam' },
+  { id: 1, name: 'Andi Wijaya', masuk: '08:00', keluar: '17:00', contact: 'andi.wijaya@email.com', status: 'Hadir' },
+  { id: 2, name: 'Sinta Marlina', masuk: '07:45', keluar: '17:30', contact: 'sinta.m@email.com', status: 'Hadir' },
+  { id: 3, name: 'Dimas Pratama', masuk: '08:10', keluar: '16:50', contact: 'dimas.p@email.com', status: 'Hadir' },
+  { id: 4, name: 'Clara Nathania', masuk: '-', keluar: '-', contact: 'clara.n@email.com', status: 'Absen' }
 ];
-
-const shifts = ['Pagi', 'Siang', 'Malam'];
-
-const Toast = ({ message, onClose }) => {
-  useEffect(() => {
-    const timeout = setTimeout(onClose, 3000);
-    return () => clearTimeout(timeout);
-  }, [onClose]);
-
-  return (
-    <div className="fixed bottom-5 right-5 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
-      <CheckCircle2 size={24} />
-      <p>{message}</p>
-    </div>
-  );
-};
 
 const ShiftPage = () => {
   const [employees, setEmployees] = useState(initialEmployees);
-  const [newName, setNewName] = useState('');
-  const [newShift, setNewShift] = useState('Pagi');
-  const [rotating, setRotating] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [inputError, setInputError] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('Today');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', masuk: '', keluar: '', contact: '', status: 'Hadir' });
+  const [editMode, setEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [activeView, setActiveView] = useState('shift');
 
-  const rotateShift = () => {
-    if (employees.length === 0) return;
-    setRotating(true);
-    setTimeout(() => {
-      const updated = employees.map(emp => {
-        const nextShift = shifts[(shifts.indexOf(emp.shift) + 1) % shifts.length];
-        return { ...emp, shift: nextShift };
-      });
-      setEmployees(updated);
-      setRotating(false);
-      setToast('Shift berhasil dirotasi!');
-    }, 900);
-  };
-
-  const addEmployee = (e) => {
-    e.preventDefault();
-    if (!newName.trim()) {
-      setInputError(true);
-      return;
+  const handleAddOrUpdateEmployee = () => {
+    if (editMode) {
+      setEmployees(prev =>
+        prev.map(emp => (emp.id === editId ? { ...formData, id: editId } : emp))
+      );
+    } else {
+      setEmployees(prev => [...prev, { ...formData, id: prev.length + 1 }]);
     }
-    setInputError(false);
-    setEmployees(prev => [
-      ...prev,
-      { id: prev.length ? prev[prev.length - 1].id + 1 : 1, name: newName.trim(), shift: newShift }
-    ]);
-    setNewName('');
-    setNewShift('Pagi');
-    setToast('Pegawai berhasil ditambahkan!');
+
+    setFormData({ name: '', masuk: '', keluar: '', contact: '', status: 'Hadir' });
+    setIsModalOpen(false);
+    setEditMode(false);
+    setEditId(null);
   };
 
-  const deleteEmployee = (id) => {
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
-    setToast('Pegawai berhasil dihapus!');
+  const handleEditClick = (emp) => {
+    setFormData(emp);
+    setEditMode(true);
+    setEditId(emp.id);
+    setIsModalOpen(true);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-200 p-8 flex flex-col items-center">
-      <h1 className="text-5xl font-extrabold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-purple-700 flex items-center gap-3">
-        👷‍♂️ Manajemen Shift Kerja
-      </h1>
+  const handleDelete = (id) => {
+    if (confirm("Yakin ingin menghapus shift ini?")) {
+      setEmployees(prev => prev.filter(emp => emp.id !== id));
+    }
+  };
 
-      <div className="w-full max-w-4xl">
-        {/* Rotasi Shift */}
-        <button
-          onClick={rotateShift}
-          disabled={rotating || employees.length === 0}
-          className={`w-full mb-10 py-4 rounded-lg font-bold text-white shadow-lg flex justify-center items-center gap-3
-            transition-all duration-300
-            ${rotating || employees.length === 0 ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-700 hover:bg-indigo-800'}
-          `}
-          aria-label="Otomatiskan pergantian shift"
-        >
-          {rotating ? (
-            <Repeat className="animate-spin" size={26} />
-          ) : (
-            <Repeat size={26} />
-          )}
-          Otomatiskan Pergantian Shift
-        </button>
+  const handleStatusChange = (id, newStatus) => {
+    setEmployees(prev =>
+      prev.map(emp => (emp.id === id ? { ...emp, status: newStatus } : emp))
+    );
+  };
 
-        {/* Form tambah pegawai */}
-        <section className="bg-white rounded-xl shadow-xl p-8 mb-12">
-          <h2 className="text-3xl font-semibold mb-6 flex items-center gap-3 text-indigo-700">
-            <UserPlus size={28} /> Tambah Pegawai Baru
-          </h2>
-          <form onSubmit={addEmployee} className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <input
-              type="text"
-              placeholder="Nama Pegawai"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              className={`flex-grow border rounded-lg px-5 py-3 focus:outline-none focus:ring-4
-                transition duration-300
-                ${inputError ? 'border-red-500 ring-red-400' : 'border-gray-300 ring-indigo-400'}
-              `}
-              aria-invalid={inputError}
-              aria-describedby="name-error"
-            />
-            <select
-              value={newShift}
-              onChange={e => setNewShift(e.target.value)}
-              className="border border-gray-300 rounded-lg px-5 py-3 focus:outline-none focus:ring-4 focus:ring-indigo-400 transition duration-300"
-              aria-label="Pilih shift pegawai"
-            >
-              {shifts.map(shift => (
-                <option key={shift} value={shift}>{shift}</option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              disabled={!newName.trim()}
-              className={`bg-green-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg
-                transition-colors duration-300
-                ${!newName.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'}
-              `}
-              aria-label="Tambah pegawai baru"
-            >
-              Tambah
-            </button>
-          </form>
-          {inputError && (
-            <p id="name-error" className="mt-2 text-sm text-red-600 font-semibold">
-              Nama pegawai tidak boleh kosong.
-            </p>
-          )}
-        </section>
+  const filters = ['Yesterday', 'Today', 'Tomorrow', 'Pagi', 'Malam', 'Fulltime'];
 
-        {/* Tabel pegawai */}
-        <section className="bg-white rounded-xl shadow-xl overflow-x-auto">
-          <h2 className="text-3xl font-semibold text-indigo-700 p-6">📋 Daftar Pegawai</h2>
-          <table className="w-full min-w-[480px] border-collapse text-left">
-            <thead className="bg-indigo-100">
-              <tr>
-                <th className="py-4 px-6 border-b border-indigo-300">#</th>
-                <th className="py-4 px-6 border-b border-indigo-300">Nama</th>
-                <th className="py-4 px-6 border-b border-indigo-300">Shift</th>
-                <th className="py-4 px-6 border-b border-indigo-300 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center py-10 text-indigo-400 italic">
-                    Belum ada data pegawai.
-                  </td>
-                </tr>
-              ) : (
-                employees.map((emp, idx) => (
-                  <tr
-                    key={emp.id}
-                    className={`transition-colors duration-300 hover:bg-indigo-50
-                      ${idx % 2 === 0 ? 'bg-indigo-50' : 'bg-white'}
-                    `}
-                  >
-                    <td className="py-4 px-6 border-b border-indigo-200">{idx + 1}</td>
-                    <td className="py-4 px-6 border-b border-indigo-200">{emp.name}</td>
-                    <td className="py-4 px-6 border-b border-indigo-200">{emp.shift}</td>
-                    <td className="py-4 px-6 border-b border-indigo-200 text-center">
-                      <button
-                        onClick={() => deleteEmployee(emp.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors"
-                        aria-label={`Hapus pegawai ${emp.name}`}
-                        title={`Hapus pegawai ${emp.name}`}
-                      >
-                        <Trash2 size={22} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </section>
+  const hadirCount = employees.filter(emp => emp.status === 'Hadir').length;
+  const absenCount = employees.filter(emp => emp.status === 'Absen').length;
+  const telatCount = employees.filter(emp => {
+    if (emp.status === 'Hadir' && emp.masuk !== '-') {
+      const [jam, menit] = emp.masuk.split(':').map(Number);
+      return jam > 8 || (jam === 8 && menit > 0);
+    }
+    return false;
+  }).length;
+
+  const EmployeeQuestView = () => (
+    <div className="text-center">
+      <h2 className="text-3xl font-bold text-orange-600 mb-6">Employee Quest</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-center text-center mb-6">
+        <div className="bg-white shadow-lg rounded-xl p-4">
+          <p className="text-gray-500 text-sm">Quest Done</p>
+          <p className="text-2xl text-orange-600 font-bold">4</p>
+        </div>
+        <div className="bg-white shadow-lg rounded-xl p-4">
+          <p className="text-gray-500 text-sm">Working Hour</p>
+          <p className="text-2xl text-orange-600 font-bold">9.00AM-2.00AM</p>
+        </div>
+        <div className="bg-white shadow-lg rounded-xl p-4">
+          <p className="text-gray-500 text-sm">Quest Remain</p>
+          <p className="text-2xl text-orange-600 font-bold">13</p>
+        </div>
       </div>
 
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      {/* Animasi keyframes */}
-      <style>{`
-        @keyframes fade-in-up {
-          0% {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.4s ease forwards;
-        }
-      `}</style>
+
+      <h3 className="text-lg font-semibold text-gray-700 mb-4">Quest List</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+        {["Cuci Piring", "Restock Barang", "Bersih Bersih", "Rekap Harian", "Closing"].map((quest, idx) => (
+          <div key={idx} className="bg-white border rounded-xl shadow p-4 flex flex-col items-center">
+            <div className="w-10 h-10 mb-2 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 font-bold">✓</span>
+            </div>
+            <p className="text-sm font-semibold mb-1">{quest}</p>
+            <span className="text-green-600 text-xs bg-green-100 px-2 py-1 rounded-full">Done</span>
+          </div>
+        ))}
+        <div className="bg-white border rounded-xl shadow p-4 flex items-center justify-center text-gray-300 text-3xl font-bold">+</div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white p-6">
+      <h1 className="text-2xl font-bold mb-4 text-gray-600">Pages / Dashboard</h1>
+
+      <div className="flex justify-center gap-6 mb-8">
+        {[{ label: 'Employee Quest', value: 'quest' }, { label: 'List Izin', value: 'izin' }, { label: 'Employee Shift', value: 'shift' }].map((btn, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveView(btn.value)}
+            className={`px-6 py-2 rounded-xl shadow font-semibold ${
+              activeView === btn.value ? 'bg-orange-500 text-white' : 'bg-white text-orange-600 border border-orange-500 hover:bg-orange-50'
+            }`}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+
+      {activeView === 'quest' ? (
+        <EmployeeQuestView />
+      ) : (
+        <>
+          <h2 className="text-3xl font-bold text-center text-orange-600 mb-8">Shift Page</h2>
+
+          {/* Statistik */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6 text-center">
+            <div className="bg-white rounded-xl shadow-md py-6">
+              <p className="text-orange-600 text-lg font-bold">Karyawan Hadir</p>
+              <p className="text-2xl font-bold text-gray-800">{hadirCount}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-md py-6">
+              <p className="text-orange-600 text-lg font-bold">Karyawan Absen</p>
+              <p className="text-2xl font-bold text-gray-800">{absenCount}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-md py-6">
+              <p className="text-orange-600 text-lg font-bold">Karyawan Telat</p>
+              <p className="text-2xl font-bold text-gray-800">{telatCount}</p>
+            </div>
+          </div>
+
+          {/* Filter Hari */}
+          <div className="flex gap-2 text-sm font-medium text-gray-700 mb-4 flex-wrap">
+            {filters.map((filter, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-3 py-1 rounded-full ${
+                  activeFilter === filter ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {/* Daftar Shift */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-orange-600">Employee Shift List</h3>
+              <button
+                onClick={() => {
+                  setIsModalOpen(true);
+                  setEditMode(false);
+                  setFormData({ name: '', masuk: '', keluar: '', contact: '', status: 'Hadir' });
+                }}
+                className="bg-orange-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-600"
+              >
+                Tambah Shift
+              </button>
+            </div>
+
+            {/* Tabel */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left border-separate border-spacing-y-2">
+                <thead className="text-orange-600">
+                  <tr>
+                    <th className="px-4 py-2">Nama</th>
+                    <th className="px-4 py-2">Masuk</th>
+                    <th className="px-4 py-2">Contact</th>
+                    <th className="px-4 py-2">Keluar</th>
+                    <th className="px-4 py-2">Status</th>
+                    <th className="px-4 py-2">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map((emp) => (
+                    <tr key={emp.id} className="bg-gray-100 hover:bg-orange-50 rounded-xl text-sm">
+                      <td className="px-4 py-2">{emp.name}</td>
+                      <td className="px-4 py-2">{emp.masuk}</td>
+                      <td className="px-4 py-2">{emp.contact}</td>
+                      <td className="px-4 py-2">{emp.keluar}</td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={emp.status}
+                          onChange={(e) => handleStatusChange(emp.id, e.target.value)}
+                          className={`px-2 py-1 text-xs rounded-md font-semibold ${
+                            emp.status === 'Hadir' ? 'bg-green-600 text-white' : 'bg-red-500 text-white'
+                          }`}
+                        >
+                          <option value="Hadir">Hadir</option>
+                          <option value="Absen">Absen</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-2 flex gap-2">
+                        <button onClick={() => handleEditClick(emp)} className="text-blue-500 hover:text-blue-700">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(emp.id)} className="text-red-500 hover:text-red-700">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Modal Tambah/Edit Shift */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg relative">
+            <button
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditMode(false);
+              }}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X />
+            </button>
+            <h3 className="text-xl font-semibold mb-4 text-orange-600">
+              {editMode ? 'Edit Shift Karyawan' : 'Tambah Shift Karyawan'}
+            </h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Nama"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className="w-full border px-4 py-2 rounded-md"
+              />
+              <input
+                type="time"
+                value={formData.masuk}
+                onChange={e => setFormData({ ...formData, masuk: e.target.value })}
+                className="w-full border px-4 py-2 rounded-md"
+              />
+              <input
+                type="time"
+                value={formData.keluar}
+                onChange={e => setFormData({ ...formData, keluar: e.target.value })}
+                className="w-full border px-4 py-2 rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="Kontak"
+                value={formData.contact}
+                onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                className="w-full border px-4 py-2 rounded-md"
+              />
+              <select
+                value={formData.status}
+                onChange={e => setFormData({ ...formData, status: e.target.value })}
+                className="w-full border px-4 py-2 rounded-md"
+              >
+                <option value="Hadir">Hadir</option>
+                <option value="Absen">Absen</option>
+              </select>
+              <button
+                onClick={handleAddOrUpdateEmployee}
+                className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 font-semibold"
+              >
+                {editMode ? 'Update Shift' : 'Simpan Shift'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,7 +24,7 @@ const menuItems = [
   { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
-  { name: 'Shift', icon: <AiFillSchedule />, path: '/shiftManagement' },
+  { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
 ]
 
