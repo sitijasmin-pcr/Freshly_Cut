@@ -108,9 +108,9 @@ const ShiftPage = () => {
           <button
             key={idx}
             onClick={() => setActiveView(btn.value)}
-            className={`px-6 py-2 rounded-xl shadow font-semibold ${
+            className={px-6 py-2 rounded-xl shadow font-semibold ${
               activeView === btn.value ? 'bg-orange-500 text-white' : 'bg-white text-orange-600 border border-orange-500 hover:bg-orange-50'
-            }`}
+            }}
           >
             {btn.label}
           </button>
@@ -145,9 +145,9 @@ const ShiftPage = () => {
               <button
                 key={idx}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-1 rounded-full ${
+                className={px-3 py-1 rounded-full ${
                   activeFilter === filter ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'
-                }`}
+                }}
               >
                 {filter}
               </button>
@@ -194,9 +194,9 @@ const ShiftPage = () => {
                         <select
                           value={emp.status}
                           onChange={(e) => handleStatusChange(emp.id, e.target.value)}
-                          className={`px-2 py-1 text-xs rounded-md font-semibold ${
+                          className={px-2 py-1 text-xs rounded-md font-semibold ${
                             emp.status === 'Hadir' ? 'bg-green-600 text-white' : 'bg-red-500 text-white'
-                          }`}
+                          }}
                         >
                           <option value="Hadir">Hadir</option>
                           <option value="Absen">Absen</option>
@@ -283,5 +283,3 @@ const ShiftPage = () => {
     </div>
   );
 };
-
-export default ShiftPage;
