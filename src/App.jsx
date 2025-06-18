@@ -13,9 +13,14 @@ import Produk from './Pages/Produk'
 import SalesManagement from './Pages/SalesManagement'
 import ProdukTerlaris from './Pages/ProdukTerlaris'
 import Penjualan from './Pages/Penjualan'
+<<<<<<< HEAD
+import BranchOutlet from './Pages/BranchOutlet'
+=======
+>>>>>>> ac0620258e4f6d54ff4bbf764b13103c930625b5
 import Feedback from './Pages/Feedback'
 import BranchOutlet from './Pages/BranchOutlet';
 import ShiftManagement from "./Pages/ShiftManagement";
+
 
 
 
@@ -35,7 +40,7 @@ function App() {
           <Route path="/produkTerlaris" element={<ProdukTerlaris />}/>
           <Route path="/sales" element={<SalesManagement />}/>   
           <Route path="/branch" element={<BranchOutlet />} />
-          <Route path="/shiftManagement" element={<ShiftManagement />} />
+          <Route path="/shift" element={<ShiftManagement />} />
           <Route path="/feedback" element={<Feedback />}/>
         </Route>
       </Routes>
