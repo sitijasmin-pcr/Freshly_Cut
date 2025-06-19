@@ -1,11 +1,4 @@
-import React from "react";
-
-const outlets = [
-  { name: "Tomoro Coffee Riau" },
-  { name: "Tomoro Coffee Hangtuah" },
-  { name: "Tomoro Coffee Sembilang" },
-  { name: "Tomoro Coffee Gobah" },
-];
+import React, { useState } from "react";
 
 const Outlet = () => {
   const [outlets, setOutlets] = useState([
@@ -35,60 +28,90 @@ const Outlet = () => {
     },
   ]);
 
-  const [newOutlet, setNewOutlet] = useState({ name: "", mapsUrl: "", imageUrl: "" });
+  const [newOutlet, setNewOutlet] = useState({
+    name: "",
+    mapsUrl: "",
+    imageUrl: "",
+  });
+
+  const [showForm, setShowForm] = useState(false);
 
   const handleAddOutlet = () => {
     if (newOutlet.name && newOutlet.mapsUrl && newOutlet.imageUrl) {
       setOutlets([...outlets, newOutlet]);
       setNewOutlet({ name: "", mapsUrl: "", imageUrl: "" });
+      setShowForm(false); // hide form after adding
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 sm:p-10">
-      <h1 className="text-4xl font-bold text-center text-orange-600 mb-4">OUTLET LOCATIONS</h1>
+      <h1 className="text-4xl font-bold text-center text-orange-600 mb-4">
+        OUTLET LOCATIONS
+      </h1>
       <p className="text-center text-gray-500 max-w-3xl mx-auto mb-10">
-        "Masukan, keluhan, atau kepuasan yang disampaikan pelanggan mengenai produk atau pelayanan yang diterima.
-        Feedback berguna untuk menemukan masalah, melakukan perbaikan, dan meningkatkan kepuasan pelanggan."
+        "Masukan, keluhan, atau kepuasan yang disampaikan pelanggan mengenai
+        produk atau pelayanan yang diterima. Feedback berguna untuk menemukan
+        masalah, melakukan perbaikan, dan meningkatkan kepuasan pelanggan."
       </p>
 
-      {/* Form Tambah Outlet */}
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow border mb-12">
-        <h2 className="text-lg font-semibold text-orange-500 mb-4">Tambah Outlet Baru</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <input
-            type="text"
-            placeholder="Nama Outlet"
-            value={newOutlet.name}
-            onChange={(e) => setNewOutlet({ ...newOutlet, name: e.target.value })}
-            className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-          <input
-            type="text"
-            placeholder="Link Maps"
-            value={newOutlet.mapsUrl}
-            onChange={(e) => setNewOutlet({ ...newOutlet, mapsUrl: e.target.value })}
-            className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-          <input
-            type="text"
-            placeholder="Link Gambar"
-            value={newOutlet.imageUrl}
-            onChange={(e) => setNewOutlet({ ...newOutlet, imageUrl: e.target.value })}
-            className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
-        </div>
-        <div className="text-right mt-4">
-          <Button
-            onClick={handleAddOutlet}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 text-sm rounded-full shadow"
-          >
-            Tambahkan Outlet
-          </Button>
-        </div>
+      {/* Tombol Tampilkan/Sembunyikan Form */}
+      <div className="text-center mb-6">
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold shadow"
+        >
+          {showForm ? "Tutup Form Tambah Outlet" : "Tambah Outlet"}
+        </button>
       </div>
 
-      {/* List Outlet */}
+      {/* Form Tambah Outlet (muncul di bawah tombol, bukan modal) */}
+      {showForm && (
+        <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow border mb-12 transition-all duration-300">
+          <h2 className="text-lg font-semibold text-orange-500 mb-4">
+            Tambah Outlet Baru
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <input
+              type="text"
+              placeholder="Nama Outlet"
+              value={newOutlet.name}
+              onChange={(e) =>
+                setNewOutlet({ ...newOutlet, name: e.target.value })
+              }
+              className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <input
+              type="text"
+              placeholder="Link Maps"
+              value={newOutlet.mapsUrl}
+              onChange={(e) =>
+                setNewOutlet({ ...newOutlet, mapsUrl: e.target.value })
+              }
+              className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <input
+              type="text"
+              placeholder="Link Gambar"
+              value={newOutlet.imageUrl}
+              onChange={(e) =>
+                setNewOutlet({ ...newOutlet, imageUrl: e.target.value })
+              }
+              className="border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+          <div className="text-right mt-4">
+            <button
+              onClick={handleAddOutlet}
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 text-sm rounded-full shadow"
+            >
+              Simpan Outlet
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Daftar Outlet */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
         {outlets.map((outlet, idx) => (
           <div
@@ -103,7 +126,9 @@ const Outlet = () => {
               />
             </div>
             <div className="p-5 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800">{outlet.name}</h2>
+              <h2 className="text-lg font-semibold text-gray-800">
+                {outlet.name}
+              </h2>
               <a
                 href={outlet.mapsUrl}
                 target="_blank"

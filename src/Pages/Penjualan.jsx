@@ -1,4 +1,13 @@
 import React from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
 const Penjualan = () => {
   const dataBulanan = [
@@ -16,33 +25,68 @@ const Penjualan = () => {
     { bulan: "Desember", totalProdukTerjual: 1700, totalPendapatan: 34000000 },
   ];
 
+  const totalProduk = dataBulanan.reduce((sum, d) => sum + d.totalProdukTerjual, 0);
+  const totalPendapatan = dataBulanan.reduce((sum, d) => sum + d.totalPendapatan, 0);
+  const rataRataPendapatan = totalPendapatan / dataBulanan.length;
+
+  const bulanMax = dataBulanan.reduce((a, b) => a.totalPendapatan > b.totalPendapatan ? a : b);
+  const bulanMin = dataBulanan.reduce((a, b) => a.totalPendapatan < b.totalPendapatan ? a : b);
+
+  const dataDenganPersentase = dataBulanan.map((item, index) => {
+    if (index === 0) return { ...item, perubahan: 0 };
+    const perubahan = ((item.totalPendapatan - dataBulanan[index - 1].totalPendapatan) /
+      dataBulanan[index - 1].totalPendapatan) * 100;
+    return { ...item, perubahan: perubahan.toFixed(2) };
+  });
+
   return (
-    <div className="max-w-5xl mx-auto p-8 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl shadow-lg">
+    <div className="max-w-6xl mx-auto p-8 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl shadow-lg">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-indigo-700">
         Rangkuman Penjualan Bulanan
       </h1>
 
+      {/* Chart */}
+      <div className="w-full h-72 mb-10 bg-white rounded-xl shadow-md p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={dataBulanan}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="bulan" />
+            <YAxis tickFormatter={(value) => `Rp${(value / 1000000)}jt`} />
+            <Tooltip formatter={(value) => `Rp${value.toLocaleString()}`} />
+            <Bar dataKey="totalPendapatan" fill="#6366f1" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Tabel */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded-xl shadow-md">
           <thead className="bg-indigo-100 text-indigo-700 uppercase font-semibold tracking-wide">
             <tr>
               <th className="px-6 py-4 text-left">Bulan</th>
-              <th className="px-6 py-4 text-right">Total Produk Terjual</th>
-              <th className="px-6 py-4 text-right">Total Pendapatan (Rp)</th>
+              <th className="px-6 py-4 text-right">Produk Terjual</th>
+              <th className="px-6 py-4 text-right">Pendapatan (Rp)</th>
+              <th className="px-6 py-4 text-right">Perubahan (%)</th>
             </tr>
           </thead>
           <tbody>
-            {dataBulanan.map(({ bulan, totalProdukTerjual, totalPendapatan }) => (
+            {dataDenganPersentase.map(({ bulan, totalProdukTerjual, totalPendapatan, perubahan }) => (
               <tr
                 key={bulan}
-                className="border-b border-gray-200 hover:bg-indigo-50 transition-colors duration-200"
+                className={`border-b ${bulan === bulanMax.bulan
+                  ? "bg-green-50"
+                  : bulan === bulanMin.bulan
+                  ? "bg-red-50"
+                  : "hover:bg-indigo-50"} transition-colors duration-200`}
               >
                 <td className="px-6 py-4 font-medium text-gray-800">{bulan}</td>
-                <td className="px-6 py-4 text-right text-gray-700 font-semibold">
-                  {totalProdukTerjual.toLocaleString()}
-                </td>
+                <td className="px-6 py-4 text-right">{totalProdukTerjual.toLocaleString()}</td>
                 <td className="px-6 py-4 text-right text-indigo-600 font-bold">
                   Rp {totalPendapatan.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 text-right text-sm text-gray-600">
+                  {perubahan >= 0 ? "+" : ""}
+                  {perubahan}%
                 </td>
               </tr>
             ))}
@@ -50,25 +94,25 @@ const Penjualan = () => {
         </table>
       </div>
 
-      {/* Summary Card */}
+      {/* Summary Cards */}
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
           <span className="text-indigo-600 text-4xl font-extrabold">
-            {dataBulanan.reduce((acc, cur) => acc + cur.totalProdukTerjual, 0).toLocaleString()}
+            {totalProduk.toLocaleString()}
           </span>
           <p className="mt-2 text-gray-600 font-semibold">Total Produk Terjual Tahun Ini</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
           <span className="text-indigo-600 text-4xl font-extrabold">
-            Rp {dataBulanan.reduce((acc, cur) => acc + cur.totalPendapatan, 0).toLocaleString()}
+            Rp {totalPendapatan.toLocaleString()}
           </span>
           <p className="mt-2 text-gray-600 font-semibold">Total Pendapatan Tahun Ini</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
           <span className="text-indigo-600 text-4xl font-extrabold">
-            {(dataBulanan.reduce((acc, cur) => acc + cur.totalPendapatan, 0) / 12).toLocaleString(undefined, {maximumFractionDigits: 0})}
+            Rp {rataRataPendapatan.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </span>
           <p className="mt-2 text-gray-600 font-semibold">Rata-rata Pendapatan Bulanan</p>
         </div>

@@ -11,22 +11,21 @@ export default function ProductPage() {
     images: [],
     sizes: [],
     price: "",
-    discount: ""
+    discount: "",
   });
   const [productList, setProductList] = useState([]);
 
-  // Dummy Data
   useEffect(() => {
     const dummyProducts = [
       {
         id: "P001",
         name: "Sneakers",
-        category: "roti",
+        category: "makanan", // diubah dari "roti"
         description: "High-quality sports sneakers",
         images: ["https://via.placeholder.com/100x100.png?text=Alpha"],
         sizes: ["6", "7", "8"],
         price: "120",
-        discount: "10"
+        discount: "10",
       },
       {
         id: "P002",
@@ -36,18 +35,18 @@ export default function ProductPage() {
         images: ["https://via.placeholder.com/100x100.png?text=Heels"],
         sizes: ["5", "6.5"],
         price: "95",
-        discount: "15"
+        discount: "15",
       },
       {
         id: "P003",
         name: "Cool Drink",
-        category: "minuman non-coffee",
+        category: "minuman non coffee", // disamakan dengan dropdown value
         description: "Refreshing beverage",
         images: ["https://via.placeholder.com/100x100.png?text=Drink"],
         sizes: ["M"],
         price: "50",
-        discount: "5"
-      }
+        discount: "5",
+      },
     ];
     setProductList(dummyProducts);
   }, []);
@@ -64,26 +63,44 @@ export default function ProductPage() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setProduct({ ...product, images: [...product.images, ...files] });
+    const newImageURLs = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setProduct({ ...product, images: [...product.images, ...newImageURLs] });
   };
 
   const handleSave = () => {
     if (!product.name || !product.price)
       return alert("Please fill required fields");
 
+    const imageURLs = product.images.map((img) =>
+      typeof img === "string" ? img : img.preview
+    );
+
     if (editingIndex !== null) {
+      const updatedProduct = { ...product, images: imageURLs };
       const updatedList = [...productList];
-      updatedList[editingIndex] = product;
+      updatedList[editingIndex] = updatedProduct;
       setProductList(updatedList);
       setEditingIndex(null);
     } else {
-      setProductList([...productList, { ...product, id: `P${Date.now()}` }]);
+      const newId = `P${String(productList.length + 1).padStart(3, "0")}`;
+      setProductList([
+        ...productList,
+        { ...product, id: newId, images: imageURLs },
+      ]);
     }
+
     resetForm();
   };
 
   const handleEdit = (index) => {
-    setProduct(productList[index]);
+    const existing = productList[index];
+    const mappedImages = existing.images.map((url) =>
+      typeof url === "string" ? { preview: url } : url
+    );
+    setProduct({ ...existing, images: mappedImages });
     setEditingIndex(index);
     setIsSidebarOpen(true);
   };
@@ -98,36 +115,38 @@ export default function ProductPage() {
       id: "",
       name: "",
       category: "",
-      // gender: "",
       description: "",
       images: [],
       sizes: [],
       price: "",
-      discount: ""
+      discount: "",
     });
+    setEditingIndex(null);
     setIsSidebarOpen(false);
   };
 
   const countByCategory = (category) =>
-    productList.filter((item) => item.category.toLowerCase() === category.toLowerCase()).length;
+    productList.filter(
+      (item) => item.category.toLowerCase() === category.toLowerCase()
+    ).length;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-orange-500 mb-4">Product Page</h1>
 
-      {/* Category Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded shadow">
-          <h2 className="text-lg font-semibold">Roti</h2>
-          <p className="text-xl">{countByCategory("roti")}</p>
+          <h2 className="text-lg font-semibold">Makanan</h2>{" "}
+          {/* diubah dari "Roti" */}
+          <p className="text-xl">{countByCategory("makanan")}</p>
         </div>
         <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded shadow">
           <h2 className="text-lg font-semibold">Minuman Coffee</h2>
           <p className="text-xl">{countByCategory("minuman coffee")}</p>
         </div>
         <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded shadow">
-          <h2 className="text-lg font-semibold">Minuman Non-Coffee</h2>
-          <p className="text-xl">{countByCategory("minuman non-coffee")}</p>
+          <h2 className="text-lg font-semibold">Minuman Non Coffee</h2>
+          <p className="text-xl">{countByCategory("minuman non coffee")}</p>
         </div>
       </div>
 
@@ -138,7 +157,6 @@ export default function ProductPage() {
         Add Product
       </button>
 
-      {/* Product Table */}
       <table className="w-full mt-6 table-auto border border-gray-200">
         <thead className="bg-gray-100 text-left">
           <tr>
@@ -146,7 +164,6 @@ export default function ProductPage() {
             <th className="px-4 py-2">Image</th>
             <th className="px-4 py-2">Product</th>
             <th className="px-4 py-2">Category</th>
-            {/* <th className="px-4 py-2">Gender</th> */}
             <th className="px-4 py-2">Price</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
@@ -157,15 +174,18 @@ export default function ProductPage() {
               <td className="px-4 py-2">{item.id}</td>
               <td className="px-4 py-2">
                 {item.images.length > 0 ? (
-                  <img src={typeof item.images[0] === 'string' ? item.images[0] : URL.createObjectURL(item.images[0])} alt="thumb" className="w-12 h-12 object-cover rounded" />
+                  <img
+                    src={item.images[0]}
+                    alt="thumb"
+                    className="w-12 h-12 object-cover rounded"
+                  />
                 ) : (
                   "N/A"
                 )}
               </td>
               <td className="px-4 py-2">{item.name}</td>
               <td className="px-4 py-2">{item.category}</td>
-              {/* <td className="px-4 py-2">{item.gender}</td> */}
-              <td className="px-4 py-2">${item.price}</td>
+              <td className="px-4 py-2">Rp.{item.price}</td>
               <td className="px-4 py-2 flex gap-2">
                 <button
                   onClick={() => handleEdit(index)}
@@ -185,7 +205,6 @@ export default function ProductPage() {
         </tbody>
       </table>
 
-      {/* Sidebar Form */}
       {isSidebarOpen && (
         <div className="fixed top-0 right-0 w-full sm:w-[480px] h-full bg-white shadow-lg z-50 p-6 overflow-y-auto">
           <button
@@ -205,20 +224,19 @@ export default function ProductPage() {
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-3"
           />
-          <input
+          <label className="block mb-1 font-medium">Category</label>
+          <select
             name="category"
-            placeholder="Category"
             value={product.category}
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-3"
-          />
-          {/* <input
-            name="gender"
-            placeholder="Gender"
-            value={product.gender}
-            onChange={handleInputChange}
-            className="border p-2 rounded w-full mb-3"
-          /> */}
+          >
+            <option value="">Select Category</option>
+            <option value="makanan">Makanan</option>
+            <option value="minuman coffee">Minuman Coffee</option>
+            <option value="minuman non coffee">Minuman Non Coffee</option>
+          </select>
+
           <textarea
             name="description"
             placeholder="Description (max 100 chars)"
@@ -228,21 +246,37 @@ export default function ProductPage() {
             className="border p-2 rounded w-full mb-3"
           />
 
-          <label className="block mb-2">Product Images</label>
-          <input
-            type="file"
-            multiple
-            onChange={handleImageUpload}
-            className="mb-3"
-          />
-          <div className="flex gap-2 mb-4">
-            {product.images.map((file, idx) => (
-              <img
-                key={idx}
-                src={typeof file === 'string' ? file : URL.createObjectURL(file)}
-                alt="product"
-                className="w-16 h-16 object-cover rounded"
-              />
+          <label className="block mb-2 font-medium">Product Images</label>
+          <label className="inline-block bg-orange-500 text-white px-4 py-2 rounded cursor-pointer mb-3">
+            Choose Images
+            <input
+              type="file"
+              multiple
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+
+          <div className="flex gap-2 mb-4 flex-wrap">
+            {product.images.map((img, idx) => (
+              <div key={idx} className="relative">
+                <img
+                  src={typeof img === "string" ? img : img.preview}
+                  alt="preview"
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <button
+                  onClick={() => {
+                    const newImages = product.images.filter(
+                      (_, i) => i !== idx
+                    );
+                    setProduct({ ...product, images: newImages });
+                  }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                >
+                  &times;
+                </button>
+              </div>
             ))}
           </div>
 
@@ -260,10 +294,7 @@ export default function ProductPage() {
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {product.sizes.map((s, i) => (
-              <span
-                key={i}
-                className="bg-gray-200 px-2 py-1 rounded text-sm"
-              >
+              <span key={i} className="bg-gray-200 px-2 py-1 rounded text-sm">
                 {s}
               </span>
             ))}
@@ -271,11 +302,13 @@ export default function ProductPage() {
 
           <input
             name="price"
-            placeholder="Pricing ($)"
+            type="number"
+            placeholder="Pricing (Rp)"
             value={product.price}
             onChange={handleInputChange}
             className="border p-2 rounded w-full mb-3"
           />
+
           <input
             name="discount"
             placeholder="Discount (%)"
