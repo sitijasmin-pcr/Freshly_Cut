@@ -7,9 +7,10 @@ import {
   Settings,
   LogIn,
   UserPlus,
+  User,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaQuestionCircle } from "react-icons/fa";
+import { FaQuestionCircle, FaUser  } from "react-icons/fa";
 import { MdFeedback } from "react-icons/md";
 import { FaMapLocationDot } from "react-icons/fa6";
 import { AiFillSchedule } from "react-icons/ai";
@@ -24,6 +25,8 @@ const menuItems = [
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
   { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
+  { name: 'User', icon: <FaUser />, path: '/user' },
+  { name: 'Karyawan', icon: <FaUser />, path: '/karyawan' },
 ];
 
 const accountItems = [

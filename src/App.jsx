@@ -11,6 +11,9 @@ import Penjualan from './Pages/Penjualan'
 import BranchOutlet from './Pages/BranchOutlet'
 import Feedback from './Pages/Feedback'
 import ShiftManagement from './Pages/ShiftManagement'
+import User from './Pages/User'
+import Karyawan from './Pages/Karyawan'
+
 
 function App() {
   return (
@@ -27,6 +30,8 @@ function App() {
           <Route path="/branch" element={<BranchOutlet />} />
           <Route path="/shift" element={<ShiftManagement />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/user" element={<User />} />
+          <Route path="/karyawan" element={<Karyawan />} />
         </Route>
       </Routes>
     </>
