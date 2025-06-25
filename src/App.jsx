@@ -11,8 +11,14 @@ import Penjualan from './Pages/Penjualan'
 import BranchOutlet from './Pages/BranchOutlet'
 import Feedback from './Pages/Feedback'
 import ShiftManagement from './Pages/ShiftManagement'
+<<<<<<< HEAD
 import HomeUser from './USERPAGE/HomeUser'
 import MenuUser from './USERPAGE/MenuUser'
+=======
+import User from './Pages/User'
+import Karyawan from './Pages/Karyawan'
+
+>>>>>>> 3caebf5166dbe8c913f95d3d33eb6bc23aa6b203
 
 function App() {
   return (
@@ -29,8 +35,13 @@ function App() {
           <Route path="/branch" element={<BranchOutlet />} />
           <Route path="/shift" element={<ShiftManagement />} />
           <Route path="/feedback" element={<Feedback />} />
+<<<<<<< HEAD
           <Route path="/HomeUser" element={<HomeUser />} />
           <Route path="/MenuUser" element={<MenuUser />} />
+=======
+          <Route path="/user" element={<User />} />
+          <Route path="/karyawan" element={<Karyawan />} />
+>>>>>>> 3caebf5166dbe8c913f95d3d33eb6bc23aa6b203
         </Route>
       </Routes>
     </>
