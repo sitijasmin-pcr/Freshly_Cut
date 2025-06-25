@@ -10,7 +10,7 @@ function User() {
 
   const fetchUsers = async () => {
     const { data, error } = await supabase
-      .from('users')
+      .from('ss')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -22,17 +22,17 @@ function User() {
     fetchUsers();
   }, []);
 
-  const addUser = async (user) => {
-    const { error } = await supabase.from('users').insert(user);
+  const addUser = async (users) => {
+    const { error } = await supabase.from('users').insert(users);
     if (error) console.error(error);
     else fetchUsers();
   };
 
-  const updateUser = async (user) => {
+  const updateUser = async (users) => {
     const { error } = await supabase
       .from('users')
-      .update(user)
-      .eq('id', user.id);
+      .update(users)
+      .eq('id', users.id);
 
     if (error) console.error(error);
     else {
@@ -58,30 +58,30 @@ function User() {
       />
 
       <ul className="mt-6 space-y-4">
-        {users.map((user) => (
+        {users.map((users) => (
           <li key={user.id} className="border p-3 rounded shadow">
             <div>
-              <p className="font-semibold">{user.nama}</p>
+              <p className="font-semibold">{users.nama}</p>
               <p className="text-sm text-gray-600">
-                Usia: {user.usia} tahun | Penghasilan: Rp {user.penghasilan} | Email: {user.email}
+                Usia: {users.usia} tahun | Penghasilan: Rp {users.penghasilan} | Email: {users.email}
               </p>
               <p className="text-sm text-gray-600">
-                Jenis Kelamin: {user.jenis_kelamin} | Kegiatan: {user.jenis_kegiatan} | Gula: {user.tingkat_kadar_gula}
+                Jenis Kelamin: {users.jenis_kelamin} | Kegiatan: {users.jenis_kegiatan} | Gula: {users.tingkat_kadar_gula}
               </p>
               <p className="text-sm text-gray-600">
-                Metode Bayar: {user.metode_pembayaran_favorit} | Status: {user.status_member}
+                Metode Bayar: {users.metode_pembayaran_favorit} | Status: {usesr.status_member}
               </p>
             </div>
 
             <div className="mt-2 space-x-2">
               <button
-                onClick={() => setEditingUser(user)}
+                onClick={() => setEditingUser(users)}
                 className="text-blue-600 hover:underline"
               >
                 Edit
               </button>
               <button
-                onClick={() => deleteUser(user.id)}
+                onClick={() => deleteUser(users.id)}
                 className="text-red-600 hover:underline"
               >
                 Hapus

@@ -3,7 +3,7 @@ import { supabase } from "../supabase"; // Pastikan path supabase benar
 import KaryawanForm from "./KaryawanForm";
 
 export default function KaryawanPage() {
-  const [karyawans, setKaryawans] = useState([]);
+  const [karyawan, setKaryawans] = useState([]);
   const [editingKaryawan, setEditingKaryawan] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false); // State untuk mengontrol visibilitas form
 
@@ -20,7 +20,7 @@ export default function KaryawanPage() {
 
   useEffect(() => {
     calculateKaryawanRoleSummary();
-  }, [karyawans]);
+  }, [karyawan]);
 
   const fetchKaryawans = async () => {
     const { data, error } = await supabase.from("karyawan").select("*").order("created_at", { ascending: false });
@@ -29,11 +29,11 @@ export default function KaryawanPage() {
   };
 
   const calculateKaryawanRoleSummary = () => {
-    const admin = karyawans.filter(k => k.role === 'Admin').length;
-    const manager = karyawans.filter(k => k.role === 'Manager').length;
-    const staff = karyawans.filter(k => k.role === 'Staff').length;
+    const admin = karyawan.filter(k => k.role === 'Admin').length;
+    const manager = karyawan.filter(k => k.role === 'Manager').length;
+    const staff = karyawan.filter(k => k.role === 'Staff').length;
     
-    const totalKaryawans = karyawans.length;
+    const totalKaryawans = karyawan.length;
 
     setKaryawanRoleSummary({
       admin: { total: admin, percentage: totalKaryawans > 0 ? ((admin / totalKaryawans) * 100).toFixed(0) : 0 },
@@ -194,7 +194,7 @@ export default function KaryawanPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {karyawans.map((k) => (
+              {karyawan.map((k) => (
                 <tr key={k.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{k.nama}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{k.email}</td>
