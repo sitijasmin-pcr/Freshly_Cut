@@ -1,15 +1,30 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
-import ProductForm from "./ProductForm";
+import ProductForm from "./ProductForm"; 
 
 export default function ProductPage() {
   const [products, setProducts] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
+  const categories = [
+    "Food and Bakery",
+    "Classic Coffee",
+    "Non Coffee",
+    "Fruity Series",
+    "Cheese Latte Series",
+    "Cloud Series",
+    "Jujutsu Kaisen Series",
+    "UPSETDUCK X PISTACHIO SERIES",
+    "Pesta Kuliner Banting Harga",
+    "SPECIAL OFFER",
+    "Flash Sale Makan Harian",
+  ];
+
   const fetchProducts = async () => {
-    const { data } = await supabase.from("produk").select("*").order("created_at", { ascending: false });
-    setProducts(data);
+    const { data, error } = await supabase.from("produk").select("*").order("created_at", { ascending: false });
+    if (error) console.error("Fetch Error:", error);
+    else setProducts(data);
   };
 
   useEffect(() => {
@@ -17,102 +32,118 @@ export default function ProductPage() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (confirm("Yakin hapus produk ini?")) {
-      await supabase.from("produk").delete().eq("id", id);
-      fetchProducts();
+    if (window.confirm("Yakin ingin menghapus produk ini?")) {
+      const { error } = await supabase.from("produk").delete().eq("id", id);
+      if (error) {
+        console.error("Delete Error:", error);
+        alert(`Gagal menghapus produk: ${error.message}`);
+      } else {
+        fetchProducts();
+      }
     }
   };
 
   const countByCategory = (kategori) => products.filter((p) => p.kategori === kategori).length;
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-orange-600 mb-6">Product Page</h1>
+  const handleEditClick = (product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
 
-      {/* CARD SUMMARY */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {["Food and Bakery", "Classic Coffee", "Non Coffee", "Fruity Series", "Cheese Latte Series", "Cloud Series", "Jujutsu Kaisen Series", "UPSETDUCK X PISTACHIO SERIES", "Pesta Kuliner Banting Harga", "SPECIAL OFFER", "Flash Sale Makan Harian"].map((kategori, index) => (
-          <div key={index} className="p-4 rounded shadow text-center bg-gray-50 border">
-            <h2 className="text-base font-semibold">{kategori}</h2>
-            <p className="text-xl">{countByCategory(kategori)}</p>
+  const handleAddNewClick = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingProduct(null);
+  };
+
+  const formatDateForTable = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Manajemen Produk</h1>
+
+      {/* Product Category Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+        {categories.map((kategori, index) => (
+          <div key={index} className="bg-white p-5 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
+            <p className="text-gray-600 text-lg font-semibold">{kategori}</p>
+            <p className="text-4xl font-bold text-orange-500 mt-2">{countByCategory(kategori)}</p>
+            <p className="text-gray-500 text-sm">Produk</p>
           </div>
         ))}
       </div>
 
-      {/* Tombol Tambah */}
-      <div className="mb-4 text-right">
+      {/* Tombol Tambah Produk */}
+      <div className="mb-6 flex justify-end">
         <button
-          onClick={() => {
-            setEditingProduct(null);
-            setIsFormOpen(true);
-          }}
-          className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700"
+          onClick={handleAddNewClick}
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out"
         >
-          Tambah Produk
+          Tambah Produk Baru
         </button>
       </div>
 
-      {/* TABEL PRODUK */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 text-sm text-left">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2">Nama</th>
-              <th className="p-2">Kategori</th>
-              <th className="p-2">Harga</th>
-              <th className="p-2">Deskripsi</th>
-              <th className="p-2">Gambar</th>
-              <th className="p-2">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((prod) => (
-              <tr key={prod.id} className="border-t">
-                <td className="p-2">{prod.nama}</td>
-                <td className="p-2">{prod.kategori}</td>
-                <td className="p-2">Rp {prod.harga}</td>
-                <td className="p-2">{prod.deskripsi}</td>
-                <td className="p-2">
-                  {prod.gambar ? (
-                    <img src={prod.gambar} alt="Produk" className="w-12 h-12 object-cover rounded" />
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-                <td className="p-2 space-x-2">
-                  <button
-                    onClick={() => {
-                      setEditingProduct(prod);
-                      setIsFormOpen(true);
-                    }}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(prod.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {products.length === 0 && (
+      {/* Tabel Produk */}
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Daftar Produk</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan="6" className="text-center p-4 text-gray-500">
-                  Tidak ada produk
-                </td>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Produk</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Dibuat</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {products.map((prod) => (
+                <tr key={prod.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {prod.gambar ? (
+                      <img src={prod.gambar} alt={prod.nama} className="w-16 h-16 object-cover rounded-md shadow-sm" />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-md text-gray-500 text-xs">No Img</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{prod.nama}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{prod.kategori}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp {prod.harga?.toLocaleString('id-ID')}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">{prod.deskripsi}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateForTable(prod.created_at)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onClick={() => handleEditClick(prod)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                    <button onClick={() => handleDelete(prod.id)} className="text-red-600 hover:text-red-900">Hapus</button>
+                  </td>
+                </tr>
+              ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="text-center p-6 text-gray-500">
+                    Tidak ada produk ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* MODAL FORM */}
+      {/* MODAL FORM yang akan muncul di atas halaman */}
       {isFormOpen && (
         <ProductForm
-          onClose={() => setIsFormOpen(false)}
+          onClose={handleCloseForm}
           onSuccess={fetchProducts}
           editingProduct={editingProduct}
         />

@@ -125,22 +125,43 @@ export default function HomeUser() {
           </div>
 
           <nav className="flex gap-8 text-sm font-medium text-gray-700">
-            <Link to="/HomeUser" className="hover:text-orange-500">
-              Home
-            </Link>
-            <Link to="/MenuUser" className="hover:text-orange-500">
-              Menu
-            </Link>
-            <Link to="/location" className="hover:text-orange-500">
-              Location
-            </Link>
-            <Link to="/faq" className="hover:text-orange-500">
-              FAQ
-            </Link>
-            <Link to="/feedback" className="hover:text-orange-500">
-              Feedback
-            </Link>
-          </nav>
+                      <Link
+                        to="/HomeUser"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        Home
+                      </Link>
+                      <Link
+                        to="/MenuUser"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        Menu
+                      </Link>
+                      <Link
+                        to="/ProfInfo"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        Story
+                      </Link>
+                      <Link
+                        to="/FAQUser"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        FAQ
+                      </Link>
+                      <Link
+                        to="/feedback"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        Feedback
+                      </Link>
+                      <Link
+                        to="/Lokasi"
+                        className="hover:text-orange-500 transition-colors"
+                      >
+                        Location
+                      </Link>
+                    </nav>
 
           <div className="flex items-center gap-4">
             <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">

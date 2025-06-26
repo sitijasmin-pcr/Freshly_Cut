@@ -1,15 +1,30 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Bell } from "lucide-react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { ShoppingCart, Bell, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabase"; // Pastikan path ini benar (relative ke src/)
+import { useCart } from "./CartContext"; // <--- KOREKSI PATH INI SANGAT PENTING
+
 // Komponen reusable untuk animasi scroll
 const SectionWithOffers = ({ title, data }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+  const { addToCart } = useCart(); // Menggunakan hook useCart di sini
+
+  // State untuk melacak ID item yang baru saja ditambahkan ke keranjang
+  const [addedItemId, setAddedItemId] = useState(null);
+
+  const handleAddToCart = (item) => {
+    addToCart(item); // Panggil fungsi addToCart dari context
+    setAddedItemId(item.id); // Set ID item yang baru ditambahkan
+
+    // Reset state addedItemId setelah beberapa detik untuk mengembalikan tampilan tombol
+    setTimeout(() => {
+      setAddedItemId(null);
+    }, 1500); // Tahan efek selama 1.5 detik
+  };
 
   return (
     <motion.section
@@ -50,7 +65,7 @@ const SectionWithOffers = ({ title, data }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {data.map((item, i) => (
                 <motion.div
-                  key={i}
+                  key={item.id || i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1, duration: 0.4 }}
@@ -58,18 +73,30 @@ const SectionWithOffers = ({ title, data }) => {
                 >
                   {/* Gambar produk di kanan atas */}
                   <img
-                    src={item.img}
-                    alt={item.name}
+                    src={item.gambar || "/img/default-product.png"}
+                    alt={item.nama}
                     className="absolute top-2 right-2 w-24 h-24 object-contain z-0"
                   />
 
                   {/* Konten teks */}
                   <div className="relative z-10 pr-28">
-                    <h4 className="font-semibold text-base">{item.name}</h4>
-                    <p className="text-xs text-gray-500 my-1">{item.desc}</p>
-                    <p className="font-semibold mt-2">{item.price}</p>
-                    <button className="mt-4 border border-orange-400 text-orange-500 font-semibold py-1 px-4 rounded-full hover:bg-orange-100 text-sm">
-                      Tambah
+                    <h4 className="font-semibold text-base">{item.nama}</h4>
+                    <p className="text-xs text-gray-500 my-1">
+                      {item.deskripsi}
+                    </p>
+                    <p className="font-semibold mt-2">
+                      Rp{item.harga?.toLocaleString("id-ID")}
+                    </p>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className={`mt-4 font-semibold py-1 px-4 rounded-full text-sm transition-colors duration-300
+                        ${
+                          addedItemId === item.id
+                            ? "bg-green-500 text-white"
+                            : "border border-orange-400 text-orange-500 hover:bg-orange-100"
+                        }`}
+                    >
+                      {addedItemId === item.id ? "Ditambahkan! ✓" : "Tambah"}
                     </button>
                   </div>
                 </motion.div>
@@ -83,128 +110,100 @@ const SectionWithOffers = ({ title, data }) => {
 };
 
 const MenuUser = () => {
-  const offers1 = [
-    {
-      name: "Choco Oat Latte",
-      desc: "Kopi oat dengan cokelat dan susu oat.",
-      price: "34.000",
-      img: "/img/Espresso_Tonic-removebg-preview.png",
-    },
-    {
-      name: "Matcha Frappe",
-      desc: "Minuman matcha dingin creamy.",
-      price: "27.000",
-      img: "/img/Ketan_Hitam_Frappe-removebg-preview.png",
-    },
-    {
-      name: "Matcha Latte",
-      desc: "Minuman matcha latte creamy.",
-      price: "30.000",
-      img: "/img/matcha-latte.png",
-    },
-  ];
+  const [specialOffers, setSpecialOffers] = useState([]);
+  const [returneeOffers, setReturneeOffers] = useState([]);
+  const [lowSugar, setLowSugar] = useState([]);
+  const [latestOrders, setLatestOrders] = useState([]);
+  const [allMenus, setAllMenus] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const offers2 = [
-    {
-      name: "Hojicha Oat Latte",
-      desc: "Minuman hojicha ringan dan creamy.",
-      price: "34.000",
-      img: "/img/hojicha.png",
-    },
-    {
-      name: "Choco Oat Latte",
-      desc: "Kopi oat dengan cokelat dan susu oat.",
-      price: "27.000",
-      img: "/img/choco-oat.png",
-    },
-    {
-      name: "Chocolate",
-      desc: "Cokelat klasik dengan susu.",
-      price: "30.000",
-      img: "/img/chocolate.png",
-    },
-  ];
+  // Menggunakan useCart di komponen MenuUser itu sendiri untuk mendapatkan cartItems
+  const { cartItems } = useCart();
 
-  const offers3 = [
-    {
-      name: "Chocolate",
-      desc: "Minuman cokelat rendah gula.",
-      price: "30.000",
-      img: "/img/chocolate.png",
-    },
-    {
-      name: "Choco Oat Latte",
-      desc: "Kopi oat dan cokelat rendah gula.",
-      price: "34.000",
-      img: "/img/choco-oat.png",
-    },
-    {
-      name: "Matcha Latte",
-      desc: "Matcha latte tanpa pemanis tambahan.",
-      price: "30.000",
-      img: "/img/matcha-latte.png",
-    },
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.from("produk").select("*");
+        if (error) {
+          console.error("Supabase Error fetching products:", error.message);
+          throw error;
+        }
 
-  const latestOrders = [
-    {
-      name: "Cinnamon Roll",
-      desc: "Roti manis dengan taburan kayu manis.",
-      price: "30.000",
-      img: "/img/cinnamon.png",
-    },
-    {
-      name: "Choco Oat Latte",
-      desc: "Kopi oat dengan cokelat dan susu oat.",
-      price: "27.000",
-      img: "/img/choco-oat.png",
-    },
-    {
-      name: "Chocolate",
-      desc: "Cokelat klasik dengan susu.",
-      price: "30.000",
-      img: "/img/chocolate.png",
-    },
-  ];
+        console.log("Fetched data from Supabase:", data);
 
-  const allMenus = [
-    {
-      name: "Butter Croissant",
-      desc: "Croissant mentega lembut, lapisan ringan.",
-      price: "27.000",
-      img: "/img/croissant.png",
-    },
-    {
-      name: "Cheese Danish",
-      desc: "Pastry lembut dengan keju meleleh.",
-      price: "34.000",
-      img: "/img/cheese-danish.png",
-    },
-    {
-      name: "Choco Danish",
-      desc: "Pastry berisi cokelat leleh lembut.",
-      price: "34.000",
-      img: "/img/choco-danish.png",
-    },
-    {
-      name: "Chocolate",
-      desc: "Cokelat klasik dengan susu.",
-      price: "30.000",
-      img: "/img/chocolate.png",
-    },
-    {
-      name: "Choco Oat Latte",
-      desc: "Kopi oat dan cokelat lembut.",
-      price: "34.000",
-      img: "/img/choco-oat.png",
-    },
-    {
-      name: "Matcha Latte",
-      desc: "Minuman matcha latte creamy.",
-      price: "30.000",
-      img: "/img/matcha-latte.png",
-    },
-  ];
+        if (data && data.length > 0) {
+          setSpecialOffers(
+            data
+              .filter(
+                (product) =>
+                  product.kategori === "SPECIAL OFFER" || product.harga < 30000
+              )
+              .slice(0, 3)
+          );
+          setReturneeOffers(
+            data
+              .filter(
+                (product) =>
+                  product.kategori === "Classic Coffee" || product.harga > 30000
+              )
+              .slice(0, 3)
+          );
+          setLowSugar(
+            data
+              .filter(
+                (product) =>
+                  product.deskripsi?.toLowerCase().includes("rendah gula") ||
+                  product.kategori === "Non Coffee"
+              )
+              .slice(0, 3)
+          );
+          setLatestOrders(
+            data.sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 3)
+          );
+          setAllMenus(data);
+        } else {
+          console.warn(
+            "Tidak ada produk ditemukan di tabel 'produk' Supabase. Pastikan tabel terisi dan RLS mengizinkan akses."
+          );
+          setSpecialOffers([]);
+          setReturneeOffers([]);
+          setLowSugar([]);
+          setLatestOrders([]);
+          setAllMenus([]);
+        }
+      } catch (err) {
+        console.error(
+          "Kesalahan fatal saat memuat produk di MenuUser:",
+          err.message
+        );
+        setError(
+          "Gagal memuat produk. Silakan coba lagi nanti. Detail: " + err.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Memuat produk...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-white text-gray-800 px-6 py-8">
@@ -221,26 +220,55 @@ const MenuUser = () => {
         </div>
 
         <nav className="flex gap-8 text-sm font-medium text-gray-700">
-          <Link to="/HomeUser" className="hover:text-orange-500">
+          <Link
+            to="/HomeUser"
+            className="hover:text-orange-500 transition-colors"
+          >
             Home
           </Link>
-          <Link to="/MenuUser" className="hover:text-orange-500">
+          <Link
+            to="/MenuUser"
+            className="hover:text-orange-500 transition-colors"
+          >
             Menu
           </Link>
-          <Link to="/location" className="hover:text-orange-500">
-            Location
+          <Link
+            to="/ProfInfo"
+            className="hover:text-orange-500 transition-colors"
+          >
+            Story
           </Link>
-          <Link to="/faq" className="hover:text-orange-500">
+          <Link
+            to="/FAQUser"
+            className="hover:text-orange-500 transition-colors"
+          >
             FAQ
           </Link>
-          <Link to="/feedback" className="hover:text-orange-500">
+          <Link
+            to="/feedback"
+            className="hover:text-orange-500 transition-colors"
+          >
             Feedback
+          </Link>
+          <Link
+            to="/Lokasi"
+            className="hover:text-orange-500 transition-colors"
+          >
+            Location
           </Link>
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
+          <Link
+            to="/CartUser"
+            className="text-orange-500 hover:text-orange-600 relative"
+          >
+            {" "}
+            {/* Tambahkan relative di sini */}
             <ShoppingCart className="w-5 h-5" />
+            {cartItems.length > 0 && ( // Tampilkan dot merah jika ada item di keranjang
+              <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
+            )}
           </Link>
           <Link
             to="/NotificationUser"
@@ -268,9 +296,15 @@ const MenuUser = () => {
 
       {/* Offer Sections */}
       <div className="max-w-6xl mx-auto mt-10">
-        <SectionWithOffers title="Special Offers For You" data={offers1} />
-        <SectionWithOffers title="Returnee Special Offers" data={offers2} />
-        <SectionWithOffers title="Low Sugars Type Person" data={offers3} />
+        <SectionWithOffers
+          title="Special Offers For You"
+          data={specialOffers}
+        />
+        <SectionWithOffers
+          title="Returnee Special Offers"
+          data={returneeOffers}
+        />
+        <SectionWithOffers title="Low Sugars Type Person" data={lowSugar} />
         <SectionWithOffers
           title="Based on Your Latest Order"
           data={latestOrders}
