@@ -373,6 +373,12 @@ const OrderPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  // State untuk pencarian
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+
   // --- Helpers ---
   // Fungsi untuk mendapatkan warna status
   const getStatusColorClass = (status) => {
@@ -394,6 +400,20 @@ const OrderPage = () => {
       default: return 'bg-blue-500';
     }
   };
+
+  // Fungsi untuk menghitung slice untuk pagination
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order =>
+      order.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [orders, searchQuery]);
+  
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage]);
+  
 
   // Fungsi untuk mengambil data pesanan dari Supabase
   const fetchOrders = async (start = '', end = '') => {
@@ -460,8 +480,9 @@ const OrderPage = () => {
 
   // Ambil pesanan saat komponen dimuat atau saat tanggal filter berubah
   useEffect(() => {
+    setCurrentPage(1);
     fetchOrders(startDate, endDate);
-  }, [startDate, endDate]); // Trigger fetch saat startDate atau endDate berubah
+  }, [startDate, endDate, searchQuery]); // Trigger fetch saat startDate atau endDate berubah
 
   // Tangani perubahan status untuk pesanan
   const handleStatusChange = async (orderId, newStatus) => {
@@ -619,6 +640,7 @@ const OrderPage = () => {
             onChange={(e) => setEndDate(e.target.value)}
             className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
+ 
           {/* Tombol filter tidak lagi diperlukan karena useEffect akan trigger on change */}
           {/* <button
             onClick={() => fetchOrders(startDate, endDate)}
@@ -641,6 +663,18 @@ const OrderPage = () => {
           <i className="fas fa-receipt mr-2"></i> Daftar Permintaan Pesanan
         </h2>
 
+        {/* Input pencarian */}
+          <div className="mb-5 flex justify-between items-center">
+          <input
+              type="text"
+              placeholder="Cari nama pelanggan..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="p-2 border border-gray-300 rounded-md w-full max-w-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <span className="text-sm text-gray-500 ml-170">Total hasil: {filteredOrders.length}</span>
+          </div>
+
         {loading ? (
           <div className="flex justify-center items-center py-10">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -661,6 +695,7 @@ const OrderPage = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pelanggan</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Pesanan</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal & Waktu</th>
@@ -672,60 +707,61 @@ const OrderPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    <td className="py-3 px-4 font-medium text-gray-900">{order.name}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{order.order_type} {order.order_type === 'Dine In' && order.table_number ? `(Meja ${order.table_number})` : ''}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
+                {paginatedOrders.map((order, index) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="py-3 px-4 font-bold text-gray-700">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="py-3 px-4">{order.name}</td>
+                    <td className="py-3 px-4">{order.order_type}{order.table_number ? ` (Meja ${order.table_number})` : ''}</td>
+                    <td className="py-3 px-4">{order.date}</td>
                     <td className="py-3 px-4">
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                        className={`text-white px-3 py-1 rounded-full text-xs font-semibold focus:outline-none cursor-pointer ${getStatusColorClass(order.status)}`}
+                        className={`text-white px-3 py-1 rounded-full text-xs font-semibold focus:outline-none ${getStatusColorClass(order.status)}`}
                       >
-                        <option value="Processing" className="bg-orange-500">Processing</option>
-                        <option value="Pending" className="bg-yellow-400 text-black">Pending</option>
-                        <option value="Completed" className="bg-green-500">Completed</option>
-                        <option value="Canceled" className="bg-red-500">Canceled</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Canceled">Canceled</option>
                       </select>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {order.items_detail.reduce((sum, item) => sum + item.quantity, 0)}
+                    <td className="py-3 px-4">
+                      {order.items_detail.reduce((s, i) => s + i.quantity, 0)}
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-gray-800">
+                    <td className="py-3 px-4 font-bold">
                       Rp {order.total_amount?.toLocaleString('id-ID')}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{order.receipt}</td>
-                    <td className="py-3 px-4 flex items-center space-x-2">
-                      <button
-                        onClick={() => handleOpenEditSalesForm(order)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Edit Pesanan (Buat Pesanan Baru Berdasarkan Data Lama)"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                        title="Lihat Detail Resi"
-                      >
-                        <i className="fas fa-eye"></i>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteOrder(order.id, order.name)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Hapus Pesanan"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
+                    <td className="py-3 px-4">{order.receipt}</td>
+                    <td className="py-3 px-4 space-x-2">
+                      <button onClick={() => { setCurrentEditingSale(order); setIsSalesFormModalOpen(true); }} className="text-blue-600 hover:text-blue-900"><i className="fas fa-edit"></i></button>
+                      <button onClick={() => setSelectedOrder(order)} className="text-indigo-600 hover:text-indigo-900"><i className="fas fa-eye"></i></button>
                     </td>
                   </tr>
                 ))}
               </tbody>
+
             </table>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+              >
+                Previous
+              </button>
+              <span className="text-gray-700">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

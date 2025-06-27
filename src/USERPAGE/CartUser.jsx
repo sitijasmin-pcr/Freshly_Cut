@@ -1,8 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingCart, Bell } from "lucide-react";
-import { useCart } from "./CartContext"; // <--- PASTIKAN PATH INI BENAR
+import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
+
+// Pastikan supabase client berhasil diinisialisasi.
+if (!supabase) {
+  console.error("Supabase client not initialized in CartUser. Check CDN setup and keys.");
+  // Fallback untuk development jika Supabase tidak terinisialisasi
+  // Ini akan mencegah crash tetapi tidak akan menyimpan data ke DB
+  window.Swal.fire('Error', 'Supabase client tidak terinisialisasi. Cek konfigurasi!', 'error');
+}
+
+import { useCart } from "./CartContext"; // Path relatif yang benar jika CartContext.jsx ada di src/
+
 
 const CartUser = () => {
   const { cartItems, updateQuantity, updateSugarLevel, removeItem, clearCart } =
@@ -13,6 +23,8 @@ const CartUser = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
+  const [customerName, setCustomerName] = useState(""); // State untuk nama pelanggan
+  const [tableNumber, setTableNumber] = useState(""); // State untuk nomor meja (opsional)
 
   const calculateSubtotal = (item) => item.price * item.quantity;
 
@@ -21,8 +33,8 @@ const CartUser = () => {
     (acc, item) => acc + calculateSubtotal(item),
     0
   );
-  const deliveryFee = 0;
-  const taxesRate = 0.1;
+  const deliveryFee = deliveryOption === "deliverToLocation" ? 15000 : 0; // Contoh: biaya pengiriman
+  const taxesRate = 0.1; // 10% pajak
 
   const taxesAmount = subTotalAmount * taxesRate;
 
@@ -43,33 +55,108 @@ const CartUser = () => {
   const handleSugarLevelChange = (id, newSugarLevel) =>
     updateSugarLevel(id, newSugarLevel);
   const handleRemoveItem = (id) => removeItem(id);
-  const handleClearShoppingCart = () => clearCart();
-
-  const formatRupiah = (amount) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const handleClearShoppingCart = () => {
+    Swal.fire({
+      title: 'Hapus Keranjang?',
+      text: "Anda yakin ingin menghapus semua item dari keranjang?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        clearCart();
+        Swal.fire('Dihapus!', 'Keranjang Anda telah dikosongkan.', 'success');
+      }
+    });
   };
 
-  const handleCheckOrderInformation = () => {
-    applyCoupon(); // Terapkan kupon terlebih dahulu
+  // Fungsi baru untuk memproses checkout dan menyimpan ke Supabase
+  const handleProceedToCheckout = async () => {
+    if (!supabase) {
+      Swal.fire('Error', 'Koneksi database tidak tersedia. Tidak dapat memproses pesanan.', 'error');
+      return;
+    }
+    if (cartItems.length === 0) {
+      Swal.fire('Peringatan', 'Keranjang Anda kosong. Tambahkan item terlebih dahulu.', 'warning');
+      return;
+    }
+    if (!customerName.trim()) {
+      Swal.fire('Peringatan', 'Nama Pelanggan wajib diisi.', 'warning');
+      return;
+    }
 
+    applyCoupon(); // Pastikan kupon diterapkan sebelum menyimpan
+
+    // Ambil nilai kupon dan totalAmount terbaru setelah applyCoupon
     const currentCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? subTotalAmount * 0.1 : 0;
     const currentTotalAmount = subTotalAmount + deliveryFee + taxesAmount - currentCouponDiscount;
 
-    const orderSummary = {
-      totalItems: totalItems,
-      subTotalAmount: subTotalAmount,
-      deliveryFee: deliveryFee,
-      taxesAmount: taxesAmount,
-      couponDiscount: currentCouponDiscount,
-      totalAmount: currentTotalAmount,
-      items: cartItems
-    };
-    navigate('/order-information', { state: { orderSummary, deliveryOption, couponCode, couponDiscount: currentCouponDiscount } });
+    try {
+      // 1. Simpan data pesanan utama ke tabel 'orders'
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+          customer_name: customerName.trim(),
+          order_type: deliveryOption === "deliverToLocation" ? "Order Online" : "Take Away", // Asumsi
+          table_number: deliveryOption === "takeAtOutlet" ? (tableNumber.trim() || null) : null, // Hanya jika take at outlet
+          customer_type: "Regular", // Contoh default, bisa disesuaikan
+          status: "Processing", // Default status
+          total_amount: currentTotalAmount,
+          receipt_id: `RECEIPT-${Date.now()}-${Math.floor(Math.random() * 1000)}` // Contoh receipt ID
+        }])
+        .select(); // Mengambil kembali data yang diinsert untuk mendapatkan order_id
+
+      if (orderError) throw orderError;
+      const orderId = orderData[0].id;
+
+      // 2. Simpan setiap item keranjang ke tabel 'order_items'
+      const orderItemsToInsert = cartItems.map(item => ({
+        order_id: orderId,
+        product_id: item.id, // Asumsi item.id adalah product_id dari tabel produk Anda
+        product_name: item.name,
+        quantity: item.quantity,
+        price_per_unit: item.price
+        // Anda bisa menambahkan sugarLevel ke notes atau kolom baru jika ada
+      }));
+
+      const { error: orderItemsError } = await supabase
+        .from('order_items')
+        .insert(orderItemsToInsert);
+
+      if (orderItemsError) throw orderItemsError;
+
+      Swal.fire('Berhasil!', 'Pesanan Anda telah disimpan!', 'success');
+      clearCart(); // Kosongkan keranjang setelah pesanan berhasil
+      // Arahkan ke halaman konfirmasi atau riwayat pesanan
+      navigate('/order-information', {
+        state: {
+          orderId: orderId,
+          totalAmount: currentTotalAmount,
+          items: cartItems.map(item => ({ // Pastikan items yang diteruskan juga lengkap
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            sugarLevel: item.sugarLevel,
+            image: item.image,
+            subtotal: item.price * item.quantity // Tambahkan subtotal untuk kemudahan
+          })),
+          customerName: customerName.trim(), // Teruskan nama pelanggan dari state input
+          deliveryOption: deliveryOption, // Teruskan opsi pengiriman
+          couponDiscount: currentCouponDiscount, // Teruskan diskon kupon
+          subTotalAmount: subTotalAmount, // Teruskan subTotalAmount
+          taxesAmount: taxesAmount, // Teruskan taxesAmount
+          deliveryFee: deliveryFee // Teruskan deliveryFee
+        }
+      });
+
+    } catch (error) {
+      console.error("Error during checkout:", error);
+      Swal.fire('Gagal!', `Terjadi kesalahan saat memproses pesanan: ${error.message}`, 'error');
+    }
   };
 
   return (
@@ -78,7 +165,7 @@ const CartUser = () => {
       <nav className="bg-white shadow-sm py-4 px-8">
         <div className="flex justify-between items-center border-b pb-3 mb-6">
           <div className="flex items-center gap-3">
-            <img src="/img/Logo.png" alt="Logo" className="h-10" />{" "}
+            <img src="/img/Logo.png" alt="Logo" className="h-10" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/FF7F50/FFFFFF?text=Logo'; }} />{" "}
             <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
               TOMORO{" "}
               <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
@@ -131,7 +218,7 @@ const CartUser = () => {
               to="/CartUser"
               className="text-orange-500 hover:text-orange-600 relative"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <i className="fas fa-shopping-cart w-5 h-5"></i> {/* Font Awesome Cart Icon */}
               {cartItems.length > 0 && (
                 <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
               )}
@@ -140,7 +227,7 @@ const CartUser = () => {
               to="/NotificationUser"
               className="text-orange-500 hover:text-orange-600"
             >
-              <Bell className="w-5 h-5" />
+              <i className="fas fa-bell w-5 h-5"></i> {/* Font Awesome Bell Icon */}
             </Link>
           </div>
         </div>
@@ -177,29 +264,17 @@ const CartUser = () => {
                 >
                   <div className="col-span-2 flex items-center space-x-4">
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemoveItem(item.id)}
                       className="text-gray-400 hover:text-red-500"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <i className="fas fa-times-circle h-5 w-5"></i> {/* Font Awesome close icon */}
                     </button>
                     <div className="flex items-center space-x-3">
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-md border border-gray-200"
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/64x64/D3D3D3/000000?text=NoImg'; }}
                       />
                       <span className="text-gray-800 font-medium">
                         {item.name}
@@ -207,7 +282,12 @@ const CartUser = () => {
                     </div>
                   </div>
                   <div className="text-center text-gray-700">
-                    {formatRupiah(item.price)}
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(item.price)}
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <button
@@ -238,10 +318,16 @@ const CartUser = () => {
                       <option value="Tinggi">Tinggi</option>
                       <option value="Sedang">Sedang</option>
                       <option value="Rendah">Rendah</option>
+                      <option value="N/A">N/A</option> {/* Tambahkan opsi N/A untuk non-minuman */}
                     </select>
                   </div>
                   <div className="text-center text-gray-800 font-medium">
-                    {formatRupiah(calculateSubtotal(item))}
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(calculateSubtotal(item))}
                   </div>
                   <div></div>
                 </motion.div>
@@ -275,6 +361,37 @@ const CartUser = () => {
               </button>
             </div>
 
+            {/* Input Nama Pelanggan dan Nomor Meja (jika Take at Outlet) */}
+            <div className="mt-4">
+              <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
+                Nama Pelanggan:
+              </label>
+              <input
+                type="text"
+                id="customerName"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Masukkan nama Anda"
+                className="w-full border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                required
+              />
+            </div>
+            {deliveryOption === "takeAtOutlet" && (
+              <div className="mt-4">
+                <label htmlFor="tableNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nomor Meja (Opsional):
+                </label>
+                <input
+                  type="text"
+                  id="tableNumber"
+                  value={tableNumber}
+                  onChange={(e) => setTableNumber(e.target.value)}
+                  placeholder="Contoh: Meja 5"
+                  className="w-full border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+            )}
+
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 Insert Your Coupon
@@ -294,10 +411,10 @@ const CartUser = () => {
                   }}
                 />
                 <button
-                  onClick={handleCheckOrderInformation}
-                  className="ml-4 bg-orange-500 text-white py-2 px-6 rounded-lg hover:bg-orange-600 transition-colors"
+                  onClick={applyCoupon} // Hanya untuk menerapkan kupon, bukan checkout
+                  className="ml-4 bg-gray-200 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors"
                 >
-                  Check Order Information
+                  Terapkan Kupon
                 </button>
               </div>
               {couponMessage && (
@@ -320,31 +437,56 @@ const CartUser = () => {
               </div>
               <div className="flex justify-between">
                 <span>Sub Total</span>
-                <span>{formatRupiah(subTotalAmount)}</span>
+                <span>{new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(subTotalAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery</span>
-                <span>{formatRupiah(deliveryFee)}</span>
+                <span>{new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(deliveryFee)}</span>
               </div>
               <div className="flex justify-between text-orange-600">
-                <span>Taxes</span>
-                <span>{formatRupiah(taxesAmount)}</span>
+                <span>Taxes ({taxesRate * 100}%)</span>
+                <span>{new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(taxesAmount)}</span>
               </div>
               <div className="flex justify-between text-red-500">
                 <span>Discount</span>
-                <span>-{formatRupiah(couponDiscount)}</span>
+                <span>-{new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(couponDiscount)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg text-gray-800 border-t pt-4 mt-4">
                 <span>Total</span>
-                <span>{formatRupiah(totalAmount)}</span>
+                <span>{new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(totalAmount)}</span>
               </div>
             </div>
-            <Link
-              to="/CheckoutUser"
+            <button
+              onClick={handleProceedToCheckout} // Panggil fungsi untuk menyimpan ke Supabase
               className="mt-8 w-full block text-center bg-orange-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors"
             >
               Proceed To Checkout
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -352,13 +494,13 @@ const CartUser = () => {
       <footer className="relative mt-20 w-full text-white">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/img/image 48.png')" }}
+          style={{ backgroundImage: "url('https://placehold.co/1920x400/333333/FFFFFF?text=Footer+Background')" }} // Placeholder for image 48.png
         ></div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src="/img/Logo.png" alt="Logo" className="h-10" />
+              <img src="https://placehold.co/40x40/FF7F50/FFFFFF?text=Logo" alt="Logo" className="h-10" />
               <div>
                 <h2 className="text-xl font-bold text-orange-400">TOMORO</h2>
                 <p className="text-sm tracking-[0.3em] text-orange-300">
