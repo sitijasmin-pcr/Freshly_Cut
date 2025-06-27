@@ -6,6 +6,7 @@ import Dashboard from './Pages/Dashboard';
 import MainLayout from './components/MainLayout';
 import Customer from './Pages/Customer';
 import Faq from './Pages/FAQ';
+import FAQForm from './Pages/FAQForm';
 import Produk from './Pages/Produk';
 import SalesManagement from './Pages/SalesManagement';
 import ProdukTerlaris from './Pages/ProdukTerlaris';
@@ -125,6 +126,7 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/faq" element={<Faq />} />
+              <Route path="/faqform" element={<FAQForm />} />
               <Route path="/customer" element={<Customer />} />
               <Route path="/laporan" element={<Penjualan />} />
               <Route path="/produk" element={<Produk />} />
