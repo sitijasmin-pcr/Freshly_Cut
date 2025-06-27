@@ -509,7 +509,7 @@ export default function OrderInformation() {
         <Link to="/MenuUser" className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold transition-colors">
           Kembali ke Menu
         </Link>
-      </div>
+      </div>  
     );
   }
 
@@ -517,9 +517,6 @@ export default function OrderInformation() {
   const currentOrderSummary = orderSummary;
   const customerName = currentOrderSummary.customerName || "Customer"; // Menggunakan nama dari state navigasi atau default
   const orderDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  
-  // Asumsi nama pelanggan tetap 'Andi Wijaya' seperti gambar
-  const customerName = "Andi Wijaya";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sans flex flex-col">
