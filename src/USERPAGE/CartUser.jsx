@@ -14,15 +14,16 @@ const CartUser = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
 
-  const calculateSubtotal = (item) => item.price * item.quantity;
+  // Ensure price and quantity are numbers for calculation
+  const calculateSubtotal = (item) => Number(item.price) * Number(item.quantity);
 
   const totalItems = cartItems.length;
   const subTotalAmount = cartItems.reduce(
     (acc, item) => acc + calculateSubtotal(item),
     0
   );
-  const deliveryFee = 0;
-  const taxesRate = 0.1;
+  const deliveryFee = 0; // Assuming delivery is free or handled elsewhere
+  const taxesRate = 0.1; // 10% tax rate
 
   const taxesAmount = subTotalAmount * taxesRate;
 
@@ -46,6 +47,10 @@ const CartUser = () => {
   const handleClearShoppingCart = () => clearCart();
 
   const formatRupiah = (amount) => {
+    // Ensure amount is a valid number before formatting
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return "Rp 0"; // Or some other indicator for invalid amount
+    }
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -57,17 +62,30 @@ const CartUser = () => {
   const handleCheckOrderInformation = () => {
     applyCoupon(); // Terapkan kupon terlebih dahulu
 
-    const currentCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? subTotalAmount * 0.1 : 0;
-    const currentTotalAmount = subTotalAmount + deliveryFee + taxesAmount - currentCouponDiscount;
+    // Recalculate values just before navigating to ensure the most up-to-date figures
+    // and correctly pass the coupon discount.
+    const currentSubTotalAmount = cartItems.reduce(
+        (acc, item) => acc + (Number(item.price) * Number(item.quantity)),
+        0
+    );
+    const currentTaxesAmount = currentSubTotalAmount * taxesRate;
+    const currentCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? currentSubTotalAmount * 0.1 : 0;
+    const currentTotalAmount = currentSubTotalAmount + deliveryFee + currentTaxesAmount - currentCouponDiscount;
+
 
     const orderSummary = {
       totalItems: totalItems,
-      subTotalAmount: subTotalAmount,
+      subTotalAmount: currentSubTotalAmount, // Use the freshly calculated subTotalAmount
       deliveryFee: deliveryFee,
-      taxesAmount: taxesAmount,
+      taxesAmount: currentTaxesAmount, // Use the freshly calculated taxesAmount
       couponDiscount: currentCouponDiscount,
-      totalAmount: currentTotalAmount,
-      items: cartItems
+      totalAmount: currentTotalAmount, // Use the freshly calculated totalAmount
+      items: cartItems.map(item => ({ // Map items to ensure subtotal is calculated here as well
+          ...item,
+          price: Number(item.price), // Ensure price is number
+          quantity: Number(item.quantity), // Ensure quantity is number
+          subtotal: Number(item.price) * Number(item.quantity) // Calculate subtotal here too
+      }))
     };
     navigate('/order-information', { state: { orderSummary, deliveryOption, couponCode, couponDiscount: currentCouponDiscount } });
   };
@@ -101,25 +119,25 @@ const CartUser = () => {
               Menu
             </Link>
             <Link
-              to="/location"
+              to="/lokasi"
               className="hover:text-orange-500 transition-colors"
             >
               Location
             </Link>
             <Link
-              to="/faq"
+              to="/FAQUser"
               className="hover:text-orange-500 transition-colors"
             >
               FAQ
             </Link>
             <Link
-              to="/feedback"
+              to="/FeedbackUser"
               className="hover:text-orange-500 transition-colors"
             >
               Feedback
             </Link>
             <Link
-              to="/profile"
+              to="/ProfInfo"
               className="hover:text-orange-500 transition-colors"
             >
               Story
@@ -200,6 +218,7 @@ const CartUser = () => {
                         src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-md border border-gray-200"
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/64x64/E8DED1/333333?text=Produk"; }}
                       />
                       <span className="text-gray-800 font-medium">
                         {item.name}

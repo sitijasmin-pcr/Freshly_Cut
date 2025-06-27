@@ -15,51 +15,66 @@ export default function OrderInformation() {
     console.log("OrderInformation mounted/updated. Current orderSummary:", orderSummary);
     console.log("Current cartItems from context:", cartItems);
 
-    if (!orderSummary && cartItems.length > 0) {
-      const subTotalAmount = cartItems.reduce(
-        (acc, item) => acc + (item.price * item.quantity),
-        0
-      );
-      const deliveryFee = 0;
-      const taxesRate = 0.1;
-      const taxesAmount = subTotalAmount * taxesRate;
-      const couponDiscount = location.state?.couponDiscount || 0; 
+    // If orderSummary is not provided via navigation state, or if cartItems have changed, recalculate
+    // Also, ensure we don't recalculate if we already have a valid orderSummary and cart is empty
+    // (This prevents infinite loops if cart is cleared but orderSummary persists)
+    if (!orderSummary || (cartItems.length > 0 && JSON.stringify(orderSummary.items) !== JSON.stringify(cartItems))) {
+      // Ensure calculation only happens if cartItems exist
+      if (cartItems.length > 0) {
+        const subTotalAmount = cartItems.reduce(
+          (acc, item) => acc + (Number(item.price) * Number(item.quantity)), // Ensure price and quantity are numbers
+          0
+        );
+        const deliveryFee = 0; // Assuming delivery is free or handled elsewhere
+        const taxesRate = 0.1; // 10% tax rate
+        const taxesAmount = subTotalAmount * taxesRate;
+        const couponDiscount = Number(location.state?.couponDiscount) || 0; // Ensure couponDiscount is a number
 
-      const totalAmount = subTotalAmount + deliveryFee + taxesAmount - couponDiscount;
+        const totalAmount = subTotalAmount + deliveryFee + taxesAmount - couponDiscount;
 
-      setOrderSummary({
-        totalItems: cartItems.length,
-        subTotalAmount,
-        deliveryFee,
-        taxesAmount,
-        couponDiscount,
-        totalAmount,
-        items: cartItems.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          sugarLevel: item.sugarLevel,
-          image: item.image,
-          subtotal: item.price * item.quantity
-        }))
-      });
-      console.log("OrderSummary recalculated from cartItems:", {
-        totalItems: cartItems.length,
-        subTotalAmount,
-        deliveryFee,
-        taxesAmount,
-        couponDiscount,
-        totalAmount,
-        items: cartItems
-      });
+        setOrderSummary({
+          totalItems: cartItems.length,
+          subTotalAmount,
+          deliveryFee,
+          taxesAmount,
+          couponDiscount,
+          totalAmount,
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: Number(item.price), // Ensure price is number
+            quantity: Number(item.quantity), // Ensure quantity is number
+            sugarLevel: item.sugarLevel,
+            image: item.image,
+            subtotal: Number(item.price) * Number(item.quantity) // Ensure subtotal is calculated with numbers
+          }))
+        });
+        console.log("OrderSummary recalculated from cartItems:", {
+          totalItems: cartItems.length,
+          subTotalAmount,
+          deliveryFee,
+          taxesAmount,
+          couponDiscount,
+          totalAmount,
+          items: cartItems
+        });
+      } else {
+        // If cart is empty and no orderSummary, redirect
+        console.log("Tidak ada informasi pesanan yang bisa ditampilkan. Keranjang kosong. Mengarahkan ke halaman Menu.");
+        navigate('/MenuUser', { replace: true });
+      }
     } else if (cartItems.length === 0 && !orderSummary) {
-      console.log("Tidak ada informasi pesanan yang bisa ditampilkan. Keranjang kosong atau halaman diakses langsung tanpa data. Mengarahkan ke halaman Menu.");
-      navigate('/MenuUser', { replace: true });
+        // Direct access to order-information with empty cart and no state
+        console.log("Tidak ada informasi pesanan yang bisa ditampilkan. Keranjang kosong atau halaman diakses langsung tanpa data. Mengarahkan ke halaman Menu.");
+        navigate('/MenuUser', { replace: true });
     }
-  }, [cartItems, orderSummary, location.state, navigate]);
+  }, [cartItems, orderSummary, location.state, navigate]); // Dependensi: jalankan ulang ketika ini berubah
 
   const formatRupiah = (amount) => {
+    // Ensure amount is a valid number before formatting
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return "Rp 0"; // Or some other indicator for invalid amount
+    }
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -70,6 +85,8 @@ export default function OrderInformation() {
 
   const handleReceiptButtonClick = () => {
     setShowReceiptModal(true); // Tampilkan modal saat tombol "Recept" diklik
+    // Clear cart after showing the receipt, assuming the order is finalized
+    clearCart();
   };
 
   // Fungsi placeholder untuk download receipt
@@ -77,9 +94,7 @@ export default function OrderInformation() {
     // Implementasi logika download receipt di sini
     console.log("Downloading receipt...");
     // Contoh: Anda bisa membuat PDF atau gambar dari konten modal
-    alert("Fungsi download receipt akan ditambahkan di sini.");
-    // Setelah download, Anda bisa memilih untuk menutup modal atau tidak
-    // setShowReceiptModal(false); 
+    Swal.fire("Info", "Fungsi download receipt akan ditambahkan di sini.", "info");
   };
 
 
@@ -100,7 +115,7 @@ export default function OrderInformation() {
   const orderDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   
   // Asumsi nama pelanggan tetap 'Andi Wijaya' seperti gambar
-  const customerName = "Andi Wijaya";
+  const customerName = "Andi Wijaya"; // This could also come from AuthContext if available
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sans flex flex-col">
@@ -108,7 +123,7 @@ export default function OrderInformation() {
       <nav className="bg-white shadow-lg py-4 px-8 sticky top-0 z-50">
         <div className="flex justify-between items-center border-b pb-3 mb-6">
           <div className="flex items-center gap-3">
-            <img src="/img/Logo.png" alt="Logo" className="h-10" />
+            <img src="/img/Logo.png" alt="Logo" className="h-10" />{" "}
             <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
               TOMORO{" "}
               <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
@@ -118,25 +133,43 @@ export default function OrderInformation() {
           </div>
 
           <nav className="flex gap-8 text-sm font-medium text-gray-700">
-            <Link to="/HomeUser" className="hover:text-orange-500 transition-colors">
+            <Link
+              to="/HomeUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               Home
             </Link>
-            <Link to="/MenuUser" className="hover:text-orange-500 transition-colors">
+            <Link
+              to="/MenuUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               Menu
             </Link>
-            <Link to="/location" className="hover:text-orange-500 transition-colors">
+            <Link
+              to="/lokasi" // Changed from /location to /lokasi based on App.jsx routes
+              className="hover:text-orange-500 transition-colors"
+            >
               Location
             </Link>
-            <Link to="/faq" className="hover:text-orange-500 transition-colors">
+            <Link
+              to="/FAQUser" // Changed from /faq to /FAQUser based on App.jsx routes
+              className="hover:text-orange-500 transition-colors"
+            >
               FAQ
             </Link>
-            <Link to="/feedback" className="hover:text-orange-500 transition-colors">
+            <Link
+              to="/FeedbackUser" // Changed from /feedback to /FeedbackUser based on App.jsx routes
+              className="hover:text-orange-500 transition-colors"
+            >
               Feedback
             </Link>
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
+            <Link
+              to="/CartUser"
+              className="text-orange-500 hover:text-orange-600 relative"
+            >
               <ShoppingCart className="w-5 h-5" />
               {cartItems.length > 0 && (
                 <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
@@ -249,7 +282,7 @@ export default function OrderInformation() {
               onClick={handleReceiptButtonClick} // Membuka modal
               className="mt-8 w-full block text-center bg-orange-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors"
             >
-              Recept
+              Receipt
             </button>
           </div>
         </div>

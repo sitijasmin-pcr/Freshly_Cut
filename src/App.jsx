@@ -1,5 +1,7 @@
+// src/App.jsx
 import React, { useState, createContext, useContext } from 'react';
 import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { supabase } from './supabase'; // Import Supabase client here
 
 // Admin Pages
 import Dashboard from './Pages/Dashboard';
@@ -27,82 +29,158 @@ import NotificationUser from './USERPAGE/NotificationUser';
 import ChatUser from './USERPAGE/ChatUser';
 import FAQUser from './USERPAGE/FAQUser';
 import ProfInfo from './USERPAGE/ProfInfo';
-import LokasiUser from './USERPAGE/LokasiUser'; // Import LokasiUser (konsisten)
-import OrderInformation from './USERPAGE/OrderInformation'; // Import OrderInformation (konsisten)
+import CreateAccount from './USERPAGE/CreateAccount';
+import FeedbackUser from './USERPAGE/FeedbackUser';
+import ProfileUser from './USERPAGE/ProfileUser';
+import LokasiUser from './USERPAGE/LokasiUser';
+import OrderInformation from './USERPAGE/OrderInformation';
 
-// Pastikan jalur ini benar untuk CartContext.jsx di src/context/
-import { CartProvider } from "./USERPAGE/CartContext"; // <--- KOREKSI JALUR INI
+// Pastikan jalur ini benar untuk CartContext.jsx
+import { CartProvider } from "./USERPAGE/CartContext";
 
 // Import komponen Login yang baru
-import Login from './Login'; // Sesuaikan path jika Login.jsx ada di subfolder Anda
+import Login from './Login';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // --- Auth Context Setup ---
 export const AuthContext = createContext(null);
 
-const DUMMY_USERS = [
-  { email: 'admin@tomoro.com', password: 'adminpassword', role: 'admin' },
-  { email: 'customer@mail.com', password: 'customerpassword', role: 'customer' },
-];
+// DUMMY ADMIN USER (Does not need to be in Supabase)
+const DUMMY_ADMIN = { 
+  email: 'admin@tomoro.com', 
+  password: 'adminpassword', 
+  role: 'admin',
+  nama: 'Admin Tomoro', // Dummy name for display in profile
+  title: 'Gold', // Dummy title for display in profile
+  address: 'Tomoro Headquarters, Global', // Dummy address
+  Profile_Picture: 'https://placehold.co/150x150/FFD700/000000?text=Admin' // Dummy profile pic
+};
 
 const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [userEmail, setUserEmail] = useState(null); 
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const login = (email, password) => {
-    const user = DUMMY_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (user) {
+  // Function to handle user login
+  const login = async (email, password) => {
+    setIsAuthLoading(true);
+    // 1. Check for DUMMY ADMIN credentials first
+    if (email === DUMMY_ADMIN.email && password === DUMMY_ADMIN.password) {
       setIsAuthenticated(true);
-      setUserRole(user.role);
+      setUserRole(DUMMY_ADMIN.role);
+      setUserEmail(DUMMY_ADMIN.email);
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('userRole', DUMMY_ADMIN.role);
+      localStorage.setItem('loggedInUserEmail', DUMMY_ADMIN.email);
+      console.log("Login successful as DUMMY ADMIN.");
+      setIsAuthLoading(false);
       return true;
     }
-    return false;
+
+    // 2. If not dummy admin, proceed with Supabase authentication
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, pass, role')
+        .eq('email', email)
+        .single();
+
+      if (error) {
+        console.error("Supabase login error:", error.message);
+        return false;
+      }
+
+      if (data && data.pass === password) {
+        setIsAuthenticated(true);
+        setUserRole(data.role);
+        setUserEmail(data.email);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('loggedInUserEmail', data.email);
+        console.log("Login successful via Supabase.");
+        return true;
+      } else {
+        console.log("Invalid credentials or user not found in Supabase.");
+        return false;
+      }
+    } catch (err) {
+      console.error("Authentication failed:", err.message);
+      return false;
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
+    setUserEmail(null);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('loggedInUserEmail');
+    console.log("User logged out. localStorage cleared.");
   };
 
-  // Cek status login dari localStorage saat aplikasi dimuat
+  // Check login status from localStorage when the app loads
   React.useEffect(() => {
+    console.log("AuthContext useEffect running...");
     const storedAuth = localStorage.getItem('isAuthenticated');
     const storedRole = localStorage.getItem('userRole');
-    if (storedAuth === 'true' && storedRole) {
+    const storedEmail = localStorage.getItem('loggedInUserEmail');
+
+    if (storedAuth === 'true' && storedRole && storedEmail) {
       setIsAuthenticated(true);
       setUserRole(storedRole);
+      setUserEmail(storedEmail);
+      console.log("Found stored session:", { storedAuth, storedRole, storedEmail });
+    } else {
+      console.log("No stored session found or incomplete.");
     }
+    setIsAuthLoading(false);
   }, []);
 
   const authContextValue = {
     isAuthenticated,
     userRole,
+    userEmail, // Provide userEmail in context value
     login,
     logout,
+    isAuthLoading
   };
 
   return (
     <AuthContext.Provider value={authContextValue}>
-      {children}
+      {isAuthLoading ? (
+        <div className="flex items-center justify-center min-h-screen text-gray-700">
+          Loading authentication...
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const { isAuthenticated, userRole } = useContext(AuthContext);
+  const { isAuthenticated, userRole, isAuthLoading } = useContext(AuthContext);
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-700">
+        Checking authentication...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
+    console.log("ProtectedRoute: Not authenticated. Redirecting to Login.");
     return <Navigate to="/Login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
+    console.log(`ProtectedRoute: User role '${userRole}' not allowed for this route. Redirecting.`);
     if (userRole === 'customer') {
       return <Navigate to="/HomeUser" replace />;
     }
@@ -115,14 +193,12 @@ const ProtectedRoute = ({ allowedRoles }) => {
 function App() {
   return (
     <AuthProvider>
-      {/* CartProvider membungkus semua rute yang membutuhkan akses keranjang */}
       <CartProvider>
         <Routes>
-          {/* Rute publik */}
           <Route path="/Login" element={<Login />} />
+          <Route path="/CreateAccount" element={<CreateAccount />} />
           <Route path="/" element={<Navigate to="Login" replace />} />
           
-          {/* --- Protected Admin Routes --- */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -142,7 +218,6 @@ function App() {
             </Route>
           </Route>
 
-          {/* --- Protected User Routes --- */}
           <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
             <Route path="/HomeUser" element={<HomeUser />} />
             <Route path="/MenuUser" element={<MenuUser />} />
@@ -152,11 +227,12 @@ function App() {
             <Route path="/ChatUser" element={<ChatUser />} />
             <Route path="/FAQUser" element={<FAQUser />} />
             <Route path="/ProfInfo" element={<ProfInfo />} />
+            <Route path="/FeedbackUser" element={<FeedbackUser />} />
+            <Route path="/ProfileUser" element={<ProfileUser />} />
             <Route path="/lokasi" element={<LokasiUser />} />
             <Route path="/order-information" element={<OrderInformation />} />
           </Route>
 
-          {/* Rute 404 */}
           <Route path="*" element={<div className="min-h-screen flex items-center justify-center text-2xl font-bold text-gray-700">404 Not Found</div>} />
         </Routes>
       </CartProvider>
