@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import ProductForm from "./ProductForm";
+// import { Search } from "lucide-react"; // Import ikon pencarian jika ingin digunakan
 
 export default function ProductPage() {
   const [products, setProducts] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null); // State untuk filter kategori
+  const [searchTerm, setSearchTerm] = useState(""); // State baru untuk input pencarian
   const [currentPage, setCurrentPage] = useState(1); // State untuk halaman pagination
   const itemsPerPage = 10; // Jumlah item per halaman
 
@@ -41,7 +43,7 @@ export default function ProductPage() {
         console.error("Delete Error:", error);
         alert(`Gagal menghapus produk: ${error.message}`);
       } else {
-        fetchProducts();
+        fetchProducts(); // Refresh daftar produk
       }
     }
   };
@@ -69,18 +71,28 @@ export default function ProductPage() {
     return date.toISOString().split('T')[0];
   };
 
-  // Filtered products based on selected category
-  const filteredProducts = selectedCategory
-    ? products.filter((prod) => prod.kategori === selectedCategory)
-    : products;
+  // --- Logic Pencarian dan Filter ---
+  const filteredAndSearchedProducts = products.filter((prod) => {
+    const matchesCategory = selectedCategory ? prod.kategori === selectedCategory : true;
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const matchesSearch =
+      prod.nama.toLowerCase().includes(lowerCaseSearchTerm) ||
+      prod.deskripsi.toLowerCase().includes(lowerCaseSearchTerm);
+    return matchesCategory && matchesSearch;
+  });
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Pagination logic applied to filtered and searched products
+  const totalPages = Math.ceil(filteredAndSearchedProducts.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredAndSearchedProducts.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Reset page to 1 when category or search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm]);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -94,7 +106,7 @@ export default function ProductPage() {
           ${!selectedCategory ? 'bg-orange-200 border-2 border-orange-500' : 'hover:bg-orange-100 hover:border-orange-300'}`}
           onClick={() => {
             setSelectedCategory(null);
-            setCurrentPage(1); // Reset page when category changes
+            // currentPage is already reset by the useEffect below
           }}
         >
           <p className="text-gray-600 text-lg font-semibold">Semua Kategori</p>
@@ -108,7 +120,7 @@ export default function ProductPage() {
             ${selectedCategory === kategori ? 'bg-orange-200 border-2 border-orange-500' : 'hover:bg-orange-100 hover:border-orange-300'}`}
             onClick={() => {
               setSelectedCategory(kategori);
-              setCurrentPage(1); // Reset page when category changes
+              // currentPage is already reset by the useEffect below
             }}
           >
             <p className="text-gray-600 text-lg font-semibold">{kategori}</p>
@@ -118,7 +130,7 @@ export default function ProductPage() {
         ))}
       </div>
 
-      {/* Tombol Tambah Produk */}
+      {/* Tombol Tambah Produk (tetap di sini) */}
       <div className="mb-6 flex justify-end">
         <button
           onClick={handleAddNewClick}
@@ -130,7 +142,19 @@ export default function ProductPage() {
 
       {/* Tabel Produk */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Daftar Produk {selectedCategory ? `(${selectedCategory})` : ''}</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Daftar Produk {selectedCategory ? `(${selectedCategory})` : ''}</h2>
+        {/* Input Pencarian dipindahkan ke sini */}
+        <div className="relative mb-6">
+          <input
+            type="text"
+            placeholder="Cari produk berdasarkan nama atau deskripsi..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+          />
+          {/* Anda bisa menggunakan ikon Search dari lucide-react jika diimpor */}
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -172,7 +196,7 @@ export default function ProductPage() {
               {currentItems.length === 0 && (
                 <tr>
                   <td colSpan="8" className="text-center p-6 text-gray-500">
-                    Tidak ada produk ditemukan di kategori ini.
+                    {searchTerm || selectedCategory ? "Tidak ada produk ditemukan dengan kriteria ini." : "Tidak ada produk."}
                   </td>
                 </tr>
               )}
@@ -181,7 +205,7 @@ export default function ProductPage() {
         </div>
 
         {/* Pagination Controls */}
-        {filteredProducts.length > itemsPerPage && (
+        {filteredAndSearchedProducts.length > itemsPerPage && (
           <div className="flex justify-center mt-6 space-x-2">
             {[...Array(totalPages)].map((_, i) => (
               <button

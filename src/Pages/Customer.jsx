@@ -37,7 +37,7 @@ export default function CustomerPage() {
     const bronze = customers.filter(cust => cust.status_member === 'Bronze').length;
     const silver = customers.filter(cust => cust.status_member === 'Silver').length;
     const newcomer = customers.filter(cust => cust.status_member === 'Newcomer').length;
-    
+
     const totalCustomers = customers.length;
 
     setMemberSummary({
@@ -53,7 +53,7 @@ export default function CustomerPage() {
     // Anda tidak perlu mengirimkannya secara eksplisit di sini.
     const { error } = await supabase.from("customers").insert({
       ...customer,
-      role: customer.role || "User", 
+      role: customer.role || "User",
     });
     if (error) {
         console.error("Insert Error:", error);
@@ -112,7 +112,7 @@ export default function CustomerPage() {
         return 'bg-gray-500';
     }
   };
-  
+
   // Helper untuk mendapatkan warna member type (digunakan untuk badge "Member Type" di tabel)
   const getMemberTypeColor = (type) => {
     switch (type) {
@@ -225,6 +225,8 @@ export default function CustomerPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                {/* Tambahkan kolom ID di sini */}
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined Date</th> {/* Tambahkan kolom Joined Date */}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Type</th>
@@ -235,8 +237,10 @@ export default function CustomerPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {customers.map((cust) => (
+              {customers.map((cust, index) => ( // Tambahkan 'index' di sini
                 <tr key={cust.id}>
+                  {/* Tampilkan nomor urut sebagai ID */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cust.nama}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateForTable(cust.created_at)}</td> {/* Tampilkan created_at */}
                   <td className="px-6 py-4 whitespace-nowrap">
