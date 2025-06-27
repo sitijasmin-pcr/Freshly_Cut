@@ -26,15 +26,16 @@ const CartUser = () => {
   const [customerName, setCustomerName] = useState(""); // State untuk nama pelanggan
   const [tableNumber, setTableNumber] = useState(""); // State untuk nomor meja (opsional)
 
-  const calculateSubtotal = (item) => item.price * item.quantity;
+  // Ensure price and quantity are numbers for calculation
+  const calculateSubtotal = (item) => Number(item.price) * Number(item.quantity);
 
   const totalItems = cartItems.length;
   const subTotalAmount = cartItems.reduce(
     (acc, item) => acc + calculateSubtotal(item),
     0
   );
-  const deliveryFee = deliveryOption === "deliverToLocation" ? 15000 : 0; // Contoh: biaya pengiriman
-  const taxesRate = 0.1; // 10% pajak
+  const deliveryFee = 0;
+  const taxesRate = 0.1;
 
   const taxesAmount = subTotalAmount * taxesRate;
 
@@ -55,22 +56,15 @@ const CartUser = () => {
   const handleSugarLevelChange = (id, newSugarLevel) =>
     updateSugarLevel(id, newSugarLevel);
   const handleRemoveItem = (id) => removeItem(id);
-  const handleClearShoppingCart = () => {
-    Swal.fire({
-      title: 'Hapus Keranjang?',
-      text: "Anda yakin ingin menghapus semua item dari keranjang?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Ya, Hapus!',
-      cancelButtonText: 'Batal'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        clearCart();
-        Swal.fire('Dihapus!', 'Keranjang Anda telah dikosongkan.', 'success');
-      }
-    });
+  const handleClearShoppingCart = () => clearCart();
+
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   // Fungsi baru untuk memproses checkout dan menyimpan ke Supabase
@@ -90,73 +84,19 @@ const CartUser = () => {
 
     applyCoupon(); // Pastikan kupon diterapkan sebelum menyimpan
 
-    // Ambil nilai kupon dan totalAmount terbaru setelah applyCoupon
     const currentCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? subTotalAmount * 0.1 : 0;
     const currentTotalAmount = subTotalAmount + deliveryFee + taxesAmount - currentCouponDiscount;
 
-    try {
-      // 1. Simpan data pesanan utama ke tabel 'orders'
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert([{
-          customer_name: customerName.trim(),
-          order_type: deliveryOption === "deliverToLocation" ? "Order Online" : "Take Away", // Asumsi
-          table_number: deliveryOption === "takeAtOutlet" ? (tableNumber.trim() || null) : null, // Hanya jika take at outlet
-          customer_type: "Regular", // Contoh default, bisa disesuaikan
-          status: "Processing", // Default status
-          total_amount: currentTotalAmount,
-          receipt_id: `RECEIPT-${Date.now()}-${Math.floor(Math.random() * 1000)}` // Contoh receipt ID
-        }])
-        .select(); // Mengambil kembali data yang diinsert untuk mendapatkan order_id
-
-      if (orderError) throw orderError;
-      const orderId = orderData[0].id;
-
-      // 2. Simpan setiap item keranjang ke tabel 'order_items'
-      const orderItemsToInsert = cartItems.map(item => ({
-        order_id: orderId,
-        product_id: item.id, // Asumsi item.id adalah product_id dari tabel produk Anda
-        product_name: item.name,
-        quantity: item.quantity,
-        price_per_unit: item.price
-        // Anda bisa menambahkan sugarLevel ke notes atau kolom baru jika ada
-      }));
-
-      const { error: orderItemsError } = await supabase
-        .from('order_items')
-        .insert(orderItemsToInsert);
-
-      if (orderItemsError) throw orderItemsError;
-
-      Swal.fire('Berhasil!', 'Pesanan Anda telah disimpan!', 'success');
-      clearCart(); // Kosongkan keranjang setelah pesanan berhasil
-      // Arahkan ke halaman konfirmasi atau riwayat pesanan
-      navigate('/order-information', {
-        state: {
-          orderId: orderId,
-          totalAmount: currentTotalAmount,
-          items: cartItems.map(item => ({ // Pastikan items yang diteruskan juga lengkap
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            sugarLevel: item.sugarLevel,
-            image: item.image,
-            subtotal: item.price * item.quantity // Tambahkan subtotal untuk kemudahan
-          })),
-          customerName: customerName.trim(), // Teruskan nama pelanggan dari state input
-          deliveryOption: deliveryOption, // Teruskan opsi pengiriman
-          couponDiscount: currentCouponDiscount, // Teruskan diskon kupon
-          subTotalAmount: subTotalAmount, // Teruskan subTotalAmount
-          taxesAmount: taxesAmount, // Teruskan taxesAmount
-          deliveryFee: deliveryFee // Teruskan deliveryFee
-        }
-      });
-
-    } catch (error) {
-      console.error("Error during checkout:", error);
-      Swal.fire('Gagal!', `Terjadi kesalahan saat memproses pesanan: ${error.message}`, 'error');
-    }
+    const orderSummary = {
+      totalItems: totalItems,
+      subTotalAmount: subTotalAmount,
+      deliveryFee: deliveryFee,
+      taxesAmount: taxesAmount,
+      couponDiscount: currentCouponDiscount,
+      totalAmount: currentTotalAmount,
+      items: cartItems
+    };
+    navigate('/order-information', { state: { orderSummary, deliveryOption, couponCode, couponDiscount: currentCouponDiscount } });
   };
 
   return (
@@ -188,25 +128,25 @@ const CartUser = () => {
               Menu
             </Link>
             <Link
-              to="/location"
+              to="/lokasi"
               className="hover:text-orange-500 transition-colors"
             >
               Location
             </Link>
             <Link
-              to="/faq"
+              to="/FAQUser"
               className="hover:text-orange-500 transition-colors"
             >
               FAQ
             </Link>
             <Link
-              to="/feedback"
+              to="/FeedbackUser"
               className="hover:text-orange-500 transition-colors"
             >
               Feedback
             </Link>
             <Link
-              to="/profile"
+              to="/ProfInfo"
               className="hover:text-orange-500 transition-colors"
             >
               Story
@@ -274,7 +214,6 @@ const CartUser = () => {
                         src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-md border border-gray-200"
-                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/64x64/D3D3D3/000000?text=NoImg'; }}
                       />
                       <span className="text-gray-800 font-medium">
                         {item.name}

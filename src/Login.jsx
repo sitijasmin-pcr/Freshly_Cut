@@ -91,7 +91,7 @@ const Login = () => {
         {/* Create Account Link */}
         <p className="text-center text-gray-600 text-sm">
           Don't have an account?{' '}
-          <Link to="/create-account" className="font-bold text-orange-500 hover:text-orange-800">
+          <Link to="/CreateAccount" className="font-bold text-orange-500 hover:text-orange-800">
             Create an account
           </Link>
         </p>

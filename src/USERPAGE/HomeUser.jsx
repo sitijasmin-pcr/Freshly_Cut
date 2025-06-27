@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Bell, MessageSquareText } from "lucide-react"; // Import MessageSquareText
+import { ShoppingCart, Bell, MessageSquareText, UserCircle } from "lucide-react"; // Import UserCircle
 
 // Reusable component for scroll-based animation
 const FadeInOnScroll = ({ children, direction = "up", delay = 0 }) => {
@@ -102,7 +102,7 @@ export default function HomeUser() {
     },
     {
       name: "Tomoro Coffee - Panam",
-    address:
+      address:
         "Jl. Durian, Jadirejo Kec. Payung Sekaki, Kota Pekanbaru, Riau 28124",
       image: "/img/image 49.png",
       rating: 4.9,
@@ -125,45 +125,50 @@ export default function HomeUser() {
           </div>
 
           <nav className="flex gap-8 text-sm font-medium text-gray-700">
-                      <Link
-                        to="/HomeUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        to="/MenuUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Menu
-                      </Link>
-                      <Link
-                        to="/ProfInfo"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Story
-                      </Link>
-                      <Link
-                        to="/FAQUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        FAQ
-                      </Link>
-                      <Link
-                        to="/feedback"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Feedback
-                      </Link>
-                      <Link
-                        to="/Lokasi"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Location
-                      </Link>
-                    </nav>
+            <Link
+              to="/HomeUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              to="/MenuUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Menu
+            </Link>
+            <Link
+              to="/ProfInfo" // Mengarahkan ke halaman profil
+              className="hover:text-orange-500 transition-colors"
+            >
+              Story
+            </Link>
+            <Link
+              to="/FAQUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/FeedbackUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Feedback
+            </Link>
+            <Link
+              to="/Lokasi"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Location
+            </Link>
+          </nav>
 
           <div className="flex items-center gap-4">
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
             <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
             </Link>
@@ -244,6 +249,26 @@ export default function HomeUser() {
                   alt="New Product"
                   className="w-40 md:w-48 object-contain"
                 />
+              </div>
+              <div className="absolute right-[-80px] top-0 hidden md:flex flex-col gap-6">
+                {coffeeList.map((coffee, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleChangeProduct(idx)}
+                    className={`relative transition-all ${
+                      active === idx ? "scale-110" : "opacity-80"
+                    }`}
+                  >
+                    <img
+                      src={coffee.img}
+                      alt={coffee.name}
+                      className="w-16 h-16 rounded-full border-2 border-orange-400"
+                    />
+                    <span className="absolute bottom-0 right-0 bg-white text-sm font-bold px-2 py-0.5 rounded-full shadow">
+                      ⭐ {coffee.rating}
+                    </span>
+                  </button>
+                ))}
               </div>
             </motion.div>
           </div>
