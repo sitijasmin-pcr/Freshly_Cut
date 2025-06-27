@@ -1,400 +1,248 @@
-// import React from 'react'
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   LineElement,
-//   PointElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-//   ArcElement,
-// } from 'chart.js'
-// import { Bar, Line, Pie } from 'react-chartjs-2'
-
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   LineElement,
-//   PointElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-//   ArcElement,
-// )
-
-// const Dashboard = () => {
-//   const menus = [
-//     { id: 1, name: "Espresso", price: 20000, sold: 124 },
-//     { id: 2, name: "Cappuccino", price: 25000, sold: 198 },
-//     { id: 3, name: "Matcha Latte", price: 27000, sold: 143 },
-//     { id: 4, name: "Americano", price: 18000, sold: 115 },
-//     { id: 5, name: "Caramel Macchiato", price: 20000, sold: 174 },
-//     { id: 6, name: "Chocolate Frappe", price: 28000, sold: 221 },
-//     { id: 7, name: "Strawberry Smoothies", price: 18000, sold: 132 },
-//     { id: 8, name: "Roti Bakar", price: 15000, sold: 96 },
-//     { id: 9, name: "Kentang Goreng", price: 18000, sold: 109 },
-//   ]
-
-//   const totalPendapatan = menus.reduce((acc, menu) => acc + menu.price * menu.sold, 0)
-//   const totalPenjualan = menus.reduce((acc, menu) => acc + menu.sold, 0)
-
-//   const stats = [
-//     { label: "Pendapatan Hari Ini", value: `Rp ${totalPendapatan.toLocaleString()}`, percent: "+55%", color: "green" },
-//     { label: "Pengguna Hari Ini", value: "2,300", percent: "+3%", color: "blue" },
-//     { label: "Klien Baru", value: "+3,462", percent: "-2%", color: "red" },
-//     { label: "Penjualan", value: totalPenjualan.toLocaleString(), percent: "+5%", color: "purple" },
-//   ]
-
-//   const barData = {
-//     labels: menus.map(menu => menu.name),
-//     datasets: [
-//       {
-//         label: "Total Penjualan (Rp)",
-//         data: menus.map(menu => menu.sold * menu.price),
-//         backgroundColor: "rgba(99, 102, 241, 0.7)",
-//       },
-//     ],
-//   }
-
-//   const barOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//     plugins: {
-//       legend: { position: 'top' },
-//       title: { display: true, text: 'Penjualan Produk Tahun Ini' },
-//       tooltip: {
-//         callbacks: {
-//           label: ctx => `Rp ${ctx.parsed.y.toLocaleString()}`,
-//         }
-//       }
-//     },
-//     scales: {
-//       y: {
-//         ticks: {
-//           callback: value => `Rp ${value.toLocaleString()}`,
-//         },
-//       },
-//     },
-//   }
-
-//   const lineData = {
-//     labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
-//     datasets: [
-//       {
-//         label: "Jumlah Pelanggan",
-//         data: [50, 75, 120, 180, 220, 260, 300, 350, 400, 430, 460, 500],
-//         borderColor: "rgba(59, 130, 246, 1)",
-//         backgroundColor: "rgba(59, 130, 246, 0.3)",
-//         fill: true,
-//         tension: 0.3,
-//         pointRadius: 4,
-//       },
-//     ],
-//   }
-
-//   const lineOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//     plugins: {
-//       legend: { position: 'top' },
-//       title: { display: true, text: 'Pertumbuhan Pelanggan Tahun Ini' },
-//     },
-//   }
-
-//   const forecastData = {
-//     labels: ["Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des", "Jan (Forecast)", "Feb (Forecast)", "Mar (Forecast)"],
-//     datasets: [
-//       {
-//         label: "Forecast Pendapatan Bulanan (Rp)",
-//         data: [4500000, 5000000, 5200000, 5400000, 5600000, 5800000, 6000000, 6200000, 6400000, 6600000],
-//         borderColor: function(context) {
-//           const index = context.dataIndex;
-//           return index >= 7 ? 'rgba(245, 158, 11, 1)' : 'rgba(34, 197, 94, 1)';
-//         },
-//         backgroundColor: function(context) {
-//           const index = context.dataIndex;
-//           return index >= 7 ? 'rgba(245, 158, 11, 0.3)' : 'rgba(34, 197, 94, 0.3)';
-//         },
-//         fill: true,
-//         tension: 0.3,
-//         pointRadius: 4,
-//         segment: {
-//           borderColor: ctx => ctx.p0DataIndex >= 7 ? 'rgba(245, 158, 11, 1)' : 'rgba(34, 197, 94, 1)',
-//           backgroundColor: ctx => ctx.p0DataIndex >= 7 ? 'rgba(245, 158, 11, 0.3)' : 'rgba(34, 197, 94, 0.3)',
-//         },
-//       },
-//     ],
-//   }
-
-//   const forecastOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//     plugins: {
-//       legend: { position: 'top' },
-//       title: { display: true, text: 'Forecast Pendapatan per Bulan' },
-//     },
-//     scales: {
-//       y: {
-//         ticks: {
-//           callback: value => `Rp ${value.toLocaleString()}`,
-//         },
-//       },
-//     },
-//   }
-
-//   const dailySales = [
-//     { day: "Senin", sales: 400000 },
-//     { day: "Selasa", sales: 600000 },
-//     { day: "Rabu", sales: 450000 },
-//     { day: "Kamis", sales: 700000 },
-//     { day: "Jumat", sales: 500000 },
-//     { day: "Sabtu", sales: 300000 },
-//     { day: "Minggu", sales: 350000 },
-//   ]
-
-//   const pieProdukData = {
-//     labels: menus.map(menu => menu.name),
-//     datasets: [
-//       {
-//         label: "Jumlah Produk Terjual",
-//         data: menus.map(menu => menu.sold),
-//         backgroundColor: [
-//           "#6366F1", "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#EF4444", "#14B8A6", "#F97316"
-//         ],
-//         hoverOffset: 30,
-//       },
-//     ],
-//   }
-
-//   const pieProdukOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//     plugins: {
-//       legend: { position: 'bottom' },
-//       title: { display: true, text: 'Proporsi Produk Terlaris (Jumlah Terjual)' },
-//     },
-//   }
-
-//   const pieHariData = {
-//     labels: dailySales.map(day => day.day),
-//     datasets: [
-//       {
-//         label: "Pemasukan Harian (Rp)",
-//         data: dailySales.map(day => day.sales),
-//         backgroundColor: [
-//           "#F87171", "#60A5FA", "#34D399", "#A78BFA", "#FBBF24", "#F43F5E", "#3B82F6"
-//         ],
-//         hoverOffset: 30,
-//       },
-//     ],
-//   }
-
-//   const pieHariOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//     plugins: {
-//       legend: { position: 'bottom' },
-//       title: { display: true, text: 'Proporsi Pemasukan Harian' },
-//     },
-//   }
-
-//   return (
-//     <div className="p-6 space-y-10 max-w-7xl mx-auto">
-//       {/* Statistik utama */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-//         {stats.map(({ label, value, percent, color }) => (
-//           <div
-//             key={label}
-//             className="bg-white rounded-xl shadow p-5 flex flex-col justify-center"
-//             style={{ minHeight: '100px' }}
-//           >
-//             <p className="text-xs sm:text-sm text-gray-500">{label}</p>
-//             <h2 className={`text-lg sm:text-xl font-bold text-${color}-600 flex items-center gap-2 mt-1`}>
-//               {value}
-//               <span className={`text-xs font-semibold text-${color}-500`}>{percent}</span>
-//             </h2>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Grafik utama dan pie dalam grid */}
-//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-//         {/* Bar & Line chart dalam 2 kolom */}
-//         <div className="col-span-2 space-y-8">
-//           <div className="bg-white rounded-xl shadow p-6" style={{ height: 280 }}>
-//             <Bar options={barOptions} data={barData} />
-//           </div>
-//           <div className="bg-white rounded-xl shadow p-6" style={{ height: 280 }}>
-//             <Line options={lineOptions} data={lineData} />
-//           </div>
-//           <div className="bg-white rounded-xl shadow p-6" style={{ height: 280 }}>
-//             <Line options={forecastOptions} data={forecastData} />
-//           </div>
-//         </div>
-
-//         {/* Pie charts di kolom kanan */}
-//         <div className="flex flex-col gap-8">
-//           <div className="bg-white rounded-xl shadow p-6" style={{ height: 280 }}>
-//             <Pie options={pieProdukOptions} data={pieProdukData} />
-//           </div>
-//           <div className="bg-white rounded-xl shadow p-6" style={{ height: 280 }}>
-//             <Pie options={pieHariOptions} data={pieHariData} />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default Dashboard
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+// Untuk ikon, pastikan Font Awesome terhubung di public/index.html Anda
+// <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 import {
-  Bar,
-  Line,
-  Pie,
-} from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from "chart.js";
-import { FaShoppingCart, FaFileInvoiceDollar, FaUsers, FaChartPie } from "react-icons/fa";
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+const Dashboard = () => {
+  // Data mock untuk grafik dan statistik
+  const [salesData] = useState([
+    { name: 'Jan', uv: 400, pv: 240 },
+    { name: 'Feb', uv: 300, pv: 139 },
+    { name: 'Mar', uv: 200, pv: 980 },
+    { name: 'Apr', uv: 278, pv: 390 },
+    { name: 'May', uv: 189, pv: 480 },
+    { name: 'Jun', uv: 239, pv: 380 },
+    { name: 'Jul', uv: 349, pv: 430 },
+    { name: 'Aug', uv: 200, pv: 500 },
+    { name: 'Sep', uv: 278, pv: 600 },
+    { name: 'Oct', uv: 189, pv: 700 },
+    { name: 'Nov', uv: 239, pv: 800 },
+    { name: 'Dec', uv: 349, pv: 900 },
+  ]);
 
-export default function Dashboard() {
-  const stats = [
-    { icon: <FaFileInvoiceDollar />, label: "Revenue Hari Ini", value: "Rp 8.500.000", color: "yellow-400" },
-    { icon: <FaShoppingCart />, label: "Order Hari Ini", value: 124, color: "red-400" },
-    { icon: <FaUsers />, label: "Pengguna Hari Ini", value: 76, color: "green-400" },
-    { icon: <FaChartPie />, label: "Produk Terjual", value: 342, color: "purple-400" },
-  ];
+  const [emailActivityData] = useState([
+    { name: 'Sent', value: 2300 },
+    { name: 'Received', value: 274 },
+  ]);
 
-  const barData = {
-    labels: ["Espresso", "Latte", "Cappuccino", "Mocha", "Matcha", "Americano"],
-    datasets: [
-      {
-        label: "Revenue per Produk (Rp)",
-        data: [1500000, 2300000, 1800000, 1200000, 900000, 750000],
-        backgroundColor: "rgba(99,102,241,0.7)",
-      },
-    ],
-  };
+  const PIE_COLORS = ['#8884d8', '#82ca9d']; // Warna untuk Donut Chart
 
-  const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
-    datasets: [
-      {
-        label: "Jumlah Order Bulanan",
-        data: [30, 45, 60, 80, 100, 120, 150, 170, 190, 210, 230, 250],
-        borderColor: "rgba(59,130,246,1)",
-        backgroundColor: "rgba(59,130,246,0.3)",
-        fill: true,
-        tension: 0.3,
-        pointRadius: 4,
-      },
-    ],
-  };
+  // Data mock untuk Top 5 Produk
+  const [topProducts] = useState([
+    { id: 1, name: 'Superstar XLG', totalSold: 110, profits: 72.3, imageUrl: 'https://placehold.co/40x40/f0f0f0/333333?text=P1' },
+    { id: 2, name: 'Superstar Bornega', totalSold: 94, profits: 14.8, imageUrl: 'https://placehold.co/40x40/f0f0f0/333333?text=P2' },
+    { id: 3, name: 'Webcam Full HD', totalSold: 65, profits: 9.7, imageUrl: 'https://placehold.co/40x40/f0f0f0/333333?text=P3' },
+    { id: 4, name: 'Conlon Camera IX65', totalSold: 55, profits: 7.4, imageUrl: 'https://placehold.co/40x40/f0f0f0/333333?text=P4' },
+    { id: 5, name: 'Nike Dunk Love Retro', totalSold: 39, profits: 6.2, imageUrl: 'https://placehold.co/40x40/f0f0f0/333333?text=P5' },
+  ]);
 
-  const pieProdukData = {
-    labels: ["Espresso", "Latte", "Cappuccino", "Mocha", "Matcha", "Americano"],
-    datasets: [
-      {
-        data: [120, 150, 100, 80, 60, 50],
-        backgroundColor: [
-          "#6366F1",
-          "#3B82F6",
-          "#8B5CF6",
-          "#EC4899",
-          "#F59E0B",
-          "#10B981",
-        ],
-        hoverOffset: 30,
-      },
-    ],
-  };
+  // Data mock untuk Top 5 Pelanggan
+  const [topCustomers] = useState([
+    { id: 1, name: 'Bayu Ramadhon', totalOrder: 88, expenses: 17.6, imageUrl: 'https://placehold.co/40x40/d0e0f0/333333?text=C1' },
+    { id: 2, name: 'Daffanurhadi_69', totalOrder: 73, expenses: 13.2, imageUrl: 'https://placehold.co/40x40/d0e0f0/333333?text=C2' },
+    { id: 3, name: 'Dhirodriunartai_10', totalOrder: 70, expenses: 10.4, imageUrl: 'https://placehold.co/40x40/d0e0f0/333333?text=C3' },
+    { id: 4, name: 'Michalperwira_8', totalOrder: 64, expenses: 10.2, imageUrl: 'https://placehold.co/40x40/d0e0f0/333333?text=C4' },
+    { id: 5, name: 'Naufalputra_0072', totalOrder: 59, expenses: 8.9, imageUrl: 'https://placehold.co/40x40/d0e0f0/333333?text=C5' },
+  ]);
 
-  const topOrders = [
-    { name: "Espresso", total: 500000, time: "10:15 AM" },
-    { name: "Latte", total: 400000, time: "11:30 AM" },
-    { name: "Cappuccino", total: 350000, time: "12:45 PM" },
-    { name: "Mocha", total: 300000, time: "2:00 PM" },
-    { name: "Matcha", total: 250000, time: "3:15 PM" },
-  ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-8">
-      {/* Card Statistik */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map((s, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-xl shadow p-5 flex items-center gap-4"
-          >
-            <div className={`p-3 bg-${s.color} rounded-full text-white text-xl`}>
-              {s.icon}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">{s.label}</p>
-              <p className="text-lg font-bold">{s.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen bg-gray-100 font-inter">
 
-      {/* Grafik & Top Order */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Bar & Line chart */}
-        <div className="col-span-2 space-y-8">
-          <div className="bg-white rounded-xl p-6 shadow h-72">
-            <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
+      {/* Main Content Area */}
+      <div className="p-6 lg:p-8">
+        {/* Welcome Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back, Admin</h2>
+            <p className="text-gray-600">Here's what's happening with your store today.</p>
           </div>
-
-          <div className="bg-white rounded-xl p-6 shadow h-72">
-            <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
+          <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 md:mt-0">
+            <button className="bg-indigo-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 flex items-center">
+              <i className="fas fa-download mr-2"></i> Download Report
+            </button>
+            <div className="relative">
+              <select className="appearance-none bg-gray-100 border border-gray-300 text-gray-700 py-2 pl-4 pr-10 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <option>Oct 1 - Oct 31</option>
+                <option>Sep 1 - Sep 30</option>
+                <option>Aug 1 - Aug 31</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
           </div>
         </div>
 
-        {/* Pie chart + Top Order */}
-        <div className="space-y-8">
-          <div className="bg-white rounded-xl p-6 shadow h-72">
-            <Pie data={pieProdukData} options={{ responsive: true, maintainAspectRatio: false }} />
+        {/* Overview Tabs */}
+        <div className="flex space-x-2 mb-6">
+          <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-medium shadow-md">Overview</button>
+          <button className="px-5 py-2 bg-white text-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-50">Performance</button>
+          <button className="px-5 py-2 bg-white text-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-50">Ads Campaign</button>
+        </div>
+
+        {/* Summary Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {/* Total Sales Card */}
+          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-start">
+            <h3 className="text-gray-500 text-lg font-semibold mb-2">Total Sales</h3>
+            <p className="text-3xl font-bold text-gray-800">$40.365.00</p>
+            <p className="text-green-500 text-sm mt-1">
+              <i className="fas fa-arrow-up mr-1"></i> 36.5% <span className="text-gray-500">since last month</span>
+            </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow">
-            <h3 className="font-semibold mb-4">Top 5 Orders Hari Ini</h3>
-            <ul className="space-y-2">
-              {topOrders.map((o, i) => (
-                <li key={i} className="flex justify-between text-sm">
-                  <span>{o.name} ({o.time})</span>
-                  <span className="font-semibold">Rp {o.total.toLocaleString()}</span>
-                </li>
+          {/* Total Orders Card */}
+          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-start">
+            <h3 className="text-gray-500 text-lg font-semibold mb-2">Total Orders</h3>
+            <p className="text-3xl font-bold text-gray-800">3.305</p>
+            <p className="text-red-500 text-sm mt-1">
+              <i className="fas fa-arrow-down mr-1"></i> 2.1% <span className="text-gray-500">since last month</span>
+            </p>
+          </div>
+
+          {/* Customers Card */}
+          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-start">
+            <h3 className="text-gray-500 text-lg font-semibold mb-2">Customers</h3>
+            <p className="text-3xl font-bold text-gray-800">25.213</p>
+            <p className="text-green-500 text-sm mt-1">
+              <i className="fas fa-arrow-up mr-1"></i> 15% <span className="text-gray-500">since last month</span>
+            </p>
+          </div>
+
+          {/* Product Views Card */}
+          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-start">
+            <h3 className="text-gray-500 text-lg font-semibold mb-2">Product Views</h3>
+            <p className="text-3xl font-bold text-gray-800">10.000</p>
+            <p className="text-green-500 text-sm mt-1">
+              <i className="fas fa-arrow-up mr-1"></i> 20% <span className="text-gray-500">since last month</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Email Activity Chart */}
+          <div className="lg:col-span-1 bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-gray-800 text-xl font-semibold mb-4">Email Activity</h3>
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={emailActivityData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {emailActivityData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="text-center text-gray-600 mt-2">
+                <p className="text-4xl font-bold text-gray-800">2574</p>
+                <p>Total</p>
+              </div>
+              <div className="flex justify-around w-full mt-4 text-sm text-gray-600">
+                <p><span className="w-3 h-3 inline-block rounded-full mr-2" style={{ backgroundColor: PIE_COLORS[0] }}></span> Email Sent: {emailActivityData[0].value}</p>
+                <p><span className="w-3 h-3 inline-block rounded-full mr-2" style={{ backgroundColor: PIE_COLORS[1] }}></span> Received: {emailActivityData[1].value}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sales Statistic Bar Chart */}
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-gray-800 text-xl font-semibold mb-4">Sales Statistic</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={salesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="uv" fill="#8884d8" name="Revenue" />
+                <Bar dataKey="pv" fill="#82ca9d" name="Profit" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* New sections: Top 5 Products and Top 5 Customers */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Top 5 Products */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-gray-800 text-xl font-semibold">Top 5 Products</h3>
+              <a href="#" className="text-indigo-600 hover:underline text-sm">View more <i className="fas fa-chevron-right ml-1"></i></a>
+            </div>
+            <div className="space-y-4">
+              {topProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center justify-between py-2 border-b last:border-b-0 border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-gray-500 font-bold text-lg">{index + 1}</div> {/* Nomor urut */}
+                    <img src={product.imageUrl} alt={product.name} className="w-10 h-10 rounded-full object-cover" />
+                    <div>
+                      <p className="text-gray-800 font-medium">{product.name}</p>
+                      <p className="text-gray-500 text-sm">Total Sold: {product.totalSold}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-800 font-semibold">${product.profits.toFixed(1)}K</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
+          </div>
+
+          {/* Top 5 Customers */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-gray-800 text-xl font-semibold">Top 5 Customers</h3>
+              <a href="#" className="text-indigo-600 hover:underline text-sm">View more <i className="fas fa-chevron-right ml-1"></i></a>
+            </div>
+            <div className="space-y-4">
+              {topCustomers.map((customer, index) => (
+                <div key={customer.id} className="flex items-center justify-between py-2 border-b last:border-b-0 border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-gray-500 font-bold text-lg">{index + 1}</div> {/* Nomor urut */}
+                    <img src={customer.imageUrl} alt={customer.name} className="w-10 h-10 rounded-full object-cover" />
+                    <div>
+                      <p className="text-gray-800 font-medium">{customer.name}</p>
+                      <p className="text-gray-500 text-sm">Total Order: {customer.totalOrder}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-800 font-semibold">${customer.expenses.toFixed(1)}K</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sales Location Map (Placeholder) - Dipindahkan ke bawah Top 5 sections */}
+        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+          <h3 className="text-gray-800 text-xl font-semibold mb-4">Sales Location</h3>
+          <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-lg">
+            {/*  */}
+            Peta Lokasi Penjualan (Placeholder)
+          </div>
+          <div className="flex justify-around w-full mt-4 text-sm text-gray-600">
+            <p><span className="w-3 h-3 inline-block rounded-full bg-blue-500 mr-2"></span> Men: 70%</p>
+            <p><span className="w-3 h-3 inline-block rounded-full bg-pink-500 mr-2"></span> Women: 40%</p>
+            <p><span className="w-3 h-3 inline-block rounded-full bg-green-500 mr-2"></span> Not Identify: 10%</p>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
