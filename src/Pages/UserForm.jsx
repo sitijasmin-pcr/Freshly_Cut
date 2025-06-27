@@ -1,140 +1,158 @@
 import { useState, useEffect } from 'react';
 
-const UserForm = ({ addUser, updateUser, editingUser }) => {
+// Komponen form untuk menambah atau mengedit pengguna
+const UserForm = ({ addUser, updateUser, editingUser, setEditingUser }) => {
+  // Inisialisasi state form dengan nilai default hanya untuk atribut yang diperlukan
   const [form, setForm] = useState({
     nama: '',
-    usia: '',
-    penghasilan: '',
-    jenis_kelamin: '',
-    jenis_kegiatan: '',
-    tingkat_kadar_gula: '',
     email: '',
-    metode_pembayaran_favorit: '',
-    status_member: '',
+    pass: '', // Atribut password
   });
 
+  // Efek samping untuk mengisi form saat editingUser berubah
   useEffect(() => {
-    if (editingUser) setForm(editingUser);
-    else setForm({
-      nama: '',
-      usia: '',
-      penghasilan: '',
-      jenis_kelamin: '',
-      jenis_kegiatan: '',
-      tingkat_kadar_gula: '',
-      email: '',
-      metode_pembayaran_favorit: '',
-      status_member: '',
-    });
-  }, [editingUser]);
+    if (editingUser) {
+      // Mengisi form dengan data pengguna yang sedang diedit
+      // Penting: Jangan mengisi field 'pass' dari data yang sudah ada (untuk keamanan).
+      // Pengguna harus memasukkan password baru jika ingin mengubahnya saat edit.
+      setForm({
+        nama: editingUser.nama,
+        email: editingUser.email,
+        pass: '', // Kosongkan password saat edit, pengguna harus memasukkan ulang/baru
+      });
+    } else {
+      // Mengosongkan form jika tidak ada pengguna yang diedit
+      setForm({
+        nama: '',
+        email: '',
+        pass: '',
+      });
+    }
+  }, [editingUser]); // Dependensi: efek akan dijalankan saat editingUser berubah
 
+  // Handler untuk perubahan input form
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  // Handler untuk submit form
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.nama || !form.email) return;  // Validasi dasar
-    editingUser ? updateUser(form) : addUser(form);
+    // Validasi dasar: nama, email, dan password tidak boleh kosong
+    if (!form.nama || !form.email || !form.pass) {
+      alert('Nama, Email, dan Password tidak boleh kosong!'); // Tetap gunakan alert sederhana untuk validasi form langsung
+      return;
+    }
+
+    // Panggil fungsi addUser atau updateUser berdasarkan mode
+    // Saat edit, hanya kirim nama dan email, password akan diatur ulang oleh pengguna.
+    // Jika password kosong saat edit, jangan update field password di database.
+    if (editingUser) {
+      const { id, nama, email } = form; // Ambil id dari editingUser
+      const dataToUpdate = { nama, email };
+      if (form.pass) { // Hanya sertakan password jika diisi saat edit
+          dataToUpdate.pass = form.pass;
+      }
+      updateUser({ id: editingUser.id, ...dataToUpdate });
+    } else {
+      addUser(form);
+    }
+
+    // Reset form setelah submit atau update berhasil
     setForm({
       nama: '',
-      usia: '',
-      penghasilan: '',
-      jenis_kelamin: '',
-      jenis_kegiatan: '',
-      tingkat_kadar_gula: '',
       email: '',
-      metode_pembayaran_favorit: '',
-      status_member: '',
+      pass: '',
     });
+
+    // Jika dalam mode edit, reset editingUser di komponen induk
+    if (editingUser && setEditingUser) {
+      setEditingUser(null);
+    }
+  };
+
+  // Handler untuk tombol batal/reset
+  const handleCancel = () => {
+    // Mengosongkan form
+    setForm({
+      nama: '',
+      email: '',
+      pass: '',
+    });
+    // Mengatur editingUser kembali ke null di komponen induk
+    if (setEditingUser) {
+      setEditingUser(null);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <input
-        type="text"
-        placeholder="Nama"
-        className="w-full p-2 border rounded"
-        value={form.nama}
-        onChange={e => setForm({ ...form, nama: e.target.value })}
-      />
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Input Nama */}
+        <div>
+          <label htmlFor="nama" className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+          <input
+            type="text"
+            id="nama"
+            name="nama"
+            placeholder="Misal: Budi Santoso"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            value={form.nama}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-      <input
-        type="number"
-        placeholder="Usia"
-        className="w-full p-2 border rounded"
-        value={form.usia}
-        onChange={e => setForm({ ...form, usia: e.target.value })}
-      />
+        {/* Input Email */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="email@example.com"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-      <input
-        type="number"
-        placeholder="Penghasilan"
-        className="w-full p-2 border rounded"
-        value={form.penghasilan}
-        onChange={e => setForm({ ...form, penghasilan: e.target.value })}
-      />
+        {/* Input Password */}
+        <div>
+          <label htmlFor="pass" className="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            id="pass"
+            name="pass"
+            placeholder={editingUser ? "Biarkan kosong jika tidak diubah" : "Masukkan password"}
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            value={form.pass}
+            onChange={handleChange}
+            required={!editingUser} // Wajib diisi saat menambah, opsional saat edit
+          />
+        </div>
+      </div>
 
-      <select
-        className="w-full p-2 border rounded"
-        value={form.jenis_kelamin}
-        onChange={e => setForm({ ...form, jenis_kelamin: e.target.value })}
-      >
-        <option value="">Pilih Jenis Kelamin</option>
-        <option value="Pria">Pria</option>
-        <option value="Wanita">Wanita</option>
-      </select>
-
-      <select
-        className="w-full p-2 border rounded"
-        value={form.jenis_kegiatan}
-        onChange={e => setForm({ ...form, jenis_kegiatan: e.target.value })}
-      >
-        <option value="">Pilih Jenis Kegiatan</option>
-        <option value="Mahasiswa">Mahasiswa</option>
-        <option value="Pengangguran">Pengangguran</option>
-        <option value="Pekerja Kantoran">Pekerja Kantoran</option>
-      </select>
-
-      <select
-        className="w-full p-2 border rounded"
-        value={form.tingkat_kadar_gula}
-        onChange={e => setForm({ ...form, tingkat_kadar_gula: e.target.value })}
-      >
-        <option value="">Tingkat Kadar Gula</option>
-        <option value="Rendah">Rendah</option>
-        <option value="Sedang">Sedang</option>
-        <option value="Tinggi">Tinggi</option>
-      </select>
-
-      <input
-        type="email"
-        placeholder="Email"
-        className="w-full p-2 border rounded"
-        value={form.email}
-        onChange={e => setForm({ ...form, email: e.target.value })}
-      />
-
-      <select
-        className="w-full p-2 border rounded"
-        value={form.metode_pembayaran_favorit}
-        onChange={e => setForm({ ...form, metode_pembayaran_favorit: e.target.value })}
-      >
-        <option value="">Metode Pembayaran Favorit</option>
-        <option value="QRIS">QRIS</option>
-        <option value="Cash">Cash</option>
-      </select>
-
-      <select
-        className="w-full p-2 border rounded"
-        value={form.status_member}
-        onChange={e => setForm({ ...form, status_member: e.target.value })}
-      >
-        <option value="">Status Member</option>
-        <option value="Gold">Gold</option>
-        <option value="Silver">Silver</option>
-        <option value="Bronze">Bronze</option>
-      </select>
-
-      <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
-        {editingUser ? 'Perbarui User' : 'Tambah User'}
-      </button>
+      {/* Tombol Aksi */}
+      <div className="flex justify-end space-x-3 mt-6">
+        {editingUser && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="flex items-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200 shadow-md text-lg"
+          >
+            <i className="fas fa-times-circle mr-2"></i> Batal
+          </button>
+        )}
+        <button
+          type="submit"
+          className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md text-lg"
+        >
+          <i className="fas fa-save mr-2"></i> {editingUser ? 'Perbarui Pengguna' : 'Tambah Pengguna'}
+        </button>
+      </div>
     </form>
   );
 };
