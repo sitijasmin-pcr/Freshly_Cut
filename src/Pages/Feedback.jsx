@@ -1,57 +1,82 @@
+// src/Pages/Feedback.jsx
 import { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/react";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Dialog } from "@headlessui/react"; // Masih dibutuhkan untuk Dialog.Panel di FeedbackForm
+import { Button } from "@/components/ui/button"; // Pastikan path ini benar
+import { X, Edit, Trash2 } from "lucide-react";
 import { Star } from "lucide-react";
+import Swal from "sweetalert2"; // Untuk notifikasi
+import { supabase } from "../supabase"; // Import Supabase
+import FeedbackForm from "./FeedbackForm"; // Import komponen FeedbackForm yang baru
 
 export default function FormFeedback() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    rating: "",
-    feedback: "",
-    role: "",
-    job: "",
-    photoUrl: "",
-  });
-
   const [feedbackList, setFeedbackList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFeedback, setEditingFeedback] = useState(null); // State untuk feedback yang sedang diedit
 
-  useEffect(() => {
-    const stored = localStorage.getItem("feedbackList");
-    if (stored) setFeedbackList(JSON.parse(stored));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
-  }, [feedbackList]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  // Fungsi untuk mengambil data feedback dari Supabase
+  const fetchFeedbacks = async () => {
+    const { data, error } = await supabase
+      .from("feedback")
+      .select("*")
+      .order("created_at", { ascending: false }); // Urutkan berdasarkan waktu terbaru
+    if (error) {
+      console.error("Error fetching feedbacks:", error.message);
+      Swal.fire("Error", `Gagal memuat feedback: ${error.message}`, "error");
+    } else {
+      setFeedbackList(data || []);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setFeedbackList((prev) => [form, ...prev]);
-    setForm({
-      name: "",
-      email: "",
-      rating: "",
-      feedback: "",
-      role: "",
-      job: "",
-      photoUrl: "",
+  // Panggil fetchFeedbacks saat komponen dimuat
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const handleEdit = (feedback) => {
+    setEditingFeedback(feedback);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Feedback ini akan dihapus secara permanen!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const { error } = await supabase.from("feedback").delete().eq("id", id);
+
+        if (!error) {
+          Swal.fire("Terhapus!", "Feedback berhasil dihapus.", "success");
+          fetchFeedbacks(); // Refresh daftar feedback setelah penghapusan
+        } else {
+          console.error("Delete error:", error.message);
+          Swal.fire("Error", `Gagal menghapus feedback: ${error.message}`, "error");
+        }
+      }
     });
+  };
+
+  const handleOpenAddModal = () => {
+    setEditingFeedback(null); // Pastikan modal dalam mode "tambah baru"
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingFeedback(null); // Reset editingFeedback saat modal ditutup
   };
 
   return (
     <div className="p-6">
       <div className="relative mb-6">
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenAddModal}
           className="absolute top-0 right-0 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-md"
         >
           + Form
@@ -69,190 +94,94 @@ export default function FormFeedback() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {feedbackList.map((item, i) => (
-          <div key={i} className="relative group">
-            <div className="absolute inset-0 -rotate-6 rounded-2xl bg-orange-400 z-0 scale-95 group-hover:scale-100 transition-transform duration-300"></div>
-            <div className="relative z-10 bg-white rounded-2xl shadow-xl p-6 text-center border border-orange-100">
-              <div className="-mt-16 mb-4">
-                <img
-                  src={
-                    item.photoUrl || `https://i.pravatar.cc/100?img=${i + 1}`
-                  }
-                  alt={item.name}
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg mx-auto"
-                />
-              </div>
-              <h3 className="text-lg font-semibold text-orange-700">
-                {item.name}
-              </h3>
-              <div className="flex justify-center gap-2 text-sm font-medium text-orange-500 mb-2">
-                <p>{item.role || "Customer"}</p>
-                {item.job && (
-                  <span className="text-gray-500">| {item.job}</span>
-                )}
-              </div>
-              <p className="text-gray-700 text-sm italic mb-4">
-                "{item.feedback}"
-              </p>
-              <div className="relative flex justify-center items-end h-12 gap-1 mt-2 -mb-6">
-                {[...Array(5)].map((_, index) => (
-                  <div
-                    key={index}
-                    className={`rounded-full w-12 h-12 flex items-center justify-center shadow-md bg-white border ${
-                      index < parseInt(item.rating)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    } z-${5 - index} relative`}
-                    style={{
-                      transform: `translateY(${Math.abs(2 - index) * 4}px)`,
-                      marginTop: "-16px",
-                    }}
+        {feedbackList.length > 0 ? (
+          feedbackList.map((item) => (
+            <div key={item.id} className="relative group">
+              <div className="absolute inset-0 -rotate-6 rounded-2xl bg-orange-400 z-0 scale-95 group-hover:scale-100 transition-transform duration-300"></div>
+              <div className="relative z-10 bg-white rounded-2xl shadow-xl p-6 text-center border border-orange-100">
+                <div className="-mt-16 mb-4">
+                  <img
+                    src={
+                      item.photo_url || `https://i.pravatar.cc/100?img=${item.id % 100 + 1}` // Menggunakan photo_url dari DB
+                    }
+                    alt={item.name}
+                    className="w-24 h-24 rounded-full border-4 border-white shadow-lg mx-auto object-cover"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-orange-700">
+                  {item.name}
+                </h3>
+                <div className="flex justify-center gap-2 text-sm font-medium text-orange-500 mb-2">
+                  <p>{item.role || "Customer"}</p>
+                  {item.job && (
+                    <span className="text-gray-500">| {item.job}</span>
+                  )}
+                </div>
+                <p className="text-gray-700 text-sm italic mb-4">
+                  "{item.feedback}"
+                </p>
+                <div className="relative flex justify-center items-end h-12 gap-1 mt-2 -mb-6">
+                  {[...Array(5)].map((_, index) => (
+                    <div
+                      key={index}
+                      className={`rounded-full w-12 h-12 flex items-center justify-center shadow-md bg-white border ${
+                        index < parseInt(item.rating)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      } z-${5 - index} relative`}
+                      style={{
+                        transform: `translateY(${Math.abs(2 - index) * 4}px)`,
+                        marginTop: "-16px",
+                      }}
+                    >
+                      <Star
+                        size={20}
+                        className={
+                          index < parseInt(item.rating) ? "fill-yellow-400" : ""
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tombol Edit dan Hapus */}
+                <div className="absolute top-3 right-3 flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    title="Edit Feedback"
                   >
-                    <Star
-                      size={20}
-                      className={
-                        index < parseInt(item.rating) ? "fill-yellow-400" : ""
-                      }
-                    />
-                  </div>
-                ))}
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200"
+                    title="Hapus Feedback"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500 py-8">
+            Belum ada feedback. Silakan berikan feedback pertama Anda!
+          </p>
+        )}
       </div>
 
-      {/* Modal */}
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-sm sm:max-w-md md:max-w-lg rounded-xl bg-white px-4 sm:px-6 py-6 mx-auto max-h-screen overflow-y-auto relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <Dialog.Title className="text-lg font-bold mb-4 text-orange-700">
-              Form Feedback
-            </Dialog.Title>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Nama Lengkap"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Email (opsional)"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-              />
-              <Select
-                label="Peran"
-                name="role"
-                value={form.role}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Pilih peran Anda</option>
-                <option value="Bronze">Bronze</option>
-                <option value="Silver">Silver</option>
-                <option value="Gold">Gold</option>
-              </Select>
-              <Input
-                label="Pekerjaan"
-                name="job"
-                value={form.job}
-                onChange={handleChange}
-              />
-              <Input
-                label="Link Foto Profil (opsional)"
-                name="photoUrl"
-                value={form.photoUrl}
-                onChange={handleChange}
-              />
-              <Select
-                label="Rating Pelayanan"
-                name="rating"
-                value={form.rating}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Pilih rating Anda</option>
-                <option value="1">⭐ Sangat Buruk</option>
-                <option value="2">⭐⭐ Buruk</option>
-                <option value="3">⭐⭐⭐ Cukup</option>
-                <option value="4">⭐⭐⭐⭐ Baik</option>
-                <option value="5">⭐⭐⭐⭐⭐ Sangat Baik</option>
-              </Select>
-              <Textarea
-                label="Masukan atau Saran"
-                name="feedback"
-                value={form.feedback}
-                onChange={handleChange}
-                required
-              />
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  Kirim
-                </Button>
-              </div>
-            </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+      {/* Modal untuk FormFeedback */}
+      {isModalOpen && (
+        <FeedbackForm
+          onClose={handleCloseModal}
+          onSuccess={fetchFeedbacks} // Panggil fetchFeedbacks saat form berhasil disubmit
+          editingFeedback={editingFeedback}
+        />
+      )}
     </div>
   );
 }
 
-// Komponen Input reusable
-const Input = ({ label, name, type = "text", ...props }) => (
-  <div>
-    <label className="block text-sm font-semibold mb-1">{label}</label>
-    <input
-      name={name}
-      type={type}
-      className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-500"
-      {...props}
-    />
-  </div>
-);
-
-// Komponen Select reusable
-const Select = ({ label, name, children, ...props }) => (
-  <div>
-    <label className="block text-sm font-semibold mb-1">{label}</label>
-    <select
-      name={name}
-      className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-500"
-      {...props}
-    >
-      {children}
-    </select>
-  </div>
-);
-
-// Komponen Textarea reusable
-const Textarea = ({ label, name, ...props }) => (
-  <div>
-    <label className="block text-sm font-semibold mb-1">{label}</label>
-    <textarea
-      name={name}
-      rows="4"
-      className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-500"
-      {...props}
-    />
-  </div>
-);
+// Catatan: Komponen Input, Select, Textarea tidak lagi didefinisikan di sini.
+// Mereka ada di FeedbackForm.jsx sekarang. 
