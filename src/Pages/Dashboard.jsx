@@ -180,7 +180,7 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-gray-800 text-xl font-semibold">Top 5 Products</h3>
-              <a href="#" className="text-indigo-600 hover:underline text-sm">View more <i className="fas fa-chevron-right ml-1"></i></a>
+              <a href="/produk" className="text-indigo-600 hover:underline text-sm">View more <i className="fas fa-chevron-right ml-1"></i></a>
             </div>
             <div className="space-y-4">
               {topProducts.map((product, index) => (

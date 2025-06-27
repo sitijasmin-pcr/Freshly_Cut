@@ -8,6 +8,7 @@ import Customer from './Pages/Customer';
 import Faq from './Pages/FAQ';
 import FAQForm from './Pages/FAQForm';
 import Produk from './Pages/Produk';
+import SalesForm from './Pages/SalesForm';
 import SalesManagement from './Pages/SalesManagement';
 import ProdukTerlaris from './Pages/ProdukTerlaris';
 import Penjualan from './Pages/Penjualan';
@@ -132,6 +133,7 @@ function App() {
               <Route path="/produk" element={<Produk />} />
               <Route path="/produkTerlaris" element={<ProdukTerlaris />} />
               <Route path="/sales" element={<SalesManagement />} />
+              <Route path="/salesform" element={<SalesForm />} />
               <Route path="/branch" element={<BranchOutlet />} />
               <Route path="/shift" element={<ShiftManagement />} />
               <Route path="/feedback" element={<Feedback />} />
