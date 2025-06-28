@@ -6,6 +6,11 @@ export default function CustomerPage() {
   const [customers, setCustomers] = useState([]);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false); // State untuk mengontrol visibilitas form
+  // State untuk pencarian
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(""); // Mengubah selectedCategory menjadi selectedStatus
+  const [startDate, setStartDate] = useState(""); // State untuk tanggal awal
+  const [endDate, setEndDate] = useState("");   // State untuk tanggal akhir
 
   // State untuk data ringkasan member
   const [memberSummary, setMemberSummary] = useState({
@@ -15,9 +20,10 @@ export default function CustomerPage() {
     newcomer: { total: 0, percentage: 0 },
   });
 
+  // Memanggil fetchCustomers setiap kali ada perubahan pada filter atau pencarian
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [searchTerm, selectedStatus, startDate, endDate]);
 
   useEffect(() => {
     // Hitung ringkasan member setiap kali data pelanggan berubah
@@ -25,8 +31,28 @@ export default function CustomerPage() {
   }, [customers]);
 
   const fetchCustomers = async () => {
+    let query = supabase.from("customers").select("*");
+
+    // Filter berdasarkan rentang tanggal
+    if (startDate) {
+      query = query.gte("created_at", `${startDate}T00:00:00.000Z`);
+    }
+    if (endDate) {
+      query = query.lt("created_at", `${endDate}T23:59:59.999Z`);
+    }
+
+    // Filter berdasarkan status
+    if (selectedStatus) {
+      query = query.eq("status_member", selectedStatus);
+    }
+
+    // Filter berdasarkan search term (nama)
+    if (searchTerm) {
+      query = query.ilike("nama", `%${searchTerm}%`);
+    }
+    
     // Mengubah order by menjadi 'created_at' karena 'joined_date' tidak ada di skema
-    const { data, error } = await supabase.from("customers").select("*").order("created_at", { ascending: false });
+    const { data, error } = await query.order("created_at", { ascending: false });
     if (error) console.error("Fetch Error:", error);
     else setCustomers(data);
   };
@@ -187,40 +213,104 @@ export default function CustomerPage() {
         </div>
       </div>
 
-      {/* Button to open form */}
-      <div className="mb-6 flex justify-end">
+      {/* Date Range Filter and Add New Button */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-2">
+            <label htmlFor="startDate" className="text-sm font-medium text-gray-700 whitespace-nowrap">Dari Tanggal:</label>
+            <input
+              type="date"
+              id="startDate"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="endDate" className="text-sm font-medium text-gray-700 whitespace-nowrap">Sampai Tanggal:</label>
+            <input
+              type="date"
+              id="endDate"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full"
+            />
+          </div>
+        </div>
         <button
           onClick={handleAddNewClick}
-          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center gap-2 w-full md:w-auto justify-center"
         >
-          Add New Customer
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          Buat Pesanan Baru
         </button>
       </div>
 
-      {/* CustomerForm - Conditionally rendered */}
-      {isFormOpen && (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</h2>
-            <button
-              onClick={handleCloseForm}
-              className="text-gray-500 hover:text-gray-800 text-xl font-bold"
-            >
-              &times;
-            </button>
-          </div>
-          <CustomerForm
-            addCustomer={addCustomer}
-            updateCustomer={updateCustomer}
-            editingCustomer={editingCustomer}
-            onClose={handleCloseForm} // Kirimkan prop onClose ke form
-          />
-        </div>
-      )}
-
       {/* Customer List Table */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer List</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2m14 0a2 2 0 01-2 2H7a2 2 0 01-2-2m7 7h.01" />
+          </svg>
+          Daftar Permintaan Pesanan
+        </h2>
+        
+        {/* Search and Status Filter */}
+        <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex-1 w-full md:w-auto">
+                <input
+                    type="text"
+                    id="search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Cari nama pelanggan..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+            </div>
+            <div className="w-full md:w-auto">
+                <select
+                    id="status"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Deactive">Deactive</option>
+                    <option value="Gold">Gold</option>
+                    <option value="Silver">Silver</option>
+                    <option value="Bronze">Bronze</option>
+                    <option value="Newcomer">Newcomer</option>
+                </select>
+            </div>
+            <div className="text-gray-500 font-medium whitespace-nowrap mt-2 md:mt-0">
+                Total hasil: {customers.length}
+            </div>
+        </div>
+
+        {/* CustomerForm - Conditionally rendered */}
+        {isFormOpen && (
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</h2>
+              <button
+                onClick={handleCloseForm}
+                className="text-gray-500 hover:text-gray-800 text-xl font-bold"
+              >
+                &times;
+              </button>
+            </div>
+            <CustomerForm
+              addCustomer={addCustomer}
+              updateCustomer={updateCustomer}
+              editingCustomer={editingCustomer}
+              onClose={handleCloseForm} // Kirimkan prop onClose ke form
+            />
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">

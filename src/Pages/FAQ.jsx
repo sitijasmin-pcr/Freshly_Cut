@@ -198,9 +198,142 @@
 //   );
 // }
 
+// import { useState, useEffect } from "react";
+// import { supabase } from "../supabase";
+// import FAQForm from "./FAQForm";
+
+// export default function FAQ() {
+//   const [faqs, setFaqs] = useState([]);
+//   const [isFormOpen, setIsFormOpen] = useState(false);
+//   const [editingFAQ, setEditingFAQ] = useState(null);
+//   const [openIndex, setOpenIndex] = useState(null);
+
+//   const fetchFaqs = async () => {
+//     const { data, error } = await supabase
+//       .from("faq")
+//       .select("*")
+//       .order("created_at", { ascending: false });
+
+//     if (error) {
+//       console.error("Fetch FAQ Error:", error);
+//     } else {
+//       setFaqs(data);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchFaqs();
+//   }, []);
+
+//   const handleAddNew = () => {
+//     setEditingFAQ(null);
+//     setIsFormOpen(true);
+//   };
+
+//   const handleEdit = (faq) => {
+//     setEditingFAQ(faq);
+//     setIsFormOpen(true);
+//   };
+
+//   const handleDelete = async (id) => {
+//     if (window.confirm("Yakin ingin menghapus FAQ ini?")) {
+//       const { error } = await supabase.from("faq").delete().eq("id", id);
+//       if (error) {
+//         console.error("Delete Error:", error);
+//         alert(`Gagal menghapus: ${error.message}`);
+//       } else {
+//         alert("FAQ berhasil dihapus!");
+//         fetchFaqs();
+//       }
+//     }
+//   };
+
+//   const handleFormClose = () => {
+//     setIsFormOpen(false);
+//     setEditingFAQ(null);
+//     fetchFaqs();
+//   };
+
+//   const toggleIndex = (index) => {
+//     setOpenIndex(openIndex === index ? null : index);
+//   };
+
+//   return (
+//     <div className="p-6 bg-gray-100 min-h-screen">
+//       <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">FAQ – Pertanyaan Umum</h1>
+
+//       {/* Tombol Tambah */}
+//       <div className="mb-6 flex justify-end">
+//         <button
+//           onClick={handleAddNew}
+//           className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg"
+//         >
+//         + Tambah FAQ Baru
+//         </button>
+//       </div>
+
+//       {/* List FAQ */}
+//       <div className="space-y-4">
+//         {faqs.length === 0 ? (
+//           <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+//         ) : (
+//           faqs.map((faq, index) => (
+//             <div
+//               key={faq.id}
+//               className="border border-gray-300 rounded-lg bg-white shadow-sm transition"
+//             >
+//               <button
+//                 onClick={() => toggleIndex(index)}
+//                 className="w-full text-left p-4 flex justify-between items-center focus:outline-none"
+//               >
+//                 <span className="font-semibold text-gray-800">{faq.question}</span>
+//                 <span
+//                   className={`transform transition-transform duration-300 ${
+//                     openIndex === index ? "rotate-180" : ""
+//                   }`}
+//                 >
+//                   ▼
+//                 </span>
+//               </button>
+
+//               {openIndex === index && (
+//                 <div className="px-4 pb-4 text-gray-700">{faq.answer}</div>
+//               )}
+
+//               <div className="flex justify-end gap-2 px-4 pb-4">
+//                 <button
+//                   onClick={() => handleEdit(faq)}
+//                   className="text-indigo-600 hover:text-indigo-800 text-sm"
+//                 >
+//                   Edit
+//                 </button>
+//                 <button
+//                   onClick={() => handleDelete(faq.id)}
+//                   className="text-red-600 hover:text-red-800 text-sm"
+//                 >
+//                   Hapus
+//                 </button>
+//               </div>
+//             </div>
+//           ))
+//         )}
+//       </div>
+
+//       {/* Modal Form */}
+//       {isFormOpen && (
+//         <FAQForm
+//           onClose={handleFormClose}
+//           editingFAQ={editingFAQ}
+//         />
+//       )}
+//     </div>
+//   );
+// }
+
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import FAQForm from "./FAQForm";
+import Swal from "sweetalert2";
 
 export default function FAQ() {
   const [faqs, setFaqs] = useState([]);
@@ -236,13 +369,24 @@ export default function FAQ() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Yakin ingin menghapus FAQ ini?")) {
+    const confirmResult = await Swal.fire({
+      title: "Yakin ingin menghapus FAQ ini?",
+      text: "Aksi ini tidak bisa dibatalkan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (confirmResult.isConfirmed) {
       const { error } = await supabase.from("faq").delete().eq("id", id);
       if (error) {
         console.error("Delete Error:", error);
-        alert(`Gagal menghapus: ${error.message}`);
+        Swal.fire("Gagal!", `Gagal menghapus: ${error.message}`, "error");
       } else {
-        alert("FAQ berhasil dihapus!");
+        Swal.fire("Terhapus!", "FAQ berhasil dihapus.", "success");
         fetchFaqs();
       }
     }
@@ -252,6 +396,14 @@ export default function FAQ() {
     setIsFormOpen(false);
     setEditingFAQ(null);
     fetchFaqs();
+  };
+
+  const handleSuccess = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Sukses!",
+      text: "Perubahan FAQ berhasil disimpan!",
+    });
   };
 
   const toggleIndex = (index) => {
@@ -268,7 +420,7 @@ export default function FAQ() {
           onClick={handleAddNew}
           className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg"
         >
-          Tambah FAQ Baru
+          + Tambah FAQ Baru
         </button>
       </div>
 
@@ -324,6 +476,7 @@ export default function FAQ() {
         <FAQForm
           onClose={handleFormClose}
           editingFAQ={editingFAQ}
+          onSuccess={handleSuccess}
         />
       )}
     </div>

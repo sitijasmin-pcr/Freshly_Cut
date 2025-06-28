@@ -7,6 +7,7 @@ import SalesForm from './SalesForm'; // Pastikan SalesForm.jsx berada di direkto
 
 // Komponen utama untuk menampilkan dan mengelola pesanan
 const OrderPage = () => {
+  const [statusFilter, setStatusFilter] = useState(''); // '' artinya tampilkan semua status
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,17 +49,29 @@ const OrderPage = () => {
 
   // Fungsi untuk menghitung slice untuk pagination
   const filteredOrders = useMemo(() => {
-    return orders.filter(order =>
-      order.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [orders, searchQuery]);
-  
+    let currentOrders = orders;
+
+    // Filter berdasarkan status
+    if (statusFilter !== '') {
+      currentOrders = currentOrders.filter(order => order.status === statusFilter);
+    }
+
+    // Filter berdasarkan search query (customer_name)
+    if (searchQuery) {
+      currentOrders = currentOrders.filter(order =>
+        order.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return currentOrders;
+  }, [orders, searchQuery, statusFilter]);
+
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredOrders, currentPage]);
-  
+
 
   // Fungsi untuk mengambil data pesanan dari Supabase
   const fetchOrders = async (start = '', end = '') => {
@@ -125,9 +138,9 @@ const OrderPage = () => {
 
   // Ambil pesanan saat komponen dimuat atau saat tanggal filter berubah
   useEffect(() => {
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset halaman ke 1 saat filter tanggal atau pencarian berubah
     fetchOrders(startDate, endDate);
-  }, [startDate, endDate, searchQuery]); // Trigger fetch saat startDate atau endDate berubah
+  }, [startDate, endDate]); // Trigger fetch saat startDate atau endDate berubah
 
   // Tangani perubahan status untuk pesanan
   const handleStatusChange = async (orderId, newStatus) => {
@@ -148,7 +161,7 @@ const OrderPage = () => {
 
   // Perhitungan ringkasan menggunakan data yang diambil
   const summary = useMemo(() => {
-    const totalOrders = orders.length;
+    const totalOrders = orders.length; // Menggunakan 'orders' asli untuk ringkasan total keseluruhan
     const completedOrders = orders.filter(o => o.status === 'Completed').length;
     const processingOrders = orders.filter(o => o.status === 'Processing').length;
     const pendingOrders = orders.filter(o => o.status === 'Pending').length;
@@ -285,14 +298,6 @@ const OrderPage = () => {
             onChange={(e) => setEndDate(e.target.value)}
             className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
- 
-          {/* Tombol filter tidak lagi diperlukan karena useEffect akan trigger on change */}
-          {/* <button
-            onClick={() => fetchOrders(startDate, endDate)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition-colors duration-200"
-          >
-            Filter
-          </button> */}
         </div>
         <button
           onClick={handleOpenNewSalesForm}
@@ -308,17 +313,57 @@ const OrderPage = () => {
           <i className="fas fa-receipt mr-2"></i> Daftar Permintaan Pesanan
         </h2>
 
-        {/* Input pencarian */}
-          <div className="mb-5 flex justify-between items-center">
-          <input
+        {/* Input pencarian dan Dropdown Filter Status */}
+        <div className="mb-5 flex justify-between items-center flex-wrap gap-4">
+          <div className="relative w-full sm:w-1/2 md:w-1/3">
+            <input
               type="text"
               placeholder="Cari nama pelanggan..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md w-full max-w-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset halaman saat pencarian berubah
+              }}
+              className="p-2 pl-10 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
-            <span className="text-sm text-gray-500 ml-170">Total hasil: {filteredOrders.length}</span>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
           </div>
+
+          <div className="flex items-center gap-4">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1); // Reset halaman saat filter status berubah
+              }}
+              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="">Semua Status</option>
+              <option value="Completed">Selesai</option>
+              <option value="Processing">Diproses</option>
+              <option value="Pending">Pending</option>
+              <option value="Canceled">Dibatalkan</option>
+            </select>
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              Total hasil: {filteredOrders.length}
+            </span>
+          </div>
+        </div>
 
         {loading ? (
           <div className="flex justify-center items-center py-10">
@@ -330,10 +375,10 @@ const OrderPage = () => {
             <strong className="font-bold">Error:</strong>
             <span className="block sm:inline"> {error}</span>
           </div>
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? ( // Menggunakan filteredOrders untuk cek kosong
           <div className="text-center text-gray-500 py-10">
             <i className="fas fa-info-circle text-4xl mb-3 text-gray-400"></i>
-            <p className="text-lg font-medium">Tidak ada pesanan yang ditemukan untuk periode ini.</p>
+            <p className="text-lg font-medium">Tidak ada pesanan yang ditemukan dengan kriteria ini.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -380,8 +425,9 @@ const OrderPage = () => {
                     </td>
                     <td className="py-3 px-4">{order.receipt}</td>
                     <td className="py-3 px-4 space-x-2">
-                      <button onClick={() => { setCurrentEditingSale(order); setIsSalesFormModalOpen(true); }} className="text-blue-600 hover:text-blue-900"><i className="fas fa-edit"></i></button>
-                      <button onClick={() => setSelectedOrder(order)} className="text-indigo-600 hover:text-indigo-900"><i className="fas fa-eye"></i></button>
+                      <button onClick={() => { setCurrentEditingSale(order); setIsSalesFormModalOpen(true); }} className="text-blue-600 hover:text-blue-900" title="Edit Pesanan"><i className="fas fa-edit"></i></button>
+                      <button onClick={() => setSelectedOrder(order)} className="text-indigo-600 hover:text-indigo-900" title="Lihat Detail Resi"><i className="fas fa-eye"></i></button>
+                      <button onClick={() => handleDeleteOrder(order.id, order.name)} className="text-red-600 hover:text-red-900" title="Hapus Pesanan"><i className="fas fa-trash-alt"></i></button>
                     </td>
                   </tr>
                 ))}

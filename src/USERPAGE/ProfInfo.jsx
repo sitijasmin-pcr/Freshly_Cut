@@ -167,27 +167,27 @@ export default function ProfInfo() {
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Misi:</h3>
             <ul className="list-disc list-inside text-gray-700 leading-relaxed space-y-1">
               <li>
-                **Kualitas Tak Tertandingi:** Menyediakan produk kopi dan
+                <b>Kualitas Tak Tertandingi:</b> Menyediakan produk kopi dan
                 non-kopi yang konsisten berkualitas tinggi, menggunakan bahan
                 baku terbaik dan proses yang cermat.
               </li>
               <li>
-                **Inovasi Berkelanjutan:** Terus berinovasi dalam menu,
+                <b>Inovasi Berkelanjutan</b>: Terus berinovasi dalam menu,
                 teknologi, dan pengalaman pelanggan untuk tetap relevan dan
                 menarik.
               </li>
               <li>
-                **Aksesibilitas Luas:** Membangun jaringan outlet yang luas dan
+                <b>Aksesibilitas Luas:</b> Membangun jaringan outlet yang luas dan
                 strategis, serta memperkuat kehadiran digital, agar kopi
                 berkualitas kami mudah dijangkau.
               </li>
               <li>
-                **Pengalaman Pelanggan Personal:** Menciptakan interaksi yang
+                <b>Pengalaman Pelanggan Personal:</b> Menciptakan interaksi yang
                 ramah, efisien, dan personal di setiap titik kontak, membuat
                 pelanggan merasa dihargai.
               </li>
               <li>
-                **Tanggung Jawab Sosial:** Berkontribusi positif pada masyarakat
+                <b>Tanggung Jawab Sosial:</b> Berkontribusi positif pada masyarakat
                 dan lingkungan melalui praktik bisnis yang berkelanjutan dan
                 program komunitas.
               </li>
@@ -208,12 +208,19 @@ export default function ProfInfo() {
             pelanggan, tempat mereka dapat bersantai, bekerja, atau sekadar
             menikmati secangkir kopi favorit.
           </p>
+          {/* Bagian ini diganti dengan iframe Google Maps */}
           <div className="flex justify-center my-6">
-            <img
-              src="https://placehold.co/800x450/FF5722/FFFFFF?text=Peta+Jaringan+Tomoro+Coffee+Indonesia"
-              alt="Peta Jaringan Tomoro Coffee di Indonesia"
-              className="rounded-lg shadow-lg max-w-full h-auto border border-orange-200"
-            />
+            <iframe
+              src="http://maps.google.com/maps?q=tomoro+coffee+indonesia&output=embed"
+              width="100%" // Mengatur lebar 100% agar responsif
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Peta Jaringan Tomoro Coffee Indonesia" // Tambahkan judul untuk aksesibilitas
+              className="rounded-lg shadow-lg border border-orange-200" // Tambahkan kelas Tailwind CSS
+            ></iframe>
           </div>
           <p className="text-gray-700 leading-relaxed">
             Ekspansi kami didukung oleh pemahaman mendalam tentang preferensi
@@ -228,27 +235,27 @@ export default function ProfInfo() {
           </h2>
           <ul className="list-disc list-inside text-gray-700 leading-relaxed space-y-2">
             <li>
-              **Ekspansi Kilat:** Lebih dari 700 outlet dibuka di Indonesia
+              <b>Ekspansi Kilat:</b> Lebih dari 700 outlet dibuka di Indonesia
               dalam kurun waktu kurang dari 3 tahun, menjadikannya salah satu
               rantai kopi dengan pertumbuhan tercepat.
             </li>
             <li>
-              **Pengakuan Industri:** Dianugerahi sebagai "Merek Kopi Pendatang
+              <b>Pengakuan Industri:</b> Dianugerahi sebagai "Merek Kopi Pendatang
               Baru Terbaik" dan "Inovasi Produk Terfavorit" pada ajang
               penghargaan industri kopi nasional 2024.
             </li>
             <li>
-              **Basis Pelanggan Loyal:** Membangun komunitas pelanggan yang kuat
+              <b>Basis Pelanggan Loyal:</b> Membangun komunitas pelanggan yang kuat
               dan setia, dengan tingkat retensi yang tinggi berkat program
               loyalitas yang menarik.
             </li>
             <li>
-              **Inovasi Digital:** Peluncuran aplikasi mobile yang inovatif,
+              <b>Inovasi Digital:</b> Peluncuran aplikasi mobile yang inovatif,
               memfasilitasi pemesanan mudah, pembayaran digital, dan penawaran
               personal.
             </li>
             <li>
-              **Dampak Sosial:** Memberikan ribuan lapangan kerja dan aktif
+              <b>Dampak Sosial:</b> Memberikan ribuan lapangan kerja dan aktif
               dalam berbagai inisiatif sosial, termasuk dukungan untuk petani
               kopi lokal dan program pendidikan.
             </li>
@@ -267,20 +274,20 @@ export default function ProfInfo() {
           </p>
           <ul className="list-disc list-inside text-gray-700 leading-relaxed space-y-2">
             <li>
-              **Pengadaan Biji Kopi Bertanggung Jawab:** Bekerja sama langsung
+              <b>Pengadaan Biji Kopi Bertanggung Jawab:</b> Bekerja sama langsung
               dengan petani yang menerapkan praktik pertanian berkelanjutan,
               memastikan keadilan harga dan dampak lingkungan yang minimal.
             </li>
             <li>
-              **Pengelolaan Sampah:** Menerapkan program daur ulang di seluruh
+              <b>Pengelolaan Sampah:</b> Menerapkan program daur ulang di seluruh
               outlet dan mengurangi penggunaan plastik sekali pakai.
             </li>
             <li>
-              **Efisiensi Energi:** Menggunakan peralatan hemat energi dan
+              <b>Efisiensi Energi:</b> Menggunakan peralatan hemat energi dan
               mendesain outlet dengan pencahayaan alami yang optimal.
             </li>
             <li>
-              **Pemberdayaan Komunitas:** Mendukung program pelatihan untuk
+              <b>Pemberdayaan Komunitas:</b> Mendukung program pelatihan untuk
               barista lokal dan inisiatif pengembangan di area penghasil kopi.
             </li>
           </ul>
