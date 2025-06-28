@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Bell, MessageSquareText, Send } from "lucide-react"; // Tambah ikon Send
+import { ShoppingCart, Bell, MessageSquareText, Send,UserCircle } from "lucide-react"; // Tambah ikon Send
 
 const ChatUser = () => {
   const [messages, setMessages] = useState([
@@ -196,6 +196,11 @@ const ChatUser = () => {
           </nav>
 
           <div className="flex items-center gap-4">
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
             <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
             </Link>

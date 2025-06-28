@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom"; // Import Link untuk navigasi
-import { ShoppingCart, Bell } from "lucide-react"; // Import ikon
+import { ShoppingCart, Bell,UserCircle } from "lucide-react"; // Import ikon
 import { useCart } from "./CartContext"; // Import useCart untuk status keranjang
 
 // FAQ content
@@ -164,11 +164,13 @@ export default function FAQUser() {
                     </nav>
 
           <div className="flex items-center gap-4">
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
-              )}
             </Link>
             <Link
               to="/NotificationUser"

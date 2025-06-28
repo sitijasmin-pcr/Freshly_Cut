@@ -1,18 +1,17 @@
+// CartUser.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
+import { supabase } from '../supabase';
+import Swal from 'sweetalert2';
+import { UserCircle, ShoppingCart, Bell } from 'lucide-react';
 
-// Pastikan supabase client berhasil diinisialisasi.
 if (!supabase) {
   console.error("Supabase client not initialized in CartUser. Check CDN setup and keys.");
-  // Fallback untuk development jika Supabase tidak terinisialisasi
-  // Ini akan mencegah crash tetapi tidak akan menyimpan data ke DB
   window.Swal.fire('Error', 'Supabase client tidak terinisialisasi. Cek konfigurasi!', 'error');
 }
 
-import { useCart } from "./CartContext"; // Path relatif yang benar jika CartContext.jsx ada di src/
-
+import { useCart } from "./CartContext";
 
 const CartUser = () => {
   const { cartItems, updateQuantity, updateSugarLevel, removeItem, clearCart } =
@@ -23,10 +22,11 @@ const CartUser = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
-  const [customerName, setCustomerName] = useState(""); // State untuk nama pelanggan
-  const [tableNumber, setTableNumber] = useState(""); // State untuk nomor meja (opsional)
+  const [customerName, setCustomerName] = useState("");
+  const [tableNumber, setTableNumber] = useState("");
+  // New state to control the visibility of the "Lihat Pesanan" button
+  const [showViewOrderButton, setShowViewOrderButton] = useState(false);
 
-  // Ensure price and quantity are numbers for calculation
   const calculateSubtotal = (item) => Number(item.price) * Number(item.quantity);
 
   const totalItems = cartItems.length;
@@ -36,7 +36,6 @@ const CartUser = () => {
   );
   const deliveryFee = 0;
   const taxesRate = 0.1;
-
   const taxesAmount = subTotalAmount * taxesRate;
 
   const applyCoupon = () => {
@@ -67,7 +66,6 @@ const CartUser = () => {
     }).format(amount);
   };
 
-  // Fungsi baru untuk memproses checkout dan menyimpan ke Supabase
   const handleProceedToCheckout = async () => {
     if (!supabase) {
       Swal.fire('Error', 'Koneksi database tidak tersedia. Tidak dapat memproses pesanan.', 'error');
@@ -82,30 +80,102 @@ const CartUser = () => {
       return;
     }
 
-    applyCoupon(); // Pastikan kupon diterapkan sebelum menyimpan
+    const finalCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? subTotalAmount * 0.1 : 0;
+    const finalTotalAmount = subTotalAmount + deliveryFee + taxesAmount - finalCouponDiscount;
 
-    const currentCouponDiscount = couponCode.toUpperCase() === "TOMORO10" ? subTotalAmount * 0.1 : 0;
-    const currentTotalAmount = subTotalAmount + deliveryFee + taxesAmount - currentCouponDiscount;
+    try {
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert([
+          {
+            customer_name: customerName.trim(),
+            order_type: deliveryOption === 'takeAtOutlet' ? 'Dine In' : 'Take Away',
+            table_number: deliveryOption === 'takeAtOutlet' && tableNumber.trim() ? tableNumber.trim() : null,
+            customer_type: 'Regular',
+            status: 'Pending',
+            total_amount: finalTotalAmount,
+          }
+        ])
+        .select()
+        .single();
 
-    const orderSummary = {
-      totalItems: totalItems,
-      subTotalAmount: subTotalAmount,
-      deliveryFee: deliveryFee,
-      taxesAmount: taxesAmount,
-      couponDiscount: currentCouponDiscount,
-      totalAmount: currentTotalAmount,
-      items: cartItems
-    };
-    navigate('/order-information', { state: { orderSummary, deliveryOption, couponCode, couponDiscount: currentCouponDiscount } });
+      if (orderError) throw orderError;
+
+      const orderId = order.id;
+
+      const orderItemsToInsert = cartItems.map(item => ({
+        order_id: orderId,
+        product_name: item.name,
+        quantity: item.quantity,
+        price_per_unit: item.price,
+      }));
+
+      const { error: orderItemsError } = await supabase
+        .from('order_items')
+        .insert(orderItemsToInsert);
+
+      if (orderItemsError) throw orderItemsError;
+
+      // --- START: Perubahan di sini untuk menyimpan ke sessionStorage ---
+      const orderSummaryToStore = {
+        totalItems: cartItems.length,
+        subTotalAmount: subTotalAmount,
+        deliveryFee: deliveryFee,
+        taxesAmount: taxesAmount,
+        couponDiscount: finalCouponDiscount,
+        totalAmount: finalTotalAmount,
+        customerName: customerName.trim(),
+        tableNumber: deliveryOption === 'takeAtOutlet' && tableNumber.trim() ? tableNumber.trim() : null,
+        deliveryOption: deliveryOption,
+        couponCode: couponCode,
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          sugarLevel: item.sugarLevel,
+          image: item.image,
+          subtotal: item.price * item.quantity
+        }))
+      };
+      sessionStorage.setItem('lastOrderSummary', JSON.stringify(orderSummaryToStore));
+      // --- END: Perubahan di sini ---
+
+      // Set the state to true to show the "Lihat Pesanan" button
+      setShowViewOrderButton(true);
+
+      Swal.fire({
+        title: 'Pesanan Berhasil!',
+        text: 'Pesanan Anda telah berhasil dibuat dan disimpan.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'Lanjutkan Belanja',
+        cancelButtonText: 'Lihat Pesanan',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          clearCart();
+          navigate('/MenuUser');
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          clearCart();
+          // Navigasi tanpa state, karena data sudah ada di sessionStorage
+          navigate('/order-information');
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error processing checkout:", error.message);
+      Swal.fire('Gagal!', `Terjadi kesalahan saat memproses pesanan: ${error.message}`, 'error');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
-      {/* Navbar Section */}
+      {/* Navbar Section (tetap sama) */}
       <nav className="bg-white shadow-sm py-4 px-8">
         <div className="flex justify-between items-center border-b pb-3 mb-6">
           <div className="flex items-center gap-3">
-            <img src="/img/Logo.png" alt="Logo" className="h-10" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/FF7F50/FFFFFF?text=Logo'; }} />{" "}
+            <img src="/img/Logo.png" alt="Logo" className="h-10" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/4F46E5/FFFFFF?text=Logo'; }} />{" "}
             <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
               TOMORO{" "}
               <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
@@ -154,20 +224,19 @@ const CartUser = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
-              to="/CartUser"
-              className="text-orange-500 hover:text-orange-600 relative"
-            >
-              <i className="fas fa-shopping-cart w-5 h-5"></i> {/* Font Awesome Cart Icon */}
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
-              )}
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
+              <ShoppingCart className="w-5 h-5" />
             </Link>
             <Link
               to="/NotificationUser"
               className="text-orange-500 hover:text-orange-600"
             >
-              <i className="fas fa-bell w-5 h-5"></i> {/* Font Awesome Bell Icon */}
+              <Bell className="w-5 h-5" />
             </Link>
           </div>
         </div>
@@ -179,7 +248,7 @@ const CartUser = () => {
         </h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Cart Items Section */}
+          {/* Cart Items Section (tetap sama) */}
           <div className="flex-1 bg-white rounded-lg shadow-md p-6">
             <div className="grid grid-cols-7 gap-4 text-gray-600 font-semibold border-b pb-3 mb-4 text-center">
               <div className="col-span-2 text-left">Product</div>
@@ -207,7 +276,7 @@ const CartUser = () => {
                       onClick={() => handleRemoveItem(item.id)}
                       className="text-gray-400 hover:text-red-500"
                     >
-                      <i className="fas fa-times-circle h-5 w-5"></i> {/* Font Awesome close icon */}
+                      <i className="fas fa-times-circle h-5 w-5"></i>
                     </button>
                     <div className="flex items-center space-x-3">
                       <img
@@ -245,7 +314,6 @@ const CartUser = () => {
                       +
                     </button>
                   </div>
-                  {/* Kolom Kadar Gula */}
                   <div className="text-center">
                     <select
                       value={item.sugarLevel}
@@ -257,7 +325,7 @@ const CartUser = () => {
                       <option value="Tinggi">Tinggi</option>
                       <option value="Sedang">Sedang</option>
                       <option value="Rendah">Rendah</option>
-                      <option value="N/A">N/A</option> {/* Tambahkan opsi N/A untuk non-minuman */}
+                      <option value="N/A">N/A</option>
                     </select>
                   </div>
                   <div className="text-center text-gray-800 font-medium">
@@ -300,7 +368,6 @@ const CartUser = () => {
               </button>
             </div>
 
-            {/* Input Nama Pelanggan dan Nomor Meja (jika Take at Outlet) */}
             <div className="mt-4">
               <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
                 Nama Pelanggan:
@@ -350,7 +417,7 @@ const CartUser = () => {
                   }}
                 />
                 <button
-                  onClick={applyCoupon} // Hanya untuk menerapkan kupon, bukan checkout
+                  onClick={applyCoupon}
                   className="ml-4 bg-gray-200 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Terapkan Kupon
@@ -376,64 +443,48 @@ const CartUser = () => {
               </div>
               <div className="flex justify-between">
                 <span>Sub Total</span>
-                <span>{new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(subTotalAmount)}</span>
+                <span>{formatRupiah(subTotalAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery</span>
-                <span>{new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(deliveryFee)}</span>
+                <span>{formatRupiah(deliveryFee)}</span>
               </div>
               <div className="flex justify-between text-orange-600">
                 <span>Taxes ({taxesRate * 100}%)</span>
-                <span>{new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(taxesAmount)}</span>
+                <span>{formatRupiah(taxesAmount)}</span>
               </div>
               <div className="flex justify-between text-red-500">
                 <span>Discount</span>
-                <span>-{new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(couponDiscount)}</span>
+                <span>-{formatRupiah(couponDiscount)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg text-gray-800 border-t pt-4 mt-4">
                 <span>Total</span>
-                <span>{new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(totalAmount)}</span>
+                <span>{formatRupiah(totalAmount)}</span>
               </div>
             </div>
             <button
-              onClick={handleProceedToCheckout} // Panggil fungsi untuk menyimpan ke Supabase
+              onClick={handleProceedToCheckout}
               className="mt-8 w-full block text-center bg-orange-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors"
             >
               Proceed To Checkout
             </button>
+            {/* Conditionally render the "Lihat Pesanan" button */}
+            {showViewOrderButton && (
+              <Link
+                to="/order-information"
+                className="mt-4 w-full block text-center bg-gray-200 text-gray-700 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Lihat Pesanan
+              </Link>
+            )}
           </div>
         </div>
       </div>
-      {/* Footer Section */}
+      {/* Footer Section (tetap sama) */}
       <footer className="relative mt-20 w-full text-white">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://placehold.co/1920x400/333333/FFFFFF?text=Footer+Background')" }} // Placeholder for image 48.png
+          style={{ backgroundImage: "url('https://placehold.co/1920x400/333333/FFFFFF?text=Footer+Background')" }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">

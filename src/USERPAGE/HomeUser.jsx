@@ -192,7 +192,7 @@ export default function HomeUser() {
             transition={{ duration: 0.6 }}
             className="text-center md:text-left md:w-1/2"
           >
-            <h1 className="text-3xl font-bold mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3"> {/* Increased font size */}
               HEY ! <br />
               ENJOY YOUR COFFE TIME
             </h1>
@@ -228,7 +228,7 @@ export default function HomeUser() {
               transition={{ duration: 0.6 }}
               className="md:w-1/2 text-center md:text-left z-10"
             >
-              <h2 className="text-5xl md:text-6xl font-extrabold leading-tight">
+              <h2 className="text-6xl md:text-7xl font-extrabold leading-tight"> {/* Increased font size */}
                 NEW <br /> RELEASE!
               </h2>
               <p className="mt-3 text-xl md:text-2xl font-medium">
@@ -250,6 +250,8 @@ export default function HomeUser() {
                   className="w-40 md:w-48 object-contain"
                 />
               </div>
+              {/* BAGIAN INI DIHAPUS UNTUK MENGHILANGKAN BUBBLE PRODUK DI KANAN */}
+              {/*
               <div className="absolute right-[-80px] top-0 hidden md:flex flex-col gap-6">
                 {coffeeList.map((coffee, idx) => (
                   <button
@@ -270,6 +272,7 @@ export default function HomeUser() {
                   </button>
                 ))}
               </div>
+              */}
             </motion.div>
           </div>
           <div className="absolute bottom-0 left-0 w-full h-12 bg-orange-400 z-0"></div>
@@ -288,7 +291,7 @@ export default function HomeUser() {
               />
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-4">SPECIAL EVENT</h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">SPECIAL EVENT</h2> {/* Increased font size */}
               <p className="text-gray-700 leading-relaxed text-sm md:text-base">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis
                 sodales tortor eget elit sollicitudin, vel pharetra odio gravida.
@@ -308,7 +311,7 @@ export default function HomeUser() {
         <section className="bg-white py-16 px-6">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="md:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">
+              <h2 className="text-4xl md:text-5xl font-bold mb-2"> {/* Increased font size */}
                 DRINK AND COFFEE <br /> OF THE DAY
               </h2>
               <h3 className="text-xl md:text-2xl font-bold mt-4">
@@ -351,6 +354,7 @@ export default function HomeUser() {
                   />
                 </AnimatePresence>
               </div>
+              {/* BAGIAN INI TETAP ADA KARENA INI ADALAH SECTION "COFFEE OF THE DAY" */}
               <div className="absolute right-[-80px] top-0 hidden md:flex flex-col gap-6">
                 {coffeeList.map((coffee, idx) => (
                   <button
@@ -378,14 +382,14 @@ export default function HomeUser() {
       {/* Location Section */}
       <FadeInOnScroll>
         <section className="bg-white py-16 px-6 text-center" id="location">
-          <h2 className="text-3xl font-bold mb-4">Location</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Location</h2> {/* Increased font size */}
           <hr className="border-t w-20 mx-auto mb-8" />
 
           <div className="relative max-w-6xl mx-auto flex items-center justify-center">
             {/* Tombol Sebelumnya */}
             <button
               onClick={handlePrev}
-              className="bg-white border border-orange-400 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 px-4 py-2 rounded-full shadow-md absolute left-0 z-10"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white border-2 border-orange-500 text-orange-500 hover:bg-orange-600 hover:text-white transition-all duration-300 px-6 py-3 rounded-full shadow-lg z-20 text-xl font-bold"
             >
               ◀
             </button>
@@ -433,7 +437,7 @@ export default function HomeUser() {
             {/* Tombol Selanjutnya */}
             <button
               onClick={handleNext}
-              className="bg-white border border-orange-400 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 px-4 py-2 rounded-full shadow-md absolute right-0 z-10"
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white border-2 border-orange-500 text-orange-500 hover:bg-orange-600 hover:text-white transition-all duration-300 px-6 py-3 rounded-full shadow-lg z-20 text-xl font-bold"
             >
               ▶
             </button>

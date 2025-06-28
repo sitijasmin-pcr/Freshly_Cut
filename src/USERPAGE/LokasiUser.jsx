@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Bell, MapPin, Plus } from "lucide-react"; // Tambah ikon Plus
+import { ShoppingCart, Bell, MapPin, Plus,UserCircle } from "lucide-react"; // Tambah ikon Plus
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useCart } from './CartContext'; // Sesuaikan path jika berbeda
@@ -113,50 +113,52 @@ export default function LokasiUser() {
           </div>
 
           <nav className="flex gap-8 text-sm font-medium text-gray-700">
-                      <Link
-                        to="/HomeUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        to="/MenuUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Menu
-                      </Link>
-                      <Link
-                        to="/ProfInfo"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Story
-                      </Link>
-                      <Link
-                        to="/FAQUser"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        FAQ
-                      </Link>
-                      <Link
-                        to="/feedback"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Feedback
-                      </Link>
-                      <Link
-                        to="/Lokasi"
-                        className="hover:text-orange-500 transition-colors"
-                      >
-                        Location
-                      </Link>
-                    </nav>
+            <Link
+              to="/HomeUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              to="/MenuUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Menu
+            </Link>
+            <Link
+              to="/ProfInfo" // Mengarahkan ke halaman profil
+              className="hover:text-orange-500 transition-colors"
+            >
+              Story
+            </Link>
+            <Link
+              to="/FAQUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/FeedbackUser"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Feedback
+            </Link>
+            <Link
+              to="/Lokasi"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Location
+            </Link>
+          </nav>
 
           <div className="flex items-center gap-4">
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
-              )}
             </Link>
             <Link
               to="/NotificationUser"
@@ -197,14 +199,6 @@ export default function LokasiUser() {
         </p>
 
         {/* Tombol Tampilkan/Sembunyikan Form Tambah Outlet (untuk admin/development) */}
-        <div className="text-center mb-10">
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold shadow-md transition-colors flex items-center justify-center mx-auto gap-2"
-          >
-            <Plus className="w-5 h-5" /> {showForm ? "Sembunyikan Form Tambah Outlet" : "Tambah Outlet Baru"}
-          </button>
-        </div>
 
         {/* Form Tambah Outlet */}
         {showForm && (
