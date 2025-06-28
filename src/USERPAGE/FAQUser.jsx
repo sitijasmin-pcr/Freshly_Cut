@@ -328,36 +328,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ShoppingCart, Bell } from "lucide-react";
-import { useCart } from "./CartContext";
-
-export default function FAQUser() {
-  const [faqs, setFaqs] = useState([]);
-  const [openIndex, setOpenIndex] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const { cartItems } = useCart();
-
-  useEffect(() => {
-    fetchFaqs();
-  }, []);
-
-  const fetchFaqs = async () => {
-    const { data, error } = await supabase
-      .from("faq")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching FAQ:", error);
-    } else {
-      setFaqs(data);
-    }
-  };
-
-  const toggleIndex = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+import { Link } from "react-router-dom"; // Import Link untuk navigasi
+import { ShoppingCart, Bell } from "lucide-react"; // Import ikon
+import { useCart } from "./CartContext"; // Import useCart untuk status keranjang
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -440,11 +413,13 @@ export default function FAQUser() {
 
           {/* Icon */}
           <div className="flex items-center gap-4">
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
-              )}
             </Link>
             <Link to="/NotificationUser" className="text-orange-500 hover:text-orange-600">
               <Bell className="w-5 h-5" />

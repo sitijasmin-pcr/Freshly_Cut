@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Bell, Coffee, Leaf, Award, MapPin } from "lucide-react"; // Tambah ikon baru
+import { ShoppingCart, Bell, Coffee, Leaf, Award, MapPin,UserCircle } from "lucide-react"; // Tambah ikon baru
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useCart } from "./CartContext"; // Sesuaikan path jika berbeda
@@ -83,14 +83,13 @@ export default function ProfInfo() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
-              to="/CartUser"
-              className="text-orange-500 hover:text-orange-600 relative"
-            >
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"></span>
-              )}
             </Link>
             <Link
               to="/NotificationUser"

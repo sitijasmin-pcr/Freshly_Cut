@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, ShoppingCart } from "lucide-react";
-import { motion } from "framer-motion"; // Untuk animasi jika diperlukan
+import { Bell, ShoppingCart, UserCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
 
 const NotificationUser = () => {
-  const notifications = [
+  // Initial notifications data
+  const initialNotifications = [
     {
       id: 1,
       type: "Discount Voucher",
@@ -59,9 +60,20 @@ const NotificationUser = () => {
     },
   ];
 
+  // State to manage visible notifications (initially all notifications)
+  const [visibleNotifications, setVisibleNotifications] = useState(initialNotifications.map(n => n.id));
+
+  const handleClaim = (id) => {
+    // Remove the notification from the visible list
+    setVisibleNotifications(prev => prev.filter(notificationId => notificationId !== id));
+    // Optionally, add logic here to handle the actual claim (e.g., send to API, show a success message)
+    console.log(`Notification with ID ${id} claimed!`);
+  };
+
   const notificationVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    exit: { opacity: 0, scale: 0.9, transition: { duration: 0.4 } }, // Dissolve effect on exit
   };
 
   return (
@@ -80,32 +92,55 @@ const NotificationUser = () => {
           </div>
 
           <nav className="flex gap-8 text-sm font-medium text-gray-700">
-            <Link to="/HomeUser" className="hover:text-orange-500">
+            <Link
+              to="/HomeUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               Home
             </Link>
-            <Link to="/MenuUser" className="hover:text-orange-500">
+            <Link
+              to="/MenuUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               Menu
             </Link>
-            <Link to="/location" className="hover:text-orange-500">
-              Location
+            <Link
+              to="/ProfInfo" // Mengarahkan ke halaman profil
+              className="hover:text-orange-500 transition-colors"
+            >
+              Story
             </Link>
-            <Link to="/faq" className="hover:text-orange-500">
+            <Link
+              to="/FAQUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               FAQ
             </Link>
-            <Link to="/feedback" className="hover:text-orange-500">
+            <Link
+              to="/FeedbackUser"
+              className="hover:text-orange-500 transition-colors"
+            >
               Feedback
+            </Link>
+            <Link
+              to="/Lokasi"
+              className="hover:text-orange-500 transition-colors"
+            >
+              Location
             </Link>
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
-              to="/CartUser"
-              className="text-orange-500 hover:text-orange-600"
-            >
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
             </Link>
             <Link
-              to="/notification"
+              to="/NotificationUser"
               className="text-orange-500 hover:text-orange-600"
             >
               <Bell className="w-5 h-5" />
@@ -120,43 +155,48 @@ const NotificationUser = () => {
         </h1>
 
         <div className="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
-          {notifications.map((notification, index) => (
-            <motion.div
-              key={notification.id}
-              variants={notificationVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: index * 0.1 }}
-              className={`bg-white rounded-lg shadow-md overflow-hidden ${notification.color}`}
-            >
-              <div className="flex items-center px-6 py-3">
-                <div className={`p-2 rounded-full ${notification.headerColor}`}>
-                  <Bell className={`h-5 w-5 text-white`} />
-                </div>
-                <h3 className={`ml-3 font-semibold text-base ${notification.bellColor}`}>
-                  {notification.type}
-                </h3>
-                <span className="ml-auto text-gray-500 text-xs flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
-                  {notification.date} at {notification.time}
-                </span>
-              </div>
-              <div className="p-6 pt-0">
-                <h4 className="font-bold text-lg mb-2">{notification.title}</h4>
-                <p className="text-gray-700 text-sm mb-4">
-                  {notification.description}
-                </p>
-                <Link
-                  to={notification.actionLink}
-                  className="inline-block bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors"
+          <AnimatePresence> {/* Wrap with AnimatePresence */}
+            {initialNotifications
+              .filter(notification => visibleNotifications.includes(notification.id)) // Filter based on visibleNotifications state
+              .map((notification, index) => (
+                <motion.div
+                  key={notification.id} // Key is crucial for AnimatePresence
+                  variants={notificationVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit" // Add exit variant
+                  transition={{ delay: index * 0.1, duration: 0.5 }} // Adjust duration for entry
+                  className={`bg-white rounded-lg shadow-md overflow-hidden ${notification.color}`}
                 >
-                  {notification.actionText}
-                </Link>
-              </div>
-            </motion.div>
-          ))}
+                  <div className="flex items-center px-6 py-3">
+                    <div className={`p-2 rounded-full ${notification.headerColor}`}>
+                      <Bell className={`h-5 w-5 text-white`} />
+                    </div>
+                    <h3 className={`ml-3 font-semibold text-base ${notification.bellColor}`}>
+                      {notification.type}
+                    </h3>
+                    <span className="ml-auto text-gray-500 text-xs flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                      </svg>
+                      {notification.date} at {notification.time}
+                    </span>
+                  </div>
+                  <div className="p-6 pt-0">
+                    <h4 className="font-bold text-lg mb-2">{notification.title}</h4>
+                    <p className="text-gray-700 text-sm mb-4">
+                      {notification.description}
+                    </p>
+                    <button // Changed from Link to button for the claim action
+                      onClick={() => handleClaim(notification.id)}
+                      className="inline-block bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors"
+                    >
+                      {notification.actionText}
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+          </AnimatePresence>
         </div>
       </div>
       {/* Footer Section */}

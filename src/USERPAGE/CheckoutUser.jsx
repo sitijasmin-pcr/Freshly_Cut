@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Bell, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Bell, ChevronDown,UserCircle } from 'lucide-react';
 
 const CheckoutUser = () => {
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // Default selected payment method
@@ -77,10 +77,12 @@ const CheckoutUser = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
-              to="/CartUser"
-              className="text-orange-500 hover:text-orange-600"
-            >
+            {/* New: Profile Icon */}
+            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+              <UserCircle className="w-5 h-5" />
+            </Link>
+            {/* Existing icons */}
+            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
               <ShoppingCart className="w-5 h-5" />
             </Link>
             <Link
