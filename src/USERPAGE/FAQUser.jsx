@@ -426,14 +426,63 @@ export default function Produk() {
             </h1>
           </div>
 
-          <nav className="flex gap-8 text-sm font-medium text-gray-700">
-            <Link to="/HomeUser" className="hover:text-orange-500">Home</Link>
-            <Link to="/MenuUser" className="hover:text-orange-500">Menu</Link>
-            <Link to="/ProfInfo" className="hover:text-orange-500">Story</Link>
-            <Link to="/FAQUser" className="hover:text-orange-500">FAQ</Link>
-            <Link to="/feedback" className="hover:text-orange-500">Feedback</Link>
-            <Link to="/Lokasi" className="hover:text-orange-500">Location</Link>
+          <nav className="flex gap-8 text-sm font-medium">
+            <Link
+              to="/HomeUser"
+              className={`transition-colors ${location.pathname === "/HomeUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/MenuUser"
+              className={`transition-colors ${location.pathname === "/MenuUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              Menu
+            </Link>
+            <Link
+              to="/ProfInfo"
+              className={`transition-colors ${location.pathname === "/ProfInfo"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              Story
+            </Link>
+            <Link
+              to="/FAQUser"
+              className={`transition-colors ${location.pathname === "/FAQUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/FeedbackUser"
+              className={`transition-colors ${location.pathname === "/FeedbackUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              Feedback
+            </Link>
+            <Link
+              to="/lokasi"
+              className={`transition-colors ${location.pathname === "/lokasi"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
+            >
+              Location
+            </Link>
           </nav>
+
 
           <div className="flex items-center gap-4">
             <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600"><FaUserCircle className="w-5 h-5" /></Link>

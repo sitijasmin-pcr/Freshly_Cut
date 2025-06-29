@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart, Bell, ChevronDown, ChevronUp, UserCircle } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "../supabase"; // Pastikan path ini benar (relative ke src/)
@@ -143,10 +143,9 @@ const SectionWithOffers = ({ title, data }) => {
                       <button
                         onClick={() => handleAddToCart(item)}
                         className={`mt-4 font-semibold py-1 px-4 rounded-full text-sm transition-colors duration-300
-                          ${
-                            addedItemId === item.id
-                              ? "bg-green-500 text-white"
-                              : "border border-orange-400 text-orange-500 hover:bg-orange-100"
+                          ${addedItemId === item.id
+                            ? "bg-green-500 text-white"
+                            : "border border-orange-400 text-orange-500 hover:bg-orange-100"
                           }`}
                       >
                         {addedItemId === item.id ? "Ditambahkan! ✓" : "Tambah"}
@@ -155,9 +154,9 @@ const SectionWithOffers = ({ title, data }) => {
                   </motion.div>
                 ))}
                 {paginatedData.length === 0 && (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                        Tidak ada menu yang tersedia untuk kategori ini.
-                    </div>
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    Tidak ada menu yang tersedia untuk kategori ini.
+                  </div>
                 )}
               </div>
               {isAllMenusSection && totalPages > 1 && (
@@ -340,65 +339,84 @@ const MenuUser = () => {
           </h1>
         </div>
 
-        <nav className="flex gap-8 text-sm font-medium text-gray-700">
+        <nav className="flex gap-8 text-sm font-medium">
           <Link
             to="/HomeUser"
-            className="hover:text-orange-500 transition-colors"
+            className={`transition-colors ${location.pathname === "/HomeUser"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             Home
           </Link>
           <Link
             to="/MenuUser"
-            className="hover:text-orange-500 transition-colors"
+            className={`transition-colors ${location.pathname === "/MenuUser"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             Menu
           </Link>
           <Link
             to="/ProfInfo"
-            className="hover:text-orange-500 transition-colors"
+            className={`transition-colors ${location.pathname === "/ProfInfo"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             Story
           </Link>
           <Link
             to="/FAQUser"
-            className="hover:text-orange-500 transition-colors"
+            className={`transition-colors ${location.pathname === "/FAQUser"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             FAQ
           </Link>
           <Link
-            to="/feedback"
-            className="hover:text-orange-500 transition-colors"
+            to="/FeedbackUser"
+            className={`transition-colors ${location.pathname === "/FeedbackUser"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             Feedback
           </Link>
           <Link
-            to="/Lokasi"
-            className="hover:text-orange-500 transition-colors"
+            to="/lokasi"
+            className={`transition-colors ${location.pathname === "/lokasi"
+                ? "text-orange-500 font-bold"
+                : "text-gray-700 hover:text-orange-500"
+              }`}
           >
             Location
           </Link>
         </nav>
-          <div className="flex items-center gap-4">
-            {/* New: Profile Icon */}
-            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
-              <UserCircle className="w-5 h-5" />
-            </Link>
-            {/* Existing icons */}
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
-              <ShoppingCart className="w-5 h-5" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
-            <Link
-              to="/NotificationUser"
-              className="text-orange-500 hover:text-orange-600"
-            >
-              <Bell className="w-5 h-5" />
-            </Link>
-          </div>
+
+        <div className="flex items-center gap-4">
+          {/* New: Profile Icon */}
+          <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+            <UserCircle className="w-5 h-5" />
+          </Link>
+          {/* Existing icons */}
+          <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
+            <ShoppingCart className="w-5 h-5" />
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
+          <Link
+            to="/NotificationUser"
+            className="text-orange-500 hover:text-orange-600"
+          >
+            <Bell className="w-5 h-5" />
+          </Link>
+        </div>
       </div>
 
       {/* Promo Poster - No change needed here */}

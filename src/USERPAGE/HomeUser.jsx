@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart, Bell, MessageSquareText, UserCircle } from "lucide-react"; // Import UserCircle
 
 // Reusable component for scroll-based animation
@@ -60,6 +60,7 @@ const coffeeList = [
 ];
 
 export default function HomeUser() {
+  const location = useLocation();
   const [active, setActive] = useState(0);
   const [qty, setQty] = useState(1);
   const [locationIndex, setLocationIndex] = useState(0);
@@ -124,44 +125,63 @@ export default function HomeUser() {
             </h1>
           </div>
 
-          <nav className="flex gap-8 text-sm font-medium text-gray-700">
+          <nav className="flex gap-8 text-sm font-medium">
             <Link
               to="/HomeUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/HomeUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Home
             </Link>
             <Link
               to="/MenuUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/MenuUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Menu
             </Link>
             <Link
-              to="/ProfInfo" // Mengarahkan ke halaman profil
-              className="hover:text-orange-500 transition-colors"
+              to="/ProfInfo"
+              className={`transition-colors ${location.pathname === "/ProfInfo"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Story
             </Link>
             <Link
               to="/FAQUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/FAQUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               FAQ
             </Link>
             <Link
               to="/FeedbackUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/FeedbackUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Feedback
             </Link>
             <Link
-              to="/Lokasi"
-              className="hover:text-orange-500 transition-colors"
+              to="/lokasi"
+              className={`transition-colors ${location.pathname === "/lokasi"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Location
             </Link>
           </nav>
+
 
           <div className="flex items-center gap-4">
             {/* New: Profile Icon */}
@@ -360,9 +380,8 @@ export default function HomeUser() {
                   <button
                     key={idx}
                     onClick={() => handleChangeProduct(idx)}
-                    className={`relative transition-all ${
-                      active === idx ? "scale-110" : "opacity-80"
-                    }`}
+                    className={`relative transition-all ${active === idx ? "scale-110" : "opacity-80"
+                      }`}
                   >
                     <img
                       src={coffee.img}

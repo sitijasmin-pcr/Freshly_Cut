@@ -144,44 +144,63 @@ export default function FeedbackUser() {
             </h1>
           </div>
 
-          <nav className="flex gap-8 text-sm font-medium text-gray-700">
+          <nav className="flex gap-8 text-sm font-medium">
             <Link
               to="/HomeUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/HomeUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Home
             </Link>
             <Link
               to="/MenuUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/MenuUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Menu
             </Link>
             <Link
               to="/ProfInfo"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/ProfInfo"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Story
             </Link>
             <Link
               to="/FAQUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/FAQUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               FAQ
             </Link>
             <Link
               to="/FeedbackUser"
-              className="hover:text-orange-500 transition-colors"
+              className={`transition-colors ${location.pathname === "/FeedbackUser"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Feedback
             </Link>
             <Link
-              to="/Lokasi"
-              className="hover:text-orange-500 transition-colors"
+              to="/lokasi"
+              className={`transition-colors ${location.pathname === "/lokasi"
+                  ? "text-orange-500 font-bold"
+                  : "text-gray-700 hover:text-orange-500"
+                }`}
             >
               Location
             </Link>
           </nav>
+
 
           <div className="flex items-center gap-4">
             <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
@@ -244,7 +263,7 @@ export default function FeedbackUser() {
                   src={photoUrl}
                   alt="Preview Profil"
                   className="max-h-24 mx-auto rounded-full object-cover border-2 border-gray-200 shadow-md"
-                  onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/100x100/CCCCCC/000000?text=Error"}}
+                  onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100/CCCCCC/000000?text=Error" }}
                 />
               </div>
             )}
@@ -286,9 +305,8 @@ export default function FeedbackUser() {
                   <Star
                     key={star}
                     size={32}
-                    className={`cursor-pointer transition-colors duration-200 ${
-                      star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-                    }`}
+                    className={`cursor-pointer transition-colors duration-200 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                      }`}
                     onClick={() => handleRating(star)}
                   />
                 ))}
