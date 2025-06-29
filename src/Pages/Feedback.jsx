@@ -75,20 +75,17 @@ export default function FormFeedback() {
   return (
     <div className="p-6">
       <div className="relative mb-6">
-        <Button
+        {/* <Button
           onClick={handleOpenAddModal}
           className="absolute top-0 right-0 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-md"
         >
-          + Form
-        </Button>
+          + Tambah Form
+        </Button> */}
         <div className="flex flex-col items-center w-full text-center">
           <h1 className="text-3xl font-bold text-orange-700">USERS FEEDBACK</h1>
           <div className="w-24 h-1 bg-orange-700 rounded-full mt-1 mb-3" />
-          <p className="text-gray-600 text-sm mt-2 max-w-3xl">
-            Masukan, keluhan, atau kepuasan yang disampaikan pelanggan mengenai
-            produk atau pelayanan yang diterima. Feedback berguna untuk
-            menemukan masalah, melakukan perbaikan, dan meningkatkan kepuasan
-            pelanggan.
+          <p className="text-gray-600 text-sm mt-2 max-w-3xl mb-10">
+          Halaman Feedback Admin berfungsi sebagai pusat kontrol bagi admin untuk memantau, membaca, dan mengelola seluruh masukan, keluhan, atau saran yang dikirimkan oleh pelanggan melalui halaman feedback customer.
           </p>
         </div>
       </div>

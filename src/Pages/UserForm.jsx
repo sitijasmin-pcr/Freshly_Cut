@@ -148,7 +148,7 @@ const UserForm = ({ addUser, updateUser, editingUser, setEditingUser }) => {
         )}
         <button
           type="submit"
-          className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md text-lg"
+          className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition duration-200 shadow-md text-lg"
         >
           <i className="fas fa-save mr-2"></i> {editingUser ? 'Perbarui Pengguna' : 'Tambah Pengguna'}
         </button>

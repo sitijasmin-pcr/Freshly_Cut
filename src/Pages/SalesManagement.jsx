@@ -29,7 +29,7 @@ const OrderPage = () => {
   // Fungsi untuk mendapatkan warna status
   const getStatusColorClass = (status) => {
     switch (status) {
-      case 'Completed': return 'bg-green-500';
+      case 'Completed': return 'bg-orange-500';
       case 'Processing': return 'bg-orange-500';
       case 'Pending': return 'bg-yellow-400 text-black';
       case 'Canceled': return 'bg-red-500';
@@ -251,20 +251,20 @@ const OrderPage = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen font-inter">
-      <h1 className="text-3xl font-bold text-center text-indigo-700 mb-6">
+      <h1 className="text-3xl font-bold text-center text-orange-700 mb-6">
         Manajemen Pesanan
       </h1>
 
       {/* Kartu Ringkasan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-5 rounded-lg shadow-md text-center border-l-4 border-indigo-600">
+        <div className="bg-white p-5 rounded-lg shadow-md text-center border-l-4 border-orange-600">
           <h3 className="text-sm font-semibold text-gray-500 mb-1">Total Pesanan</h3>
-          <p className="text-3xl font-bold text-indigo-600">{summary.total}</p>
+          <p className="text-3xl font-bold text-orange-600">{summary.total}</p>
           <p className="text-xs text-gray-400">Semua pesanan</p>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-md text-center border-l-4 border-green-500">
+        <div className="bg-white p-5 rounded-lg shadow-md text-center border-l-4 border-orange-500">
           <h3 className="text-sm font-semibold text-gray-500 mb-1">Selesai</h3>
-          <p className="text-3xl font-bold text-green-500">{summary.completed}</p>
+          <p className="text-3xl font-bold text-orange-500">{summary.completed}</p>
           <p className="text-xs text-gray-400">{summary.percentCompleted}% dari total</p>
         </div>
         <div className="bg-white p-5 rounded-lg shadow-md text-center border-l-4 border-orange-500">
@@ -288,7 +288,7 @@ const OrderPage = () => {
             id="startDate"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
           <label htmlFor="endDate" className="text-gray-700 font-medium">Sampai Tanggal:</label>
           <input
@@ -296,12 +296,12 @@ const OrderPage = () => {
             id="endDate"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
         </div>
         <button
           onClick={handleOpenNewSalesForm}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200 flex items-center"
+          className="bg-orange-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 flex items-center"
         >
           <i className="fas fa-plus mr-2"></i> Buat Pesanan Baru
         </button>
@@ -309,7 +309,7 @@ const OrderPage = () => {
 
       {/* Tabel Pesanan */}
       <div className="bg-white p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+        <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
           <i className="fas fa-receipt mr-2"></i> Daftar Permintaan Pesanan
         </h2>
 
@@ -324,7 +324,7 @@ const OrderPage = () => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1); // Reset halaman saat pencarian berubah
               }}
-              className="p-2 pl-10 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="p-2 pl-10 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg
@@ -351,7 +351,7 @@ const OrderPage = () => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1); // Reset halaman saat filter status berubah
               }}
-              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
             >
               <option value="">Semua Status</option>
               <option value="Completed">Selesai</option>
@@ -367,7 +367,7 @@ const OrderPage = () => {
 
         {loading ? (
           <div className="flex justify-center items-center py-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
             <p className="ml-3 text-lg text-gray-600">Memuat pesanan...</p>
           </div>
         ) : error ? (
@@ -426,7 +426,7 @@ const OrderPage = () => {
                     <td className="py-3 px-4">{order.receipt}</td>
                     <td className="py-3 px-4 space-x-2">
                       <button onClick={() => { setCurrentEditingSale(order); setIsSalesFormModalOpen(true); }} className="text-blue-600 hover:text-blue-900" title="Edit Pesanan"><i className="fas fa-edit"></i></button>
-                      <button onClick={() => setSelectedOrder(order)} className="text-indigo-600 hover:text-indigo-900" title="Lihat Detail Resi"><i className="fas fa-eye"></i></button>
+                      <button onClick={() => setSelectedOrder(order)} className="text-orange-600 hover:text-orange-900" title="Lihat Detail Resi"><i className="fas fa-eye"></i></button>
                       <button onClick={() => handleDeleteOrder(order.id, order.name)} className="text-red-600 hover:text-red-900" title="Hapus Pesanan"><i className="fas fa-trash-alt"></i></button>
                     </td>
                   </tr>
@@ -438,7 +438,7 @@ const OrderPage = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-orange-600 text-white hover:bg-orange-700'}`}
               >
                 Previous
               </button>
@@ -448,7 +448,7 @@ const OrderPage = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-orange-600 text-white hover:bg-orange-700'}`}
               >
                 Next
               </button>
@@ -470,9 +470,9 @@ const OrderPage = () => {
             </button>
 
             <div className="text-center mb-6 border-b pb-4">
-              <h1 className="text-3xl font-bold text-green-600">GREEN GROUNDS COFFEE</h1>
-              <p className="text-gray-600 text-sm mt-1">Jl. Contoh No. 123, Kota Anda, Kode Pos 45678</p>
-              <p className="text-green-600 font-semibold mt-3">TERIMA KASIH ATAS PESANAN ANDA!</p>
+              <h1 className="text-3xl font-bold text-orange-600">TOMORO COFFEE</h1>
+              <p className="text-gray-600 text-sm mt-1">Jl. Sembilang, Limbungan, Kec. Rumbai Pesisir, Kota Pekanbaru, Riau 28266</p>
+              <p className="text-orange-600 font-semibold mt-3">TERIMA KASIH ATAS PESANAN ANDA!</p>
             </div>
 
             <div className="mb-6 space-y-2 text-gray-700">
@@ -533,7 +533,7 @@ const OrderPage = () => {
             <div className="text-center">
               <button
                 onClick={handleDownload}
-                className="bg-green-600 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center mx-auto"
+                className="bg-orange-600 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-orange-700 transition-colors duration-200 flex items-center justify-center mx-auto"
               >
                 <i className="fas fa-download mr-3"></i> Unduh Resi
               </button>
