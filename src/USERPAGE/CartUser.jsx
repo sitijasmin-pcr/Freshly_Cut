@@ -1,5 +1,4 @@
-// CartUser.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Import useEffect
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from '../supabase';
@@ -26,6 +25,35 @@ const CartUser = () => {
   const [tableNumber, setTableNumber] = useState("");
   // New state to control the visibility of the "Lihat Pesanan" button
   const [showViewOrderButton, setShowViewOrderButton] = useState(false);
+
+  // Add useEffect to check for uncompleted orders on component mount
+  useEffect(() => {
+    const checkUncompletedOrders = async () => {
+      if (!supabase) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('id, status')
+          .neq('status', 'Completed'); // Check for orders not yet 'Completed'
+
+        if (error) {
+          console.error("Error fetching uncompleted orders:", error.message);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          setShowViewOrderButton(true); // If there are any uncompleted orders, show the button
+        } else {
+          setShowViewOrderButton(false); // Otherwise, hide the button
+        }
+      } catch (err) {
+        console.error("Unexpected error in checkUncompletedOrders:", err.message);
+      }
+    };
+
+    checkUncompletedOrders();
+  }, []); // Run once on component mount
 
   const calculateSubtotal = (item) => Number(item.price) * Number(item.quantity);
 
@@ -482,53 +510,62 @@ const CartUser = () => {
       </div>
       {/* Footer Section (tetap sama) */}
       <footer className="relative mt-20 w-full text-white">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://placehold.co/1920x400/333333/FFFFFF?text=Footer+Background')" }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <img src="https://placehold.co/40x40/FF7F50/FFFFFF?text=Logo" alt="Logo" className="h-10" />
-              <div>
-                <h2 className="text-xl font-bold text-orange-400">TOMORO</h2>
-                <p className="text-sm tracking-[0.3em] text-orange-300">
-                  COFFEE
-                </p>
-              </div>
-            </div>
-            <div className="text-sm leading-relaxed">
-              <p className="text-orange-400 font-semibold mb-1">Our Location</p>
-              <p>Headquarters</p>
-              <p>
-                Jl. Riau No.57 B, Kp. Bandar, Kec. Senapelan, Kota Pekanbaru,
-                Riau 28291
-              </p>
-            </div>
-          </div>
-          <div className="text-sm">
-            <p className="text-orange-400 font-semibold mb-2">Social Media</p>
-            <div className="flex gap-4 text-lg">
-              <a href="#" className="hover:text-orange-300">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#" className="hover:text-orange-300">
-                <i className="fab fa-tiktok"></i>
-              </a>
-              <a
-                href="mailto:contact@tomorocoffee.com"
-                className="hover:text-orange-300"
-              >
-                <i className="fas fa-envelope"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="relative z-10 text-center text-sm text-white bg-black/40 py-2">
-          Hak Cipta © 2025 PT KOPI BINTANG INDONESIA
-        </div>
-      </footer>
+        {/* Background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/img/image 48.png')" }}
+        ></div>
+
+        {/* Overlay gradasi gelap transparan */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">
+          {/* Left - Logo & Location */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <img src="/img/Logo.png" alt="Logo" className="h-10" />
+              <div>
+                <h2 className="text-xl font-bold text-orange-400">TOMORO</h2>
+                <p className="text-sm tracking-[0.3em] text-orange-300">
+                  COFFEE
+                </p>
+              </div>
+            </div>
+            <div className="text-sm leading-relaxed">
+              <p className="text-orange-400 font-semibold mb-1">Our Location</p>
+              <p>Headquarters</p>
+              <p>
+                Jl. Riau No.57 B, Kp. Bandar, Kec. Senapelan, Kota Pekanbaru,
+                Riau 28291
+              </p>
+            </div>
+          </div>
+
+          {/* Right - Social Media */}
+          <div className="text-sm">
+            <p className="text-orange-400 font-semibold mb-2">Social Media</p>
+            <div className="flex gap-4 text-lg">
+              <a href="#" className="hover:text-orange-300">
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a href="#" className="hover:text-orange-300">
+                <i className="fab fa-tiktok"></i>
+              </a>
+              <a
+                href="mailto:contact@tomorocoffee.com"
+                className="hover:text-orange-300"
+              >
+                <i className="fas fa-envelope"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="relative z-10 text-center text-sm text-white bg-black/40 py-2">
+          Hak Cipta © 2025 PT KOPI BINTANG INDONESIA
+        </div>
+      </footer>
     </div>
   );
 };

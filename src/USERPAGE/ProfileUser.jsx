@@ -569,7 +569,7 @@ export default function ProfileUser() {
               <p className="text-lg text-gray-700">Peran: <span className="font-medium">{profileData.role}</span></p>
               <p className="text-lg text-gray-700">Tingkat Member: <span className="font-medium text-orange-600">{profileData.memberLevel}</span></p>
               {/* Tampilkan total transaksi */}
-              <p className="text-lg text-gray-700">Total Transaksi: <span className="font-medium">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(profileData.totalTransactions)}</span></p>
+              <p className="text-lg text-gray-700">Total Transaksi: <span className="font-medium">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(profileData. totalTransactions)}</span></p>
               {/* Tampilkan pesan milestone */}
               {milestoneMessage && (
                 <p className="text-base text-gray-600 italic mt-2">{milestoneMessage}</p>

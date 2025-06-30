@@ -218,7 +218,7 @@ function App() {
             </Route>
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
             <Route path="/HomeUser" element={<HomeUser />} />
             <Route path="/MenuUser" element={<MenuUser />} />
             <Route path="/CartUser" element={<CartUser />} />
