@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Bell, MessageSquareText, UserCircle } from "lucide-react"; // Import UserCircle
+import {
+  ShoppingCart,
+  Bell,
+  MessageSquareText,
+  UserCircle,
+} from "lucide-react"; // Import UserCircle
 
 // Reusable component for scroll-based animation
 const FadeInOnScroll = ({ children, direction = "up", delay = 0 }) => {
@@ -128,68 +133,79 @@ export default function HomeUser() {
           <nav className="flex gap-8 text-sm font-medium">
             <Link
               to="/HomeUser"
-              className={`transition-colors ${location.pathname === "/HomeUser"
+              className={`transition-colors ${
+                location.pathname === "/HomeUser"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               Home
             </Link>
             <Link
               to="/MenuUser"
-              className={`transition-colors ${location.pathname === "/MenuUser"
+              className={`transition-colors ${
+                location.pathname === "/MenuUser"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               Menu
             </Link>
             <Link
               to="/ProfInfo"
-              className={`transition-colors ${location.pathname === "/ProfInfo"
+              className={`transition-colors ${
+                location.pathname === "/ProfInfo"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               Story
             </Link>
             <Link
               to="/FAQUser"
-              className={`transition-colors ${location.pathname === "/FAQUser"
+              className={`transition-colors ${
+                location.pathname === "/FAQUser"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               FAQ
             </Link>
             <Link
               to="/FeedbackUser"
-              className={`transition-colors ${location.pathname === "/FeedbackUser"
+              className={`transition-colors ${
+                location.pathname === "/FeedbackUser"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               Feedback
             </Link>
             <Link
               to="/lokasi"
-              className={`transition-colors ${location.pathname === "/lokasi"
+              className={`transition-colors ${
+                location.pathname === "/lokasi"
                   ? "text-orange-500 font-bold"
                   : "text-gray-700 hover:text-orange-500"
-                }`}
+              }`}
             >
               Location
             </Link>
           </nav>
 
-
           <div className="flex items-center gap-4">
             {/* New: Profile Icon */}
-            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
+            <Link
+              to="/ProfileUser"
+              className="text-orange-500 hover:text-orange-600"
+            >
               <UserCircle className="w-5 h-5" />
             </Link>
             {/* Existing icons */}
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
+            <Link
+              to="/CartUser"
+              className="text-orange-500 hover:text-orange-600"
+            >
               <ShoppingCart className="w-5 h-5" />
             </Link>
             <Link
@@ -202,7 +218,6 @@ export default function HomeUser() {
         </div>
       </header>
 
-
       {/* Hero Section */}
       <FadeInOnScroll>
         <section className="flex flex-col-reverse md:flex-row items-center justify-between px-6 py-12 bg-white">
@@ -212,7 +227,9 @@ export default function HomeUser() {
             transition={{ duration: 0.6 }}
             className="text-center md:text-left md:w-1/2"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-3"> {/* Increased font size */}
+            <h1 className="text-4xl md:text-5xl font-bold mb-3">
+              {" "}
+              {/* Increased font size */}
               HEY ! <br />
               ENJOY YOUR COFFE TIME
             </h1>
@@ -248,7 +265,9 @@ export default function HomeUser() {
               transition={{ duration: 0.6 }}
               className="md:w-1/2 text-center md:text-left z-10"
             >
-              <h2 className="text-6xl md:text-7xl font-extrabold leading-tight"> {/* Increased font size */}
+              <h2 className="text-6xl md:text-7xl font-extrabold leading-tight">
+                {" "}
+                {/* Increased font size */}
                 NEW <br /> RELEASE!
               </h2>
               <p className="mt-3 text-xl md:text-2xl font-medium">
@@ -311,15 +330,19 @@ export default function HomeUser() {
               />
             </div>
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">SPECIAL EVENT</h2> {/* Increased font size */}
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                {" "}
+                SPECIAL EVENT – NIKMATI MOMEN ISTIMEWA DI TOMORO COFFEE{" "}
+              </h2>{" "}
+              {/* Increased font size */}
               <p className="text-gray-700 leading-relaxed text-sm md:text-base">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis
-                sodales tortor eget elit sollicitudin, vel pharetra odio gravida.
-                Maecenas sit amet cursus augue. Ut volutpat sit amet tortor in
-                gravida. Ut non eleifend turpis, non viverra augue. Aliquam vitae,
-                lacinia nunc a, malesuada libero. Aenean pellentesque eros nec
-                pellentesque aliquam. Morbi leo massa, tristique eget mauris eget,
-                dictum convallis sem.
+                Rasakan pengalaman ngopi yang berbeda bersama Tomoro Coffee!
+                Kami menghadirkan Special Event dengan suasana hangat dan penuh
+                kejutan spesial untuk Anda. Mulai dari live music, promo
+                bundling menu favorit, hingga sesi coffee tasting yang eksklusif
+                — semua dirancang untuk menemani momen santai Anda dengan lebih
+                istimewa. Jangan lewatkan keseruannya dan ajak orang tersayang
+                untuk bergabung.
               </p>
             </div>
           </div>
@@ -331,7 +354,9 @@ export default function HomeUser() {
         <section className="bg-white py-16 px-6">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
             <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold mb-2"> {/* Increased font size */}
+              <h2 className="text-4xl md:text-5xl font-bold mb-2">
+                {" "}
+                {/* Increased font size */}
                 DRINK AND COFFEE <br /> OF THE DAY
               </h2>
               <h3 className="text-xl md:text-2xl font-bold mt-4">
@@ -380,8 +405,9 @@ export default function HomeUser() {
                   <button
                     key={idx}
                     onClick={() => handleChangeProduct(idx)}
-                    className={`relative transition-all ${active === idx ? "scale-110" : "opacity-80"
-                      }`}
+                    className={`relative transition-all ${
+                      active === idx ? "scale-110" : "opacity-80"
+                    }`}
                   >
                     <img
                       src={coffee.img}
@@ -401,9 +427,9 @@ export default function HomeUser() {
       {/* Location Section */}
       <FadeInOnScroll>
         <section className="bg-white py-16 px-6 text-center" id="location">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Location</h2> {/* Increased font size */}
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Location</h2>{" "}
+          {/* Increased font size */}
           <hr className="border-t w-20 mx-auto mb-8" />
-
           <div className="relative max-w-6xl mx-auto flex items-center justify-center">
             {/* Tombol Sebelumnya */}
             <button
