@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
 import Swal from 'sweetalert2'; // Pastikan SweetAlert2 sudah diinstal (npm install sweetalert2)
 import 'sweetalert2/dist/sweetalert2.min.css'; // Opsional: Untuk styling default SweetAlert2
+import { Calendar } from "lucide-react";
+
 
 import SalesForm from './SalesForm'; // Pastikan SalesForm.jsx berada di direktori yang sama
 
@@ -281,24 +283,33 @@ const OrderPage = () => {
 
       {/* Filter Tanggal dan Tombol Buat Pesanan Baru */}
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <div className="flex items-center space-x-3">
-          <label htmlFor="startDate" className="text-gray-700 font-medium">Dari Tanggal:</label>
-          <input
-            type="date"
-            id="startDate"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-          <label htmlFor="endDate" className="text-gray-700 font-medium">Sampai Tanggal:</label>
-          <input
-            type="date"
-            id="endDate"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
+       <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+  <div className="flex items-center gap-2">
+    <label htmlFor="startDate" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+      <Calendar size={18} className="inline-block mr-1 text-orange-500" />Dari:
+    </label>
+    <input
+      type="date"
+      id="startDate"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+      className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full md:w-auto"
+    />
+  </div>
+  <div className="flex items-center gap-2">
+    <label htmlFor="endDate" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+      <Calendar size={18} className="inline-block mr-1 text-orange-500" />Sampai:
+    </label>
+    <input
+      type="date"
+      id="endDate"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+      className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full md:w-auto"
+    />
+  </div>
+</div>
+
         <button
           onClick={handleOpenNewSalesForm}
           className="bg-orange-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 flex items-center"

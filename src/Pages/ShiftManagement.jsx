@@ -71,15 +71,49 @@ const ShiftPage = () => {
     }
     return false;
   }).length;
+  const filteredEmployees = employees.filter((emp) => {
+  const today = new Date();
+  const empDate = new Date(emp.shift_date);
 
-  const filters = [
-    "Yesterday",
-    "Today",
-    "Tomorrow",
-    "Pagi",
-    "Malam",
-    "Fulltime",
-  ];
+  switch (activeFilter) {
+    case "Today":
+      return empDate.toDateString() === today.toDateString();
+
+    case "Yesterday":
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      return empDate.toDateString() === yesterday.toDateString();
+
+    case "Pagi":
+      return emp.shift_type?.toLowerCase() === "pagi";
+
+    case "Malam":
+      return emp.shift_type?.toLowerCase() === "malam";
+
+    case "Fulltime":
+      return emp.shift_type?.toLowerCase() === "fulltime";
+
+    case "Part Time":
+      return emp.shift_type?.toLowerCase() === "part time";
+
+    case "All":
+    default:
+      return true;
+  }
+});
+
+
+
+const filters = [
+  "All",
+  "Today",
+  "Yesterday",
+  "Pagi",
+  "Malam",
+  "Fulltime",
+  "Part Time",
+];
+
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -92,11 +126,10 @@ const ShiftPage = () => {
           <button
             key={idx}
             onClick={() => setActiveView(btn.value)}
-            className={`px-6 py-2 rounded-xl shadow font-semibold ${
-              activeView === btn.value
+            className={`px-6 py-2 rounded-xl shadow font-semibold ${activeView === btn.value
                 ? "bg-orange-500 text-white"
                 : "bg-white text-orange-600 border border-orange-500 hover:bg-orange-50"
-            }`}
+              }`}
           >
             {btn.label}
           </button>
@@ -135,11 +168,10 @@ const ShiftPage = () => {
               <button
                 key={idx}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-1 rounded-full ${
-                  activeFilter === filter
+                className={`px-3 py-1 rounded-full ${activeFilter === filter
                     ? "bg-orange-500 text-white"
                     : "bg-orange-100 text-orange-600"
-                }`}
+                  }`}
               >
                 {filter}
               </button>
@@ -160,7 +192,7 @@ const ShiftPage = () => {
                 }}
                 className="bg-orange-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-600"
               >
-               + Tambah Shift
+                + Tambah Shift
               </button>
             </div>
 
@@ -180,7 +212,7 @@ const ShiftPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map((emp, index) => ( // Tambahkan 'index' sebagai parameter kedua
+                  {filteredEmployees.map((emp, index) => (
                     <tr
                       key={emp.id}
                       className="bg-gray-100 hover:bg-orange-50 rounded-xl text-sm"
@@ -198,11 +230,10 @@ const ShiftPage = () => {
                           onChange={(e) =>
                             handleStatusChange(emp.id, e.target.value)
                           }
-                          className={`px-2 py-1 text-xs rounded-md font-semibold ${
-                            emp.status === "Hadir"
+                          className={`px-2 py-1 text-xs rounded-md font-semibold ${emp.status === "Hadir"
                               ? "bg-green-600 text-white"
                               : "bg-red-500 text-white"
-                          }`}
+                            }`}
                         >
                           <option value="Hadir">Hadir</option>
                           <option value="Absen">Absen</option>
