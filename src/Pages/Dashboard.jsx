@@ -419,37 +419,38 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <div className="p-6 lg:p-8">
-        {/* Bagian Selamat Datang */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Selamat Datang Kembali, Admin!</h2>
-            <p className="text-gray-600">Inilah ringkasan toko Anda hari ini.</p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 md:mt-0">
-            <button
-              onClick={handleDownloadReport}
-              className="bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 flex items-center"
-            >
-              <Download size={20} className="mr-2" /> Unduh Laporan
-            </button>
-            <div className="relative">
-              <select
-                className="appearance-none bg-gray-100 border border-gray-300 text-gray-700 py-2 pl-4 pr-10 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                value={selectedPeriod}
-                onChange={handlePeriodChange}
-              >
-                <option>Bulan Ini</option>
-                <option>Bulan Lalu</option>
-                <option>3 Bulan Terakhir</option>
-                <option>6 Bulan Terakhir</option>
-                <option>12 Bulan Terakhir</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={18} />
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <div className="p-6 lg:p-8">
+        {/* Bagian Selamat Datang */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Selamat Datang Kembali, Admin!</h2>
+            <p className="text-gray-600">Inilah ringkasan toko Anda hari ini.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 md:mt-0">
+            <button
+              onClick={handleDownloadReport}
+              className="bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 flex items-center"
+            >
+              <Download size={20} className="mr-2" /> Unduh Laporan
+            </button>
+            <div className="relative">
+              <select
+                className="appearance-none bg-gray-100 border border-gray-300 text-gray-700 py-2 pl-4 pr-10 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                value={selectedPeriod}
+                onChange={handlePeriodChange}
+              >
+                {/* PENTING: Ubah nilai 'value' agar sesuai dengan 'case' di fungsi fetchDashboardData */}
+                <option value="Current Month">Bulan Ini</option>
+                <option value="Last Month">Bulan Lalu</option>
+                <option value="Last 3 Months">3 Bulan Terakhir</option>
+                <option value="Last 6 Months">6 Bulan Terakhir</option>
+                <option value="Last 12 Months">12 Bulan Terakhir</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={18} />
+            </div>
+          </div>
+        </div>
 
         {/* Tab Ringkasan */}
         <div className="flex space-x-2 mb-6">
