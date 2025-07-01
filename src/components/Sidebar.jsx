@@ -25,7 +25,7 @@ const menuItems = [
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
   { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
-  { name: 'HomeUser', icon: <FaMapLocationDot />, path: '/HomeUser' },
+  // { name: 'HomeUser', icon: <FaMapLocationDot />, path: '/HomeUser' },
   { name: 'User', icon: <FaUser />, path: '/user' },
   { name: 'Karyawan', icon: <FaUser />, path: '/karyawan' },
 ];

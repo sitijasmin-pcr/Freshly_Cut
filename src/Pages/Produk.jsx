@@ -448,22 +448,22 @@ export default function ProductPage() {
   };
 
   const filteredAndSearchedProducts = useMemo(() => {
-    let currentProducts = products;
-
-    if (selectedCategory) {
-      currentProducts = currentProducts.filter((prod) => prod.kategori === selectedCategory);
-    }
-
-    if (searchTerm) {
-      const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      currentProducts = currentProducts.filter(
-        (prod) =>
-          prod.nama.toLowerCase().includes(lowerCaseSearchSearchTerm) ||
-          prod.deskripsi.toLowerCase().includes(lowerCaseSearchTerm)
-      );
-    }
-    return currentProducts;
-  }, [products, selectedCategory, searchTerm]);
+        let currentProducts = products;
+    
+        if (selectedCategory) {
+          currentProducts = currentProducts.filter((prod) => prod.kategori === selectedCategory);
+        }
+    
+        if (searchTerm) {
+          const lowerCaseSearchTerm = searchTerm.toLowerCase();
+          currentProducts = currentProducts.filter(
+            (prod) =>
+              prod.nama.toLowerCase().includes(lowerCaseSearchTerm) || // <<< Perbaikan di sini!
+              prod.deskripsi.toLowerCase().includes(lowerCaseSearchTerm)
+          );
+        }
+        return currentProducts;
+      }, [products, selectedCategory, searchTerm]);
 
   const totalPages = Math.ceil(filteredAndSearchedProducts.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -620,7 +620,7 @@ export default function ProductPage() {
 
           {/* Table of Products */}
           {!loading && filteredAndSearchedProducts.length > 0 && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto **max-h-[400px] overflow-y-auto**">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-orange-100">
                   <tr>
