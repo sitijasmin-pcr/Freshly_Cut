@@ -48,12 +48,12 @@ export const AuthContext = createContext(null);
 
 // DUMMY ADMIN USER (Does not need to be in Supabase)
 const DUMMY_ADMIN = { 
-  email: 'admin@tomoro.com', 
+  email: 'admin@freshly.com', 
   password: 'adminpassword', 
   role: 'admin',
-  nama: 'Admin Tomoro', // Dummy name for display in profile
+  nama: 'Admin Freshly Cut', // Dummy name for display in profile
   title: 'Gold', // Dummy title for display in profile
-  address: 'Tomoro Headquarters, Global', // Dummy address
+  address: 'Freshly Cut Headquarters, Global', // Dummy address
   Profile_Picture: 'https://placehold.co/150x150/FFD700/000000?text=Admin' // Dummy profile pic
 };
 
