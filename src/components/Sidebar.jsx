@@ -20,6 +20,7 @@ const menuItems = [
   { name: 'Produk', icon: <Box />, path: '/produk' },
   { name: 'Sales', icon: <ShoppingCart />, path: '/sales' },
   { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
+  { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
   { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },

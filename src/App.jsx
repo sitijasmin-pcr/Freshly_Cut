@@ -9,6 +9,7 @@ import MainLayout from './components/MainLayout';
 import Customer from './Pages/Customer';
 import Faq from './Pages/FAQ';
 import FAQForm from './Pages/FAQForm';
+import ManajemenProduksi from "./Pages/ManajemenProduksi";
 import Produk from './Pages/Produk';
 import SalesForm from './Pages/SalesForm';
 import SalesManagement from './Pages/SalesManagement';
@@ -209,6 +210,7 @@ function App() {
               <Route path="/faqform" element={<FAQForm />} />
               <Route path="/customer" element={<Customer />} />
               <Route path="/laporan" element={<Penjualan />} />
+              <Route path="/produksi" element={<ManajemenProduksi />} />
               <Route path="/produk" element={<Produk />} />
               <Route path="/produkTerlaris" element={<ProdukTerlaris />} />
               <Route path="/sales" element={<SalesManagement />} />
