@@ -30,6 +30,7 @@ import NotificationUser from './USERPAGE/NotificationUser';
 import ChatUser from './USERPAGE/ChatUser';
 import FAQUser from './USERPAGE/FAQUser';
 import ProfInfo from './USERPAGE/ProfInfo';
+import StoryUser from './USERPAGE/StoryUser';
 import CreateAccount from './USERPAGE/CreateAccount';
 import FeedbackUser from './USERPAGE/FeedbackUser';
 import ProfileUser from './USERPAGE/ProfileUser';
@@ -184,7 +185,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     console.log(`ProtectedRoute: User role '${userRole}' not allowed for this route. Redirecting.`);
     if (userRole === 'customer') {
-      return <Navigate to="/home" replace />;
+      return <Navigate to="/MenuUser" replace />;
     }
     return <Navigate to="/Login" replace />;
   }
@@ -201,7 +202,7 @@ function App() {
           <Route path="/CreateAccount" element={<CreateAccount />} />
 
           {/* Ini diganti ke halaman home user ketika link web diakses biar langsung ke web company profile */}
-          <Route path="/" element={<Navigate to="/home" replace />} />  
+          <Route path="/" element={<Navigate to="/HomeUser" replace />} />  
           
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<MainLayout />}>
@@ -224,14 +225,15 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
-            <Route path="/home" element={<HomeUser />} />
-            <Route path="/menu" element={<MenuUser />} />
+            <Route path="/HomeUser" element={<HomeUser />} />
+            <Route path="/MenuUser" element={<MenuUser />} />
             <Route path="/CartUser" element={<CartUser />} />
             <Route path="/CheckoutUser" element={<CheckoutUser />} />
             <Route path="/NotificationUser" element={<NotificationUser />} />
             <Route path="/ChatUser" element={<ChatUser />} />
             <Route path="/FAQUser" element={<FAQUser />} />
             <Route path="/ProfInfo" element={<ProfInfo />} />
+            <Route path="/StoryUser" element={<StoryUser />} />
             <Route path="/tentang" element={<TentangUser />} />
             <Route path="/FeedbackUser" element={<FeedbackUser />} />
             <Route path="/ProfileUser" element={<ProfileUser />} />

@@ -1,681 +1,276 @@
-// import { ChevronLeft, ChevronRight } from "lucide-react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import { useInView } from "react-intersection-observer";
-// import { Link, useLocation } from "react-router-dom";
-// import { ShoppingCart, Bell, ChevronDown, ChevronUp, UserCircle } from "lucide-react";
-// import React, { useState, useEffect, useMemo } from "react";
-// import { supabase } from "../supabase"; // Pastikan path ini benar (relative ke src/)
-// import { useCart } from "./CartContext";
-
-// // Komponen reusable untuk animasi scroll
-// const SectionWithOffers = ({ title, data, selectedCategory }) => { // Tambahkan selectedCategory prop
-//   const [isExpanded, setIsExpanded] = useState(true);
-//   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-//   const { addToCart } = useCart();
-
-//   const [addedItemId, setAddedItemId] = useState(null);
-
-//   // Pagination states for "All Menus"
-//   const isAllMenusSection = title.includes("Menus"); // Ubah pengecekan title agar fleksibel
-//   const itemsPerPage = 12; // 3 kolom x 4 baris = 12 items per page
-//   const [currentPage, setCurrentPage] = useState(0); // 0-indexed page
-
-//   // Calculate filtered and paginated data
-//   const paginatedData = useMemo(() => {
-//     let filteredData = data;
-//     if (isAllMenusSection && selectedCategory && selectedCategory !== "All") {
-//       filteredData = data.filter(item => item.kategori === selectedCategory);
-//     }
-
-//     if (!isAllMenusSection) {
-//       return filteredData; // No pagination for other sections
-//     }
-//     const startIndex = currentPage * itemsPerPage;
-//     const endIndex = startIndex + itemsPerPage;
-//     return filteredData.slice(startIndex, endIndex);
-//   }, [data, currentPage, isAllMenusSection, itemsPerPage, selectedCategory]); // Tambahkan selectedCategory sebagai dependency
-
-//   const totalPages = useMemo(() => {
-//     let filteredData = data;
-//     if (isAllMenusSection && selectedCategory && selectedCategory !== "All") {
-//       filteredData = data.filter(item => item.kategori === selectedCategory);
-//     }
-//     if (!isAllMenusSection) {
-//       return 1;
-//     }
-//     return Math.ceil(filteredData.length / itemsPerPage);
-//   }, [data.length, isAllMenusSection, itemsPerPage, selectedCategory]); // Tambahkan selectedCategory sebagai dependency
-
-//   // Modifikasi fungsi ini untuk memicu animasi dengan mengubah key AnimatePresence
-//   const goToNextPage = () => {
-//     setCurrentPage((prevPage) => (prevPage + 1) % totalPages);
-//   };
-
-//   const goToPrevPage = () => {
-//     setCurrentPage((prevPage) => (prevPage - 1 + totalPages) % totalPages);
-//   };
-
-//   useEffect(() => {
-//     // Reset to first page when category changes
-//     setCurrentPage(0);
-//   }, [selectedCategory]);
-
-//   const handleAddToCart = (item) => {
-//     addToCart(item);
-//     setAddedItemId(item.id);
-
-//     setTimeout(() => {
-//       setAddedItemId(null);
-//     }, 1500);
-//   };
-
-//   return (
-//     <motion.section
-//       ref={ref}
-//       initial={{ opacity: 0, y: 50 }}
-//       animate={inView ? { opacity: 1, y: 0 } : {}}
-//       transition={{ duration: 0.6, ease: "easeOut" }}
-//       className="mt-12"
-//     >
-//       {/* Header Section */}
-//       <div className="flex justify-between items-center mb-4">
-//         <h3 className="text-xl md:text-2xl font-bold border-b-2 border-orange-500 pb-1">
-//           {title}
-//         </h3>
-//         <button
-//           onClick={() => setIsExpanded(!isExpanded)}
-//           className="p-2 rounded-full border border-gray-300 hover:bg-orange-100 transition"
-//         >
-//           {isExpanded ? (
-//             <ChevronUp className="text-orange-500" />
-//           ) : (
-//             <ChevronDown className="text-orange-500" />
-//           )}
-//         </button>
-//        </div>
-
-//       {/* Product Grid */}
-//       <AnimatePresence mode='wait' initial={false}> {/* Tambahkan mode='wait' */}
-//         {isExpanded && (
-//           // Tambahkan key={currentPage} di sini untuk memicu AnimatePresence
-//           <motion.div
-//             key={isAllMenusSection ? `${currentPage}-${selectedCategory}` : "content"} // Key akan berubah saat currentPage atau selectedCategory berubah
-//             initial={{ opacity: 0, y: 20 }} // Animasi masuk dari bawah sedikit
-//             animate={{ opacity: 1, y: 0 }}
-//             exit={{ opacity: 0, y: -20 }} // Animasi keluar ke atas sedikit
-//             transition={{ duration: 0.3 }}
-//             className="overflow-hidden"
-//           >
-//             <div className="relative"> {/* Added relative for positioning buttons */}
-//               {/* Pagination controls for "All Menus" */}
-//               {isAllMenusSection && totalPages > 1 && (
-//                 <>
-//                   <button
-//                     onClick={goToPrevPage}
-//                     className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 p-2 rounded-full shadow-md z-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-//                     aria-label="Previous page"
-//                   >
-//                     <ChevronLeft className="text-gray-600" />
-//                   </button>
-//                   <button
-//                     onClick={goToNextPage}
-//                     className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 p-2 rounded-full shadow-md z-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-//                     aria-label="Next page"
-//                   >
-//                     <ChevronRight className="text-gray-600" />
-//                   </button>
-//                 </>
-//               )}
-
-//               {/* PERUBAHAN UTAMA DI SINI: grid-cols-3 untuk 3 kolom */}
-//               {/* Mengurangi padding horizontal agar lebih leluasa */}
-//               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 px-4 md:px-8">
-//                 {paginatedData.map((item, i) => (
-//                   <motion.div
-//                     key={item.id || i} // Key unik untuk setiap item agar animasi list berjalan
-//                     initial={{ opacity: 0, y: 20 }}
-//                     animate={{ opacity: 1, y: 0 }}
-//                     transition={{ delay: i * 0.05, duration: 0.3 }}
-//                     className="relative overflow-hidden border rounded-xl p-4 shadow hover:shadow-md transition-all bg-white"
-//                   >
-//                     {/* Gambar produk di kanan atas */}
-//                     <img
-//                       src={item.gambar || "/img/default-product.png"}
-//                       alt={item.nama}
-//                       className="absolute top-2 right-2 w-24 h-24 object-contain z-0"
-//                     />
-
-//                     {/* Konten teks */}
-//                     <div className="relative z-10 pr-28">
-//                       <h4 className="font-semibold text-base">{item.nama}</h4>
-//                       <p className="text-xs text-gray-500 my-1 line-clamp-2">
-//                         {item.deskripsi}
-//                       </p>
-//                       <p className="font-semibold mt-2">
-//                         Rp{item.harga?.toLocaleString("id-ID")}
-//                       </p>
-//                       <button
-//                         onClick={() => handleAddToCart(item)}
-//                         className={`mt-4 font-semibold py-1 px-4 rounded-full text-sm transition-colors duration-300
-//                           ${addedItemId === item.id
-//                             ? "bg-green-500 text-white"
-//                             : "border border-orange-400 text-orange-500 hover:bg-orange-100"
-//                           }`}
-//                       >
-//                         {addedItemId === item.id ? "Ditambahkan! ✓" : "Tambah"}
-//                       </button>
-//                     </div>
-//                   </motion.div>
-//                 ))}
-//                 {paginatedData.length === 0 && (
-//                   <div className="col-span-full text-center py-8 text-gray-500">
-//                     Tidak ada menu yang tersedia untuk kategori ini.
-//                   </div>
-//                 )}
-//               </div>
-//               {isAllMenusSection && totalPages > 1 && (
-//                 <div className="text-center mt-4 text-sm text-gray-600">
-//                   Halaman {currentPage + 1} dari {totalPages}
-//                 </div>
-//               )}
-//             </div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </motion.section>
-//   );
-// };
-
-// // --- KOMPONEN MENUUSER ---
-// const MenuUser = () => {
-//   const [specialOffers, setSpecialOffers] = useState([]);
-//   const [returneeOffers, setReturneeOffers] = useState([]);
-//   const [lowSugar, setLowSugar] = useState([]);
-//   const [latestOrders, setLatestOrders] = useState([]);
-//   const [allMenus, setAllMenus] = useState([]); // This will hold all product data for "All Menus"
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [selectedCategory, setSelectedCategory] = useState("All"); // State baru untuk filter kategori
-
-//   const { cartItems } = useCart();
-//   const [user, setUser] = useState(null); // State untuk menyimpan objek user dari Supabase
-
-//   const categories = ["All", "Classic Coffee", "Food and Bakery", "Non Coffee"]; // Daftar kategori yang tersedia
-//   const location = useLocation(); // Tambahkan useLocation
-
-//   useEffect(() => {
-//     // Fungsi untuk mendapatkan sesi pengguna dan mendengarkan perubahan status otentikasi
-//     const getSessionAndListen = async () => {
-//       // Dapatkan sesi awal
-//       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-//       if (sessionError) {
-//         console.error("Error getting session:", sessionError.message);
-//       }
-//       setUser(session?.user || null); // Set user jika ada sesi
-
-//       // Dengarkan perubahan status otentikasi (login/logout)
-//       const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-//         console.log("Auth state changed:", _event, session);
-//         setUser(session?.user || null); // Update user state saat ada perubahan otentikasi
-//       });
-
-//       // Cleanup listener saat komponen di-unmount
-//       return () => {
-//         authListener.subscription.unsubscribe();
-//       };
-//     };
-
-//     getSessionAndListen();
-//   }, []); // Hanya jalankan sekali saat komponen mount untuk setup listener
-
-//   useEffect(() => {
-//     const fetchUserDataAndProducts = async () => {
-//       setLoading(true);
-//       try {
-//         let currentUserStatus = 'Non-Member'; // Default status
-
-//         // Jika ada user yang login (dari state 'user' yang diisi oleh useEffect sebelumnya)
-//         if (user) {
-//           const currentUserId = user.id;
-//           console.log("Logged-in user ID:", currentUserId);
-
-//           // Ambil data profil pengguna dari tabel 'customers'
-//           const { data: customerData, error: customerError } = await supabase
-//             .from("customers")
-//             .select("status_member") // Asumsi ada kolom 'status_member' di tabel 'customers'
-//             .eq("id_user", currentUserId) // Asumsi ada kolom 'id_user' di tabel 'customers' yang merujuk ke auth.users.id
-//             .single();
-
-//           if (customerError && customerError.code !== 'PGRST116') { // PGRST116 means no rows found for single()
-//             console.warn("Error fetching customer data:", customerError.message);
-//           } else if (customerData) {
-//             currentUserStatus = customerData.status_member;
-//             console.log("User membership status:", currentUserStatus);
-//           }
-//         } else {
-//           console.log("No user logged in. Displaying default public menu.");
-//         }
-
-//         // --- Fetch semua produk dari database ---
-//         const { data: produkData, error: produkError } = await supabase.from("produk").select("*");
-//         if (produkError) {
-//           console.error("Supabase Error fetching products:", produkError.message);
-//           throw produkError;
-//         }
-
-//         console.log("Fetched all products from Supabase:", produkData);
-
-//         if (produkData && produkData.length > 0) {
-//           let filteredSpecialOffers = [];
-//           let filteredReturneeOffers = [];
-//           let filteredLowSugar = [];
-//           let filteredLatestOrders = [];
-
-//           // Logika untuk memfilter produk berdasarkan status member
-//           switch (currentUserStatus) {
-//             case 'Gold':
-//               console.log("Applying Gold Member offers.");
-//               filteredSpecialOffers = produkData.filter(p => p.kategori === 'Premium Offers').slice(0, 3);
-//               filteredReturneeOffers = produkData.filter(p => p.kategori === 'Gold Member Exclusive' || p.kategori === 'Speciality Coffee').slice(0, 3);
-//               filteredLowSugar = produkData.filter(p => p.deskripsi?.toLowerCase().includes("rendah gula") || p.kategori === 'Herbal Tea').slice(0, 3);
-//               filteredLatestOrders = produkData.sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 3);
-//               break;
-//             case 'Silver':
-//               console.log("Applying Silver Member offers.");
-//               filteredSpecialOffers = produkData.filter(p => p.kategori === 'SPECIAL OFFER' || p.harga < 25000).slice(0, 3);
-//               filteredReturneeOffers = produkData.filter(p => p.kategori === 'Classic Coffee' || p.kategori === 'Milk Based').slice(0, 3);
-//               filteredLowSugar = produkData.filter(p => p.deskripsi?.toLowerCase().includes("rendah gula") || p.kategori === "Non Coffee").slice(0, 3);
-//               filteredLatestOrders = produkData.sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 3);
-//               break;
-//             case 'Bronze':
-//               console.log("Applying Bronze Member offers.");
-//               filteredSpecialOffers = produkData.filter(p => p.kategori === "Bronze Promo" || p.harga < 20000).slice(0, 3);
-//               filteredReturneeOffers = produkData.filter(p => p.kategori === "New Release").slice(0, 0); // No returnee offers for bronze in original logic
-//               filteredLowSugar = produkData.filter(p => p.deskripsi?.toLowerCase().includes("low sugar")).slice(0, 3);
-//               filteredLatestOrders = produkData.sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 3);
-//               break;
-//             default: // Termasuk 'Non-Member' atau status yang belum terdefinisi
-//               console.log("Applying default public offers.");
-//               filteredSpecialOffers = produkData.filter(p => p.kategori === "SPECIAL OFFER" || p.harga < 30000).slice(0, 3);
-//               filteredReturneeOffers = produkData.filter(p => p.kategori === "Classic Coffee" || p.harga > 30000).slice(0, 3);
-//               filteredLowSugar = produkData.filter(p => p.deskripsi?.toLowerCase().includes("rendah gula") || p.kategori === "Non Coffee").slice(0, 3);
-//               filteredLatestOrders = produkData.sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 3);
-//               break;
-//           }
-
-//           setSpecialOffers(filteredSpecialOffers);
-//           setReturneeOffers(filteredReturneeOffers);
-//           setLowSugar(filteredLowSugar);
-//           setLatestOrders(filteredLatestOrders);
-//           setAllMenus(produkData); // Set all products to allMenus
-//         } else {
-//           console.warn("Tidak ada produk ditemukan di tabel 'produk' Supabase. Pastikan tabel terisi dan RLS mengizinkan akses.");
-//           setSpecialOffers([]);
-//           setReturneeOffers([]);
-//           setLowSugar([]);
-//           setLatestOrders([]);
-//           setAllMenus([]);
-//         }
-//       } catch (err) {
-//         console.error("Kesalahan fatal saat memuat produk di MenuUser:", err.message);
-//         setError("Gagal memuat produk. Silakan coba lagi nanti. Detail: " + err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchUserDataAndProducts();
-//   }, [user]);
-
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center items-center min-h-screen">
-//         <p>Memuat produk...</p>
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="flex justify-center items-center min-h-screen text-red-500">
-//         <p>{error}</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="w-full min-h-screen bg-white text-gray-800 px-6 py-8">
-//       {/* Header Section */}
-//       <div className="flex justify-between items-center border-b pb-3 mb-6">
-//         <div className="flex items-center gap-3">
-//           <img src="/img/Logo.png" alt="Logo" className="h-10" />
-//           <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
-//             TOMORO{" "}
-//             <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
-//               COFFEE
-//             </span>
-//           </h1>
-//         </div>
-
-//         <nav className="flex gap-8 text-sm font-medium">
-//           <Link
-//             to="/HomeUser"
-//             className={`transition-colors ${location.pathname === "/HomeUser"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             Home
-//           </Link>
-//           <Link
-//             to="/MenuUser"
-//             className={`transition-colors ${location.pathname === "/MenuUser"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             Menu
-//           </Link>
-//           <Link
-//             to="/ProfInfo"
-//             className={`transition-colors ${location.pathname === "/ProfInfo"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             Story
-//           </Link>
-//           <Link
-//             to="/FAQUser"
-//             className={`transition-colors ${location.pathname === "/FAQUser"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             FAQ
-//           </Link>
-//           <Link
-//             to="/FeedbackUser"
-//             className={`transition-colors ${location.pathname === "/FeedbackUser"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             Feedback
-//           </Link>
-//           <Link
-//             to="/lokasi"
-//             className={`transition-colors ${location.pathname === "/lokasi"
-//                 ? "text-orange-500 font-bold"
-//                 : "text-gray-700 hover:text-orange-500"
-//               }`}
-//           >
-//             Location
-//           </Link>
-//         </nav>
-
-//         <div className="flex items-center gap-4">
-//           {/* New: Profile Icon */}
-//           <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
-//             <UserCircle className="w-5 h-5" />
-//           </Link>
-//           {/* Existing icons */}
-//           <Link to="/CartUser" className="text-orange-500 hover:text-orange-600 relative">
-//             <ShoppingCart className="w-5 h-5" />
-//             {cartItems.length > 0 && (
-//               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-//                 {cartItems.length}
-//               </span>
-//             )}
-//           </Link>
-//           <Link
-//             to="/NotificationUser"
-//             className="text-orange-500 hover:text-orange-600"
-//           >
-//             <Bell className="w-5 h-5" />
-//           </Link>
-//         </div>
-//       </div>
-
-//       {/* Promo Poster - No change needed here */}
-//       <div className="relative w-full max-w-6xl mx-auto mt-8">
-//         <button className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white border border-orange-300 p-2 rounded-full shadow-md z-10 hover:bg-orange-100">
-//           <ChevronLeft className="text-orange-600" />
-//         </button>
-//         <img
-//           src="/img/Mask group.png"
-//           alt="Tomoro Promo Poster"
-//           className="w-full rounded-lg shadow-lg"
-//         />
-//         <button className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white border border-orange-300 p-2 rounded-full shadow-md z-10 hover:bg-orange-100">
-//           <ChevronRight className="text-orange-600" />
-//         </button>
-//       </div>
-
-//       {/* Offer Sections */}
-//       <div className="max-w-6xl mx-auto mt-10">
-//         <SectionWithOffers
-//           title="Special Offers For You"
-//           data={specialOffers}
-//         />
-//         <SectionWithOffers
-//           title="Returnee Special Offers"
-//           data={returneeOffers}
-//         />
-//         <SectionWithOffers title="Low Sugars Type Person" data={lowSugar} />
-//         <SectionWithOffers
-//           title="Based on Your Latest Order"
-//           data={latestOrders}
-//         />
-
-//         {/* Filter buttons for All Menus */}
-//         <div className="mt-12">
-//           <h3 className="text-xl md:text-2xl font-bold border-b-2 border-orange-500 pb-1 mb-4">
-//             {/* Judul statis "All Menus" sebelum filtering, tidak perlu diubah */}
-// All Menu List
-//           </h3>
-//           <div className="flex flex-wrap gap-3 mb-6">
-//             {categories.map((category) => (
-//               <button
-//                 key={category}
-//                 onClick={() => setSelectedCategory(category)}
-//                 className={`py-2 px-5 rounded-full text-sm font-semibold transition-colors duration-300
-//                   ${selectedCategory === category
-//                     ? "bg-orange-500 text-white shadow-md"
-//                     : "bg-white border border-gray-300 text-gray-700 hover:bg-orange-50 hover:text-orange-600"
-//                   }`}
-//               >
-//                 {category}
-//               </button>
-//             ))}
-//           </div>
-//           {/* Pass allMenus AND selectedCategory to the SectionWithOffers for "All Menus" */}
-//           <SectionWithOffers
-//             title={selectedCategory === "All" ? "All Menus" : `${selectedCategory} Menus`}
-//             data={allMenus}
-//             selectedCategory={selectedCategory}
-//           />
-//         </div>
-//       </div>
-//       {/* Footer Section */}
-//       <footer className="relative mt-20 w-full text-white">
-//         {/* Background image */}
-//         <div
-//           className="absolute inset-0 bg-cover bg-center"
-//           style={{ backgroundImage: "url('/img/image 48.png')" }}
-//         ></div>
-
-//         {/* Overlay gradasi gelap transparan */}
-//         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
-
-//         <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">
-//           {/* Left - Logo & Location */}
-//           <div>
-//             <div className="flex items-center gap-3 mb-4">
-//               <img src="/img/Logo.png" alt="Logo" className="h-10" />
-//               <div>
-//                 <h2 className="text-xl font-bold text-orange-400">TOMORO</h2>
-//                 <p className="text-sm tracking-[0.3em] text-orange-300">
-//                   COFFEE
-//                 </p>
-//               </div>
-//             </div>
-//             <div className="text-sm leading-relaxed">
-//               <p className="text-orange-400 font-semibold mb-1">Our Location</p>
-//               <p>Headquarters</p>
-//               <p>
-//                 Jl. Riau No.57 B, Kp. Bandar, Kec. Senapelan, Kota Pekanbaru,
-//                 Riau 28291
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* Right - Social Media */}
-//           <div className="text-sm">
-//             <p className="text-orange-400 font-semibold mb-2">Social Media</p>
-//             <div className="flex gap-4 text-lg">
-//               <a href="#" className="hover:text-orange-300">
-//                 <i className="fab fa-instagram"></i>
-//               </a>
-//               <a href="#" className="hover:text-orange-300">
-//                 <i className="fab fa-tiktok"></i>
-//               </a>
-//               <a
-//                 href="mailto:contact@tomorocoffee.com"
-//                 className="hover:text-orange-300"
-//               >
-//                 <i className="fas fa-envelope"></i>
-//               </a>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Copyright */}
-//         <div className="relative z-10 text-center text-sm text-white bg-black/40 py-2">
-//           Hak Cipta © 2025 PT KOPI BINTANG INDONESIA
-//         </div>
-//       </footer>
-//     </div>
-//   );
-// };
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ShoppingCart, UserCircle, Bell, Search, Plus } from "lucide-react";
-
-// Import aset gambar
-import saladBuahImg from "../assets/img/salad_buah.jpg";
-import cheeseCakeImg from "../assets/img/cheese_cake.jpg";
-import buahPotongImg from "../assets/img/buah_potong.jpg";
-
-const menuData = [
-  { id: 1, name: "Salad Buah", category: "Salad", price: "Rp 15.000", img: saladBuahImg },
-  { id: 2, name: "Cheese Cake", category: "Cake", price: "Rp 20.000", img: cheeseCakeImg },
-  { id: 3, name: "Buah Potong Segar", category: "Buah", price: "Rp 10.000", img: buahPotongImg },
-  // Tambahkan item menu lainnya di sini
-];
-
-const categories = ["Semua", "Salad", "Cake", "Buah"];
+import { Link, useLocation } from "react-router-dom";
+import { 
+  ShoppingCart, 
+  UserCircle, 
+  Search, 
+  Plus, 
+  Bell,
+  Loader2,
+  ChevronRight
+} from "lucide-react";
+// Import Supabase & Context
+import { supabase } from "../supabase";
+import { useCart } from "./CartContext";
 
 export default function MenuUser() {
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const { addToCart, cartItems } = useCart();
+  const location = useLocation();
+  
+  // States
+  const [allMenus, setAllMenus] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [addedItemId, setAddedItemId] = useState(null);
+  
+  const categories = ["All", "Dessert", "Buah Potong 250gr", "Buah Potong 500gr"];
 
-  const filteredMenu = selectedCategory === "Semua" 
-    ? menuData 
-    : menuData.filter(item => item.category === selectedCategory);
+  // Fetch Data
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.from("produk").select("*");
+        if (!error) setAllMenus(data);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Filter Logic
+  const filteredMenu = useMemo(() => {
+    return allMenus.filter((item) => {
+      const matchesCat = selectedCategory === "All" || item.kategori === selectedCategory;
+      const matchesSearch = item.nama.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCat && matchesSearch;
+    });
+  }, [allMenus, selectedCategory, searchQuery]);
+
+  const handleAddToCart = (item) => {
+    addToCart(item);
+    setAddedItemId(item.id);
+    setTimeout(() => setAddedItemId(null), 1000);
+  };
+
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-white">
+      <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+      <div className="font-black text-blue-900 text-2xl italic uppercase tracking-tighter">
+        FETCHING FRESHNESS...
+      </div>
+    </div>
+  );
 
   return (
-    <div className="font-sans bg-[#FDFBE2] min-h-screen">
-       {/* --- HEADER --- */}
-       <header className="px-4 py-6">
-        <nav className="bg-[#2D5A27] rounded-full max-w-4xl mx-auto py-3 px-8 flex justify-between items-center text-white shadow-lg">
-          <div className="flex gap-6 text-sm font-medium">
-            <Link to="/" className="hover:text-yellow-400">
-              Home
+    <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-blue-100">
+      {/* --- NAVBAR (Sesuai HomeUser) --- */}
+      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          <Link to="/HomeUser" className="flex items-center gap-2">
+            <img src="/img/Logo.png" alt="Logo" className="h-12" />
+            <div className="hidden sm:block">
+              <span className="text-xl font-black text-orange-600 block leading-none">TOMORO</span>
+              <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Coffee & More</span>
+            </div>
+          </Link>
+          <nav className="hidden md:flex gap-10">
+            {['Home', 'Menu', 'Story', 'FAQ', 'Feedback'].map((item) => (
+              <Link
+                key={item}
+                to={item === 'Home' ? '/HomeUser' : `/${item}User`}
+                className={`text-sm font-bold uppercase tracking-widest transition-all hover:text-orange-600 ${
+                  location.pathname.includes(item) ? "text-orange-600 border-b-2 border-orange-600" : "text-gray-500"
+                }`}
+              >
+                {item}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-5">
+            <Link to="/ProfileUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600">
+              <UserCircle size={22} />
             </Link>
-            <Link to="/menu" className="text-yellow-400 font-bold">
-              Menu
+            <Link to="/CartUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600 relative">
+              <ShoppingCart size={22} />
+              {cartItems.length > 0 && (
+                <span className="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
+            <div className="h-6 w-[1px] bg-gray-200 mx-1"></div>
+            <Link to="/NotificationUser" className="relative p-2 text-gray-600">
+              <Bell size={22} />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
             </Link>
           </div>
-          <img
-            src="/img/logo-freshly-cut.png"
-            alt="Logo"
-            className="h-10 w-10 object-contain"
-          />
-          <div className="flex gap-6 text-sm font-medium">
-            <Link to="/tentang" className="hover:text-yellow-400">
-              Tentang
-            </Link>
-            <Link to="/lokasi" className="hover:text-yellow-400">
-              Lokasi
-            </Link>
-            <Link to="/Login" className="hover:text-yellow-400">
-              Login
-            </Link>
-          </div>
-        </nav>
+        </div>
       </header>
 
-      {/* --- HERO SECTION MENU --- */}
-      <section className="py-12 px-6 text-center">
-        <h1 className="text-5xl font-serif font-bold text-[#2D5A27] mb-4">Pilihan Menu Segar</h1>
-        <p className="text-gray-600">Pilih camilan sehat favoritmu hari ini</p>
+      {/* --- HERO SECTION (Sesuai HomeUser: Light Blue Background) --- */}
+      <section className="relative py-20 overflow-hidden bg-[#F0F9FF]">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            transition={{ duration: 1 }}
+          >
+            <span className="inline-block px-4 py-1 bg-blue-600 text-white text-xs font-black rounded-full mb-4 tracking-widest uppercase italic">
+              Our Full Menu
+            </span>
+            <h1 className="text-6xl md:text-7xl font-black leading-[0.9] mb-6 text-blue-900">
+              EXPLORE <br /> <span className="text-orange-600 italic uppercase">OUR TASTE.</span>
+            </h1>
+            <p className="text-lg text-blue-800/70 mb-8 max-w-md font-medium">
+              Temukan berbagai pilihan menu terbaik kami yang siap menyegarkan harimu kapan saja.
+            </p>
+          </motion.div>
+          
+          <div className="w-full max-w-md relative">
+            <div className="relative group">
+              <input 
+                type="text" 
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full py-5 px-8 rounded-full border-none shadow-xl shadow-blue-100 font-bold text-lg focus:ring-4 focus:ring-orange-400 outline-none transition-all"
+              />
+              <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        {/* Dekorasi blur lembut seperti HomeUser */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px]"></div>
+      </section>
 
-        {/* Category Filters */}
-        <div className="flex justify-center gap-4 mt-8">
+      {/* --- CATEGORY NAVIGATION --- */}
+      <nav className="max-w-7xl mx-auto px-6 -mt-8 relative z-20">
+        <div className="bg-white p-2 rounded-full shadow-xl flex justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar border border-gray-100">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-2 rounded-full transition-all ${
-                selectedCategory === cat 
-                ? "bg-[#2D5A27] text-white shadow-md" 
-                : "bg-white text-[#2D5A27] border border-[#2D5A27] hover:bg-green-50"
+              className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                selectedCategory === cat
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-transparent text-gray-400 hover:text-blue-600 hover:bg-gray-50"
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
-      </section>
+      </nav>
 
-      {/* --- MENU GRID --- */}
-      <main className="max-w-6xl mx-auto px-6 pb-20">
-        <motion.div 
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          <AnimatePresence>
-            {filteredMenu.map((item) => (
+      {/* --- PRODUCT GRID (Tetap dengan Gaya Card Produk Anda) --- */}
+      <main className="max-w-7xl mx-auto px-6 py-24">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <AnimatePresence mode="popLayout">
+            {filteredMenu.map((item, i) => (
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center group hover:shadow-xl transition-all duration-300"
+                transition={{ delay: i * 0.05 }}
+                className="group bg-white rounded-[2rem] border-b-8 border-blue-100 hover:border-orange-500 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-2xl flex flex-col h-full"
               >
-                <div className="overflow-hidden mb-4 rounded-2xl w-full h-56">
+                {/* Image Container */}
+                <div className="relative h-48 md:h-64 bg-[#F8FBFF] flex items-center justify-center p-6 overflow-hidden">
+                  <div className="absolute w-full h-full bg-blue-100/30 rounded-full scale-0 group-hover:scale-125 transition-transform duration-700"></div>
                   <img 
-                    src={item.img} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
+                    src={item.gambar || "/img/default-product.png"} 
+                    alt={item.nama}
+                    className="h-full object-contain z-10 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500"
                   />
+                  <div className="absolute top-4 left-4 z-20">
+                    <span className="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter">
+                      {item.kategori}
+                    </span>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-[#2D5A27] mb-1">{item.name}</h3>
-                <p className="text-[#A3C982] font-semibold mb-4">{item.price}</p>
-                
-                <button className="bg-[#F3B414] hover:bg-yellow-500 text-[#2D5A27] px-8 py-2 rounded-full font-bold flex items-center gap-2 transition">
-                  <Plus size={18} /> Tambah
-                </button>
+
+                {/* Info Container */}
+                <div className="p-5 text-center flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base md:text-xl font-black text-blue-900 uppercase italic leading-none mb-2 line-clamp-2">
+                      {item.nama}
+                    </h3>
+                    <p className="text-orange-500 font-black text-lg md:text-2xl mb-4 tracking-tighter">
+                      Rp {item.harga?.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleAddToCart(item)}
+                    className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 ${
+                      addedItemId === item.id
+                        ? "bg-green-500 text-white"
+                        : "bg-blue-600 hover:bg-orange-500 text-white"
+                    }`}
+                  >
+                    {addedItemId === item.id ? "ADDED! ✓" : <><Plus size={16} strokeWidth={3} /> ORDER NOW</>}
+                  </button>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
+
+        {/* Empty State */}
+        {filteredMenu.length === 0 && (
+          <div className="text-center py-20 bg-gray-50 rounded-[3rem] mt-10 border-2 border-dashed border-gray-200">
+            <div className="text-8xl mb-4 opacity-20">☕</div>
+            <h3 className="text-2xl font-black text-gray-400 uppercase italic">Product not found</h3>
+          </div>
+        )}
       </main>
+
+      {/* --- FOOTER (Sesuai HomeUser) --- */}
+      <footer className="bg-white pt-24 pb-12 px-6 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 border-b border-gray-100 pb-16 mb-8">
+          <div>
+            <img src="/img/Logo.png" alt="Logo" className="h-16 mb-6" />
+            <p className="text-gray-400 text-sm font-medium italic">
+              Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
+            <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
+              <li><Link to="/HomeUser" className="hover:text-orange-600 transition-colors">Home</Link></li>
+              <li><Link to="/MenuUser" className="hover:text-orange-600 transition-colors">Our Menu</Link></li>
+              <li><Link to="/StoryUser" className="hover:text-orange-600 transition-colors">Our Story</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
+            <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
+              <li><Link to="/FAQUser" className="hover:text-orange-600 transition-colors">General FAQ</Link></li>
+              <li><Link to="/FeedbackUser" className="hover:text-orange-600 transition-colors">Feedback</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
+            <div className="flex gap-4">
+              {["instagram", "tiktok", "facebook"].map((social) => (
+                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                  <i className={`fab fa-${social}`}></i>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+          &copy; 2026 PT KOPI BINTANG INDONESIA - ALL RIGHTS RESERVED
+        </p>
+      </footer>
     </div>
   );
 }
-
-// export default MenuUser;

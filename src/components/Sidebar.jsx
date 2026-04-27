@@ -22,7 +22,7 @@ const menuItems = [
   { name: 'POS', icon: <ShoppingCart />, path: '/sales' },
   { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
   // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
-  // { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
+  { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   // { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
   // { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },

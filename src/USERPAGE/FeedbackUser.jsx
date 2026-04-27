@@ -1,328 +1,216 @@
-// src/USERPAGE/FeedbackUser.jsx
 import React, { useState } from "react";
-import { Star, UserCircle, ShoppingCart, Bell } from "lucide-react"; // Import necessary icons
-import Swal from "sweetalert2"; // For notifications
-import { supabase } from "../supabase"; // Ensure this path is correct for Supabase client
-import { Button } from "@/components/ui/button"; // Ensure this path is correct for Button component
-import { Link } from "react-router-dom"; // Import Link for navigation
-
-// Reusable Input component
-const Input = ({ label, name, type = "text", ...props }) => (
-  <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-      {props.required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      id={name}
-      name={name}
-      type={type}
-      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-      {...props}
-    />
-  </div>
-);
-
-// Reusable Select component
-const Select = ({ label, name, children, ...props }) => (
-  <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-      {props.required && <span className="text-red-500">*</span>}
-    </label>
-    <select
-      id={name}
-      name={name}
-      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm appearance-none"
-      {...props}
-    >
-      {children}
-    </select>
-  </div>
-);
-
-// Reusable Textarea component
-const Textarea = ({ label, name, ...props }) => (
-  <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-      {props.required && <span className="text-red-500">*</span>}
-    </label>
-    <textarea
-      id={name}
-      name={name}
-      rows="5"
-      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm resize-y"
-      {...props}
-    />
-  </div>
-);
-
+import { Star, UserCircle, ShoppingCart, Bell, Send, MessageSquare } from "lucide-react";
+import Swal from "sweetalert2";
+import { supabase } from "../supabase";
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useCart } from "./CartContext"; // Pastikan path ini sesuai dengan struktur folder Anda
 
 export default function FeedbackUser() {
+  const location = useLocation();
+  
+  // --- TAMBAHKAN LINE INI UNTUK MEMPERBAIKI ERROR ---
+  const { cartItems } = useCart(); 
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [feedbackText, setFeedbackText] = useState("");
-  const [rating, setRating] = useState(0); // 0-5 stars
+  const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState(""); // Add state for photo URL
-  const [role, setRole] = useState(""); // Add state for role
-  const [job, setJob] = useState(""); // Add state for job
 
-  // Handle rating selection
-  const handleRating = (selectedRating) => {
-    setRating(selectedRating);
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Basic validation
-    if (!name || !feedbackText || rating === 0 || !role) { // Added role to validation
-      Swal.fire("Peringatan", "Nama, Feedback, Rating, dan Peran harus diisi.", "warning");
+    if (!name || !feedback || rating === 0) {
+      Swal.fire({
+        title: "Ups!",
+        text: "Mohon isi Nama, Feedback, dan berikan Rating ya!",
+        icon: "warning",
+        confirmButtonColor: "#2563eb",
+      });
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const { data, error } = await supabase
-        .from("feedback") // Assuming 'feedback' is your table name for user feedback
-        .insert([
-          {
-            name: name,
-            email: email, // Email is optional, can be null if not provided
-            feedback: feedbackText,
-            rating: rating,
-            photo_url: photoUrl, // Include photoUrl in the data submitted to Supabase
-            role: role, // Include role in the data
-            job: job, // Include job in the data
-            // You might want to add a 'user_id' if you link it to authenticated users
-            // user_id: supabase.auth.user()?.id,
-          },
-        ]);
+      const { error } = await supabase.from("feedback").insert([{
+        name, 
+        email, 
+        feedback, 
+        rating
+      }]);
 
-      if (error) {
-        console.error("Error submitting feedback:", error.message);
-        Swal.fire("Error", `Gagal mengirim feedback: ${error.message}`, "error");
-      } else {
-        Swal.fire(
-          "Berhasil!",
-          "Terima kasih atas feedback Anda!",
-          "success"
-        );
-        // Clear form after successful submission
-        setName("");
-        setEmail("");
-        setFeedbackText("");
-        setRating(0);
-        setPhotoUrl(""); // Clear photo URL after submission
-        setRole(""); // Clear role after submission
-        setJob(""); // Clear job after submission
-      }
+      if (error) throw error;
+
+      Swal.fire({
+        title: "TERIMA KASIH!",
+        text: "Feedback kamu sudah kami terima. Masukanmu sangat berharga!",
+        icon: "success",
+        confirmButtonColor: "#2563eb",
+      });
+
+      setName(""); setEmail(""); setFeedback(""); setRating(0);
     } catch (error) {
-      console.error("Unexpected error:", error.message);
-      Swal.fire("Error", "Terjadi kesalahan yang tidak terduga.", "error");
+      Swal.fire("Error", "Gagal mengirim feedback. Silakan coba lagi.", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Header Section */}
-      <header className="bg-white shadow-sm py-4 px-8 sticky top-0 z-50">
-        <div className="flex justify-between items-center border-b pb-3 mb-6">
-          <div className="flex items-center gap-3">
-            <img src="/img/Logo.png" alt="Logo" className="h-10" />
-            <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
-              TOMORO{" "}
-              <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
-                COFFEE
-              </span>
-            </h1>
-          </div>
+    <div className="flex flex-col min-h-screen bg-white font-sans text-gray-900">
+      {/* --- HEADER --- */}
+      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          <Link to="/HomeUser" className="flex items-center gap-2">
+            <img src="/img/Logo.png" alt="Logo" className="h-12" />
+            <div className="hidden sm:block">
+              <span className="text-xl font-black text-orange-600 block leading-none">TOMORO</span>
+              <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Coffee & More</span>
+            </div>
+          </Link>
 
-          <nav className="flex gap-8 text-sm font-medium">
-            <Link
-              to="/HomeUser"
-              className={`transition-colors ${location.pathname === "/HomeUser"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
+          <nav className="hidden md:flex gap-10">
+            {['Home', 'Menu', 'Story', 'FAQ', 'Feedback'].map((item) => (
+              <Link
+                key={item}
+                to={item === 'Home' ? '/HomeUser' : `/${item}User`}
+                className={`text-sm font-bold uppercase tracking-widest transition-all hover:text-orange-600 ${
+                  location.pathname.includes(item) ? "text-orange-600 border-b-2 border-orange-600" : "text-gray-500"
                 }`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/MenuUser"
-              className={`transition-colors ${location.pathname === "/MenuUser"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
-                }`}
-            >
-              Menu
-            </Link>
-            <Link
-              to="/ProfInfo"
-              className={`transition-colors ${location.pathname === "/ProfInfo"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
-                }`}
-            >
-              Story
-            </Link>
-            <Link
-              to="/FAQUser"
-              className={`transition-colors ${location.pathname === "/FAQUser"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
-                }`}
-            >
-              FAQ
-            </Link>
-            <Link
-              to="/FeedbackUser"
-              className={`transition-colors ${location.pathname === "/FeedbackUser"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
-                }`}
-            >
-              Feedback
-            </Link>
-            <Link
-              to="/lokasi"
-              className={`transition-colors ${location.pathname === "/lokasi"
-                  ? "text-orange-500 font-bold"
-                  : "text-gray-700 hover:text-orange-500"
-                }`}
-            >
-              Location
-            </Link>
+              >
+                {item}
+              </Link>
+            ))}
           </nav>
 
+          <div className="flex items-center gap-5">
+            <Link to="/ProfileUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600"><UserCircle size={22} /></Link>
+            
+            <Link to="/CartUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600 relative">
+              <ShoppingCart size={22} />
+              {/* Cek cartItems sebelum mengakses length agar aman */}
+              {cartItems && cartItems.length > 0 && (
+                <span className="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
 
-          <div className="flex items-center gap-4">
-            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
-              <UserCircle className="w-5 h-5" />
-            </Link>
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
-              <ShoppingCart className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/NotificationUser"
-              className="text-orange-500 hover:text-orange-600"
-            >
-              <Bell className="w-5 h-5" />
+            <div className="h-6 w-[1px] bg-gray-200 mx-1"></div>
+            <Link to="/NotificationUser" className="relative p-2 text-gray-600">
+              <Bell size={22} />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Feedback Form Section */}
-      <div className="flex-grow flex items-center justify-center p-4 sm:p-6">
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-lg border border-orange-100">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold text-orange-700 mb-2">Beri Kami Feedback</h1>
-            <p className="text-gray-600 text-sm">
-              Masukan Anda sangat berharga untuk peningkatan layanan kami.
-            </p>
-            <div className="w-24 h-1 bg-orange-700 rounded-full mx-auto mt-2" />
-          </div>
+      {/* --- HERO SECTION --- */}
+      <section className="bg-gradient-to-b from-[#F0F9FF] to-white py-24 px-6 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200 text-white">
+            <MessageSquare size={40} />
+          </motion.div>
+          <h1 className="text-5xl md:text-6xl font-black text-blue-900 mb-6 italic tracking-tighter uppercase">
+            BERI KAMI <span className="text-orange-600">MASUKAN</span>
+          </h1>
+          <p className="text-blue-800/60 font-bold text-lg uppercase tracking-widest">
+            Pendapatmu membuat Freshly Cut lebih baik lagi
+          </p>
+        </div>
+      </section>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Input
-              label="Nama Anda"
-              id="name"
-              placeholder="Masukkan nama lengkap Anda"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+      {/* --- FORM --- */}
+      <main className="flex-grow flex items-center justify-center px-6 pb-24 -mt-10 relative z-20">
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+          className="bg-white rounded-[3.5rem] shadow-2xl shadow-blue-100 p-8 md:p-12 w-full max-w-2xl border border-blue-50"
+        >
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input label="Nama Lengkap" placeholder="Nama Anda" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input label="Email" type="email" placeholder="email@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
 
-            <Input
-              label="Email Anda (Opsional)"
-              id="email"
-              type="email"
-              placeholder="email@contoh.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <Textarea label="Pesan atau Saran" placeholder="Bagaimana pengalamanmu hari ini?" value={feedback} onChange={(e) => setFeedback(e.target.value)} required />
 
-            <Input
-              label="Link Foto Profil (Opsional)"
-              id="photoUrl"
-              type="url"
-              placeholder="Mis: https://example.com/foto.jpg"
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
-            />
-            {photoUrl && (
-              <div className="mt-4 text-center">
-                <img
-                  src={photoUrl}
-                  alt="Preview Profil"
-                  className="max-h-24 mx-auto rounded-full object-cover border-2 border-gray-200 shadow-md"
-                  onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100/CCCCCC/000000?text=Error" }}
-                />
-              </div>
-            )}
-
-            <Select
-              label="Peran"
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-            >
-              <option value="">Pilih peran Anda</option>
-              <option value="Bronze">Bronze</option>
-              <option value="Silver">Silver</option>
-              <option value="Gold">Gold</option>
-            </Select>
-
-            <Input
-              label="Pekerjaan (Opsional)"
-              id="job"
-              placeholder="Contoh: Frontend Developer"
-              value={job}
-              onChange={(e) => setJob(e.target.value)}
-            />
-
-            <Textarea
-              label="Feedback Anda"
-              id="feedback"
-              placeholder="Berikan masukan atau pengalaman Anda..."
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              required
-            />
-
-            <div className="flex flex-col items-center">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Rating Anda <span className="text-red-500">*</span></label>
-              <div className="flex space-x-1">
+            <div className="bg-blue-50 rounded-[2rem] p-8 text-center border-2 border-dashed border-blue-200">
+              <label className="block text-xs font-black uppercase tracking-widest text-blue-900 mb-4">Rating Pengalaman</label>
+              <div className="flex justify-center gap-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={32}
-                    className={`cursor-pointer transition-colors duration-200 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-                      }`}
-                    onClick={() => handleRating(star)}
-                  />
+                  <motion.div key={star} whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+                    <Star
+                      size={42}
+                      className={`cursor-pointer transition-all duration-300 ${star <= rating ? "text-orange-500 fill-orange-500" : "text-white fill-gray-200"}`}
+                      onClick={() => setRating(star)}
+                      strokeWidth={1}
+                    />
+                  </motion.div>
                 ))}
               </div>
             </div>
 
-            <Button
+            <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
               disabled={isSubmitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 transition-all shadow-xl shadow-blue-200 active:scale-95 disabled:bg-gray-300"
             >
-              {isSubmitting ? "Mengirim Feedback..." : "Kirim Feedback"}
-            </Button>
+              {isSubmitting ? "Mengirim..." : (
+                <>
+                  <Send size={18} /> Kirim Masukan Sekarang
+                </>
+              )}
+            </button>
           </form>
+        </motion.div>
+      </main>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-blue-900 pt-20 pb-10 px-6 text-white rounded-t-[50px]">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-16 mb-16">
+          <div className="text-center md:text-left">
+            <img src="/img/Logo.png" alt="Logo" className="h-12 mx-auto md:mx-0 mb-6 brightness-200" />
+            <p className="text-blue-200/60 font-bold uppercase text-[10px] tracking-widest">Makan sehat, tinggal hap!</p>
+          </div>
+          <div className="flex justify-center md:justify-around gap-10 font-black uppercase text-[10px] tracking-widest text-blue-200">
+             <Link to="/HomeUser" className="hover:text-orange-500">Home</Link>
+             <Link to="/MenuUser" className="hover:text-orange-500">Menu</Link>
+             <Link to="/FeedbackUser" className="text-orange-500">Feedback</Link>
+          </div>
+          <div className="text-center md:text-right text-[10px] font-black uppercase tracking-widest text-blue-400">
+            <p>© 2026 FRESHLY CUT INDONESIA</p>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
+
+// Tambahkan komponen Input dan Textarea di bawah export default atau di file terpisah agar rapi
+const Input = ({ label, name, type = "text", ...props }) => (
+  <div className="w-full">
+    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-900 mb-2 ml-4">
+      {label} {props.required && <span className="text-orange-600">*</span>}
+    </label>
+    <input
+      type={type}
+      className="w-full px-6 py-4 bg-white border-2 border-blue-50 rounded-[2rem] text-sm font-bold text-gray-700 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all placeholder:text-gray-300 shadow-sm"
+      {...props}
+    />
+  </div>
+);
+
+const Textarea = ({ label, ...props }) => (
+  <div className="w-full">
+    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-900 mb-2 ml-4">
+      {label} {props.required && <span className="text-orange-600">*</span>}
+    </label>
+    <textarea
+      rows="4"
+      className="w-full px-6 py-4 bg-white border-2 border-blue-50 rounded-[2.5rem] text-sm font-bold text-gray-700 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all placeholder:text-gray-300 shadow-sm resize-none"
+      {...props}
+    />
+  </div>
+);

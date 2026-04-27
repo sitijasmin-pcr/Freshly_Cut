@@ -1,262 +1,174 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Bell, ShoppingCart, UserCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
+import { Link, useLocation } from "react-router-dom";
+import { 
+  Bell, 
+  ShoppingCart, 
+  UserCircle, 
+  MapPin, 
+  MessageSquareText, 
+  ChevronRight,
+  X
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "./CartContext"; // Pastikan path ini benar
 
 const NotificationUser = () => {
-  // Initial notifications data
+  const location = useLocation();
+  const { cartItems } = useCart();
+
   const initialNotifications = [
-    {
-      id: 1,
-      type: "Discount Voucher",
-      title: "Selamat Anda Mendapatkan Voucher Diskon",
-      description: "20% Untuk Kategori Snacks Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales tortor eget elit sollicitudin, vel pharetra odio gravida. Maecenas sit amet cursus augue.",
-      date: "24 Jun 2025",
-      time: "11:00 am",
-      actionText: "CLAIM!",
-      actionLink: "#", // Ganti dengan link yang sesuai
-      color: "bg-orange-100", // Warna latar belakang untuk notifikasi
-      bellColor: "text-orange-500", // Warna ikon bell
-      headerColor: "bg-orange-500", // Warna header notifikasi
-    },
-    {
-      id: 2,
-      type: "Limit Voucher",
-      title: "Cepat Gunakan Voucher anda",
-      description: "Voucher Diskon 10% Pada Kategori Coffee akan hangus pada tanggal 11 Apr 2025 at 00:00 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales tortor eget elit sollicitudin, vel pharetra odio gravida. Maecenas sit amet cursus augue. Ut",
-      date: "9 Apr 2025",
-      time: "1:00 pm",
-      actionText: "CLAIM!",
-      actionLink: "#",
-      color: "bg-red-100",
-      bellColor: "text-red-500",
-      headerColor: "bg-red-500",
-    },
-    {
-      id: 3,
-      type: "New Product!",
-      title: "Silahkan Coba Produk Baru KopiMint Coffee",
-      description: "Diskon 10% pada 2 jam Setelah Perilisan! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales tortor eget elit sollicitudin, vel pharetra odio gravida. Maecenas sit amet cursus augue. Ut",
-      date: "9 Apr 2025",
-      time: "1:00 pm",
-      actionText: "CHECK NOW!",
-      actionLink: "#",
-      color: "bg-green-100",
-      bellColor: "text-green-500",
-      headerColor: "bg-green-500",
-    },
-    {
-      id: 4,
-      type: "HAPPY BIRTHDAY!",
-      title: "SELAMAT ULANG TAHUN! Jane Doe",
-      description: "Pada Hari special kamu Kami Memberikan VOUCHER Diskon All Product 15%! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales tortor eget elit sollicitudin, vel pharetra odio gravida. Maecenas sit amet cursus augue.",
-      date: "9 Apr 2025",
-      time: "1:00 pm",
-      actionText: "CLAIM NOW!",
-      actionLink: "#",
-      color: "bg-pink-100",
-      bellColor: "text-pink-500",
-      headerColor: "bg-pink-500",
-    },
+    { id: 1, type: "DISCOUNT", title: "Selamat! Voucher 20% Menanti", description: "Voucher diskon khusus untuk kategori Snacks. Berlaku hingga akhir bulan.", date: "24 Jun 2025", color: "border-orange-500" },
+    { id: 2, type: "PROMOTION", title: "Cepat Gunakan Voucher Anda!", description: "Voucher 10% Coffee akan hangus segera. Jangan sampai terlewat.", date: "9 Apr 2025", color: "border-red-500" },
+    { id: 3, type: "NEW PRODUCT", title: "KopiMint Coffee Telah Hadir", description: "Rasakan sensasi baru dengan diskon 10% pada 2 jam pertama perilisan.", date: "9 Apr 2025", color: "border-green-500" },
+    { id: 4, type: "BIRTHDAY", title: "Special Gift untuk Anda", description: "Karena hari ini spesial, nikmati diskon 15% untuk semua produk kami.", date: "9 Apr 2025", color: "border-pink-500" },
   ];
 
-  // State to manage visible notifications (initially all notifications)
   const [visibleNotifications, setVisibleNotifications] = useState(initialNotifications.map(n => n.id));
 
   const handleClaim = (id) => {
-    // Remove the notification from the visible list
-    setVisibleNotifications(prev => prev.filter(notificationId => notificationId !== id));
-    // Optionally, add logic here to handle the actual claim (e.g., send to API, show a success message)
-    console.log(`Notification with ID ${id} claimed!`);
-  };
-
-  const notificationVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-    exit: { opacity: 0, scale: 0.9, transition: { duration: 0.4 } }, // Dissolve effect on exit
+    setVisibleNotifications(prev => prev.filter(nId => nId !== id));
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans">
-      {/* Navbar Section */}
-      <nav className="bg-white shadow-sm py-4 px-8">
-        <div className="flex justify-between items-center border-b pb-3 mb-6">
-          <div className="flex items-center gap-3">
-            <img src="/img/Logo.png" alt="Logo" className="h-10" />{" "}
-            <h1 className="text-2xl font-bold text-orange-600 tracking-wide">
-              TOMORO{" "}
-              <span className="block text-xs font-normal text-orange-500 tracking-[.25em]">
-                COFFEE
-              </span>
-            </h1>
-          </div>
+    <div className="font-sans text-gray-900 bg-white selection:bg-blue-100 min-h-screen">
+      {/* --- NAVBAR --- */}
+      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          <Link to="/HomeUser" className="flex items-center gap-2">
+            <img src="/img/Logo.png" alt="Logo" className="h-12" />
+            <div className="hidden sm:block">
+              <span className="text-xl font-black text-orange-600 block leading-none">TOMORO</span>
+              <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Coffee & More</span>
+            </div>
+          </Link>
 
-          <nav className="flex gap-8 text-sm font-medium text-gray-700">
-            <Link
-              to="/HomeUser"
-              className="hover:text-orange-500 transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              to="/MenuUser"
-              className="hover:text-orange-500 transition-colors"
-            >
-              Menu
-            </Link>
-            <Link
-              to="/ProfInfo" // Mengarahkan ke halaman profil
-              className="hover:text-orange-500 transition-colors"
-            >
-              Story
-            </Link>
-            <Link
-              to="/FAQUser"
-              className="hover:text-orange-500 transition-colors"
-            >
-              FAQ
-            </Link>
-            <Link
-              to="/FeedbackUser"
-              className="hover:text-orange-500 transition-colors"
-            >
-              Feedback
-            </Link>
-            <Link
-              to="/Lokasi"
-              className="hover:text-orange-500 transition-colors"
-            >
-              Location
-            </Link>
+          <nav className="hidden md:flex gap-10">
+            {['Home', 'Menu', 'Story', 'FAQ', 'Feedback'].map((item) => (
+              <Link
+                key={item}
+                to={item === 'Home' ? '/HomeUser' : `/${item}User`}
+                className={`text-sm font-bold uppercase tracking-widest transition-all hover:text-orange-600 ${
+                  location.pathname.includes(item) ? "text-orange-600 border-b-2 border-orange-600" : "text-gray-500"
+                }`}
+              >
+                {item}
+              </Link>
+            ))}
           </nav>
 
-          <div className="flex items-center gap-4">
-            {/* New: Profile Icon */}
-            <Link to="/ProfileUser" className="text-orange-500 hover:text-orange-600">
-              <UserCircle className="w-5 h-5" />
+          <div className="flex items-center gap-5">
+            <Link to="/ProfileUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600"><UserCircle size={22} /></Link>
+            <Link to="/CartUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600 relative">
+              <ShoppingCart size={22} />
+              {cartItems?.length > 0 && (
+                <span className="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
+                  {cartItems.length}
+                </span>
+              )}
             </Link>
-            {/* Existing icons */}
-            <Link to="/CartUser" className="text-orange-500 hover:text-orange-600">
-              <ShoppingCart className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/NotificationUser"
-              className="text-orange-500 hover:text-orange-600"
-            >
-              <Bell className="w-5 h-5" />
+            <div className="h-6 w-[1px] bg-gray-200 mx-1"></div>
+            <Link to="/NotificationUser" className="relative p-2 text-orange-600">
+              <Bell size={22} />
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-gray-800 text-center mb-10">
-          Notifications
-        </h1>
+      {/* --- HERO SECTION --- */}
+      <section className="py-20 bg-[#F0F9FF]">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <span className="inline-block px-4 py-1 bg-blue-600 text-white text-xs font-black rounded-full mb-4 tracking-widest uppercase italic">Updates & Offers</span>
+          <h1 className="text-5xl md:text-6xl font-black italic text-blue-900 mb-6 uppercase tracking-tighter">
+            Notifications
+          </h1>
+          <p className="text-blue-800/70 font-medium italic">
+            Stay updated with our latest offers, news, and special rewards just for you.
+          </p>
+        </div>
+      </section>
 
-        <div className="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
-          <AnimatePresence> {/* Wrap with AnimatePresence */}
-            {initialNotifications
-              .filter(notification => visibleNotifications.includes(notification.id)) // Filter based on visibleNotifications state
-              .map((notification, index) => (
-                <motion.div
-                  key={notification.id} // Key is crucial for AnimatePresence
-                  variants={notificationVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit" // Add exit variant
-                  transition={{ delay: index * 0.1, duration: 0.5 }} // Adjust duration for entry
-                  className={`bg-white rounded-lg shadow-md overflow-hidden ${notification.color}`}
-                >
-                  <div className="flex items-center px-6 py-3">
-                    <div className={`p-2 rounded-full ${notification.headerColor}`}>
-                      <Bell className={`h-5 w-5 text-white`} />
-                    </div>
-                    <h3 className={`ml-3 font-semibold text-base ${notification.bellColor}`}>
-                      {notification.type}
-                    </h3>
-                    <span className="ml-auto text-gray-500 text-xs flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                      </svg>
-                      {notification.date} at {notification.time}
-                    </span>
-                  </div>
-                  <div className="p-6 pt-0">
-                    <h4 className="font-bold text-lg mb-2">{notification.title}</h4>
-                    <p className="text-gray-700 text-sm mb-4">
-                      {notification.description}
-                    </p>
-                    <button // Changed from Link to button for the claim action
-                      onClick={() => handleClaim(notification.id)}
-                      className="inline-block bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors"
-                    >
-                      {notification.actionText}
-                    </button>
-                  </div>
+      {/* --- NOTIFICATION AREA --- */}
+      <main className="max-w-3xl mx-auto px-6 py-20">
+        <div className="space-y-6">
+          <AnimatePresence>
+            {initialNotifications.filter(n => visibleNotifications.includes(n.id)).length === 0 ? (
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center py-20 text-gray-400 font-black uppercase tracking-widest">
+                    No new notifications
                 </motion.div>
-              ))}
+            ) : (
+                initialNotifications.filter(n => visibleNotifications.includes(n.id)).map((n) => (
+                <motion.div
+                    key={n.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    className={`bg-white p-8 rounded-[30px] border-l-8 ${n.color} shadow-lg shadow-gray-100 flex justify-between items-start hover:shadow-xl transition-shadow`}
+                >
+                    <div>
+                    <span className="text-[10px] font-black tracking-widest text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">
+                        {n.type}
+                    </span>
+                    <h3 className="text-xl font-black mt-3 mb-2 text-blue-900 italic tracking-tight">{n.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6 max-w-md">{n.description}</p>
+                    <button 
+                        onClick={() => handleClaim(n.id)} 
+                        className="text-xs font-black uppercase tracking-widest bg-blue-900 text-white px-8 py-3 rounded-2xl hover:bg-orange-600 transition-all active:scale-95"
+                    >
+                        Claim Now
+                    </button>
+                    </div>
+                    <div className="text-right text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    {n.date}
+                    </div>
+                </motion.div>
+                ))
+            )}
           </AnimatePresence>
         </div>
-      </div>
-      {/* Footer Section */}
-      <footer className="relative mt-20 w-full text-white">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/img/image 48.png')" }}
-        ></div>
+      </main>
 
-        {/* Overlay gradasi gelap transparan */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
-
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-10 text-white">
-          {/* Left - Logo & Location */}
+      {/* --- FOOTER --- */}
+      <footer className="bg-white pt-24 pb-12 px-6 border-t border-gray-50">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 border-b border-gray-100 pb-16 mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/img/Logo.png" alt="Logo" className="h-10" />
-              <div>
-                <h2 className="text-xl font-bold text-orange-400">TOMORO</h2>
-                <p className="text-sm tracking-[0.3em] text-orange-300">
-                  COFFEE
-                </p>
-              </div>
-            </div>
-            <div className="text-sm leading-relaxed">
-              <p className="text-orange-400 font-semibold mb-1">Our Location</p>
-              <p>Headquarters</p>
-              <p>
-                Jl. Riau No.57 B, Kp. Bandar, Kec. Senapelan, Kota Pekanbaru,
-                Riau 28291
-              </p>
-            </div>
+            <img src="/img/Logo.png" alt="Logo" className="h-16 mb-6" />
+            <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
-
-          {/* Right - Social Media */}
-          <div className="text-sm">
-            <p className="text-orange-400 font-semibold mb-2">Social Media</p>
-            <div className="flex gap-4 text-lg">
-              <a href="#" className="hover:text-orange-300">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#" className="hover:text-orange-300">
-                <i className="fab fa-tiktok"></i>
-              </a>
-              <a
-                href="mailto:contact@tomorocoffee.com"
-                className="hover:text-orange-300"
-              >
-                <i className="fas fa-envelope"></i>
-              </a>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
+            <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
+              <li><Link to="/HomeUser" className="hover:text-orange-600 transition-colors">Home</Link></li>
+              <li><Link to="/MenuUser" className="hover:text-orange-600 transition-colors">Our Menu</Link></li>
+              <li><Link to="/StoryUser" className="hover:text-orange-600 transition-colors">Our Story</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
+            <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
+              <li><Link to="/FAQUser" className="hover:text-orange-600 transition-colors">General FAQ</Link></li>
+              <li><Link to="/FeedbackUser" className="hover:text-orange-600 transition-colors">Feedback</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
+            <div className="flex gap-4">
+              {['instagram', 'tiktok', 'facebook'].map(social => (
+                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm">
+                  <i className={`fab fa-${social}`}></i>
+                </a>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Copyright */}
-        <div className="relative z-10 text-center text-sm text-white bg-black/40 py-2">
-          Hak Cipta © 2025 PT KOPI BINTANG INDONESIA
-        </div>
+        <p className="text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+          &copy; 2026 PT KOPI BINTANG INDONESIA - ALL RIGHTS RESERVED
+        </p>
       </footer>
+
+      {/* Floating Chat */}
+      <Link to="/ChatUser" className="fixed bottom-8 right-8 bg-orange-500 text-white w-16 h-16 rounded-3xl shadow-2xl flex items-center justify-center hover:bg-blue-600 transition-all hover:-translate-y-2 z-50 animate-bounce group">
+        <MessageSquareText size={28} className="group-hover:rotate-12 transition-transform" />
+      </Link>
     </div>
   );
 };
