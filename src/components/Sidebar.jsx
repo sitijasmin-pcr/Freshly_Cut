@@ -16,24 +16,20 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import { AiFillSchedule } from "react-icons/ai";
 
 const menuItems = [
-  { name: 'Dashboard', icon: <LayoutDashboard />, path: '/dashboard' },
+  { name: 'Dashboard', icon: <BarChart2 />, path: '/laporan' },
+  // { name: 'Dashboard', icon: <LayoutDashboard />, path: '/dashboard' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
-<<<<<<< HEAD
   { name: 'POS', icon: <ShoppingCart />, path: '/sales' },
   { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
   // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   // { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
   // { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
-=======
   { name: 'Materials', icon: <TbToolsKitchen2 />, path: '/materials' },
   { name: 'Sales', icon: <ShoppingCart />, path: '/sales' },
-  { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
-  { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
-  { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
-  { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
+  // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
+  // { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
->>>>>>> 7c454f8b4197f7cb1b4f287cd38d9b3a8d758e35
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
   { name: 'User', icon: <FaUser />, path: '/user' },
 ];
