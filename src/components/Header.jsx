@@ -395,11 +395,10 @@ const Header = () => {
     <header className="flex justify-between items-center px-8 py-4 bg-gradient-to-r from-white to-orange-50 shadow-sm sticky top-0 z-20">
       {/* Left Side: Greeting and Current Page */}
       <div>
-        <p className="text-sm text-gray-600 font-medium mb-1">
+      <p className="text-sm text-[#004d33]/70 font-semibold mb-1">
           {greeting}, Admin Freshly!
         </p>
-        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-          {currentPageName}
+        <h1 className="text-2xl font-black text-[#004d33] tracking-tight">          {currentPageName}
         </h1>
       </div>
 
@@ -408,18 +407,16 @@ const Header = () => {
 
         {/* User Profile/Notification (Example placeholder) */}
         <div className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-purple-700">
-          <FaBell className="w-5 h-5 text-orange-600" />
-        </div>
+        <FaBell className="w-5 h-5 text-orange-500 hover:text-[#004d33] transition" />        </div>
         
         {/* Logout Button */}
         <div
-          className="flex items-center gap-2 text-sm cursor-pointer text-orange-700 hover:text-red-600 transition duration-200 ease-in-out px-3 py-2 rounded-lg bg-orange -50 hover:bg-red-50"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="font-medium hidden sm:block">Keluar</span> {/* Hide text on very small screens */}
-        </div>
-      </div>
+  className="flex items-center gap-2 text-sm cursor-pointer text-white bg-[#004d33] hover:bg-green-800 transition duration-200 px-4 py-2 rounded-xl shadow"
+  onClick={handleLogout}
+>
+  <LogOut className="w-4 h-4" />
+  <span className="font-semibold hidden sm:block">Keluar</span>
+</div>      </div>
     </header>
   );
 };
