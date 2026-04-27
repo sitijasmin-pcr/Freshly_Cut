@@ -11,12 +11,8 @@ import Faq from './Pages/FAQ';
 import FAQForm from './Pages/FAQForm';
 import ManajemenProduksi from "./Pages/ManajemenProduksi";
 import Produk from './Pages/Produk';
-<<<<<<< HEAD
 import Materials from './Pages/Materials';
 import MaterialsForm from './Pages/MaterialsForm';
-=======
-import ProductForm from './Pages/ProductForm';
->>>>>>> 441ce4fe351eb646b61a38cc1a4176429225a86a
 import SalesForm from './Pages/SalesForm';
 import SalesManagement from './Pages/SalesManagement';
 import ProdukTerlaris from './Pages/ProdukTerlaris';
@@ -219,11 +215,7 @@ function App() {
               <Route path="/laporan" element={<Penjualan />} />
               <Route path="/produksi" element={<ManajemenProduksi />} />
               <Route path="/produk" element={<Produk />} />
-<<<<<<< HEAD
               <Route path="/materials" element={<Materials />} />
-=======
-              <Route path="/produkform" element={<ProductForm />} />
->>>>>>> 441ce4fe351eb646b61a38cc1a4176429225a86a
               <Route path="/produkTerlaris" element={<ProdukTerlaris />} />
               <Route path="/sales" element={<SalesManagement />} />
               <Route path="/salesform" element={<SalesForm />} />
