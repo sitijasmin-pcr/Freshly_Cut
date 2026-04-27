@@ -11,6 +11,7 @@ import Faq from './Pages/FAQ';
 import FAQForm from './Pages/FAQForm';
 import ManajemenProduksi from "./Pages/ManajemenProduksi";
 import Produk from './Pages/Produk';
+import ProductForm from './Pages/ProductForm';
 import SalesForm from './Pages/SalesForm';
 import SalesManagement from './Pages/SalesManagement';
 import ProdukTerlaris from './Pages/ProdukTerlaris';
@@ -212,6 +213,7 @@ function App() {
               <Route path="/laporan" element={<Penjualan />} />
               <Route path="/produksi" element={<ManajemenProduksi />} />
               <Route path="/produk" element={<Produk />} />
+              <Route path="/produkform" element={<ProductForm />} />
               <Route path="/produkTerlaris" element={<ProdukTerlaris />} />
               <Route path="/sales" element={<SalesManagement />} />
               <Route path="/salesform" element={<SalesForm />} />

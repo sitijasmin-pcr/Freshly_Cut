@@ -8,248 +8,213 @@ export default function ProductForm({ onClose, onSuccess, editingProduct }) {
     harga: "",
     deskripsi: "",
     gambar: "",
-    created_at: "",
   });
+
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (editingProduct) {
       setForm({
-        ...editingProduct,
+        nama: editingProduct.nama || "",
+        kategori: editingProduct.kategori || "",
+        harga: editingProduct.harga?.toString() || "",
         deskripsi: editingProduct.deskripsi || "",
         gambar: editingProduct.gambar || "",
-        created_at: editingProduct.created_at || "",
-      });
-    } else {
-      setForm({
-        nama: "",
-        kategori: "",
-        harga: "",
-        deskripsi: "",
-        gambar: "",
-        created_at: "", // Pastikan ini kosong untuk produk baru
       });
     }
   }, [editingProduct]);
 
+  const formatRupiah = (value) => {
+    if (!value) return "";
+    return `Rp ${Number(value).toLocaleString("id-ID")}`;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "harga") {
+      const angka = value.replace(/\D/g, "");
+      setForm((prev) => ({ ...prev, harga: angka }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.nama || !form.kategori || !form.harga) {
       alert("Nama, Kategori, dan Harga wajib diisi!");
       return;
     }
 
-    const dataToSubmit = { ...form };
-    if (!editingProduct) {
-      // Hapus created_at jika ini produk baru agar Supabase mengisi otomatis
-      delete dataToSubmit.created_at;
-    }
+    setLoading(true);
 
     try {
-      if (editingProduct) {
-        const { error } = await supabase
-          .from("produk")
-          .update(dataToSubmit)
-          .eq("id", editingProduct.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("produk").insert([dataToSubmit]);
-        if (error) throw error;
+      let imageUrl = form.gambar;
+
+      // 🔥 UPLOAD GAMBAR (AMAN)
+      if (imageFile) {
+        try {
+          const fileExt = imageFile.name.split(".").pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+
+          const { data, error } = await supabase.storage
+            .from("produk-images")
+            .upload(fileName, imageFile, {
+              cacheControl: "3600",
+              upsert: true,
+              contentType: imageFile.type,
+            });
+
+          if (!error && data) {
+            const { data: publicUrlData } = supabase.storage
+              .from("produk-images")
+              .getPublicUrl(data.path);
+
+            imageUrl = publicUrlData.publicUrl;
+          } else {
+            console.warn("Upload gagal, lanjut tanpa gambar");
+          }
+        } catch (err) {
+          console.warn("Upload error:", err);
+        }
       }
+
+      const dataToSubmit = {
+        nama: form.nama,
+        kategori: form.kategori,
+        harga: Number(form.harga),
+        deskripsi: form.deskripsi || "",
+        gambar: imageUrl || null,
+      };
+
+      let result;
+
+      // 🔥 FIX CORS → pakai UPSERT
+      if (editingProduct) {
+        result = await supabase
+          .from("produk")
+          .upsert({
+            id: editingProduct.id,
+            ...dataToSubmit,
+          })
+          .select();
+      } else {
+        result = await supabase
+          .from("produk")
+          .insert([dataToSubmit])
+          .select();
+      }
+
+      if (result.error) throw result.error;
+
+      alert("Berhasil disimpan!");
       onSuccess();
       onClose();
+
     } catch (error) {
-      console.error("Error submitting product:", error);
-      alert(`Gagal menyimpan produk: ${error.message}`);
+      console.error("ERROR:", error);
+      alert("Gagal menyimpan: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return new Date(dateString).toLocaleDateString("id-ID", options);
-  };
-
+  // ✅ RETURN HARUS DI LUAR TRY
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg relative animate-fade-in-up">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white p-6 rounded-[2rem] shadow-xl w-full max-w-lg relative">
+
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-3xl font-semibold leading-none"
-          aria-label="Tutup"
+          className="absolute top-4 right-4 text-gray-500 text-2xl hover:text-black"
         >
-          &times;
+          ✕
         </button>
 
-        <h2 className="text-xl font-bold text-gray-800 mb-6">
-          {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
+        <h2 className="text-xl font-black text-[#004d33] mb-6">
+          {editingProduct ? "Edit Produk" : "Tambah Produk"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="nama"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Nama Produk
-            </label>
-            <input
-              type="text"
-              name="nama"
-              id="nama"
-              placeholder="Nama Produk"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-              value={form.nama}
-              onChange={handleChange}
-              required
+
+          <input
+            type="text"
+            name="nama"
+            placeholder="Nama Produk"
+            className="w-full p-3 rounded-xl border-2 border-[#004d33]/20"
+            value={form.nama}
+            onChange={handleChange}
+            required
+          />
+
+          <select
+            name="kategori"
+            className="w-full p-3 rounded-xl border-2 border-[#004d33]/20"
+            value={form.kategori}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Pilih Kategori</option>
+            <option value="Buah Potong">Buah Potong</option>
+            <option value="Dessert">Dessert</option>
+          </select>
+
+          <input
+            type="text"
+            name="harga"
+            placeholder="Harga"
+            className="w-full p-3 rounded-xl border-2 border-[#004d33]/20"
+            value={formatRupiah(form.harga)}
+            onChange={handleChange}
+            required
+          />
+
+          <textarea
+            name="deskripsi"
+            placeholder="Deskripsi"
+            className="w-full p-3 rounded-xl border-2 border-[#004d33]/20"
+            value={form.deskripsi}
+            onChange={handleChange}
+          />
+
+          <input
+            type="file"
+            accept="image/png, image/jpeg"
+            onChange={handleFileChange}
+            className="w-full p-2 border-2 border-[#004d33]/20 rounded-xl"
+          />
+
+          {(imageFile || form.gambar) && (
+            <img
+              src={imageFile ? URL.createObjectURL(imageFile) : form.gambar}
+              alt="preview"
+              className="w-32 h-32 object-cover mx-auto rounded-xl border-2 border-dashed border-[#004d33]/20"
             />
-          </div>
-
-          <div>
-            <label
-              htmlFor="kategori"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Kategori
-            </label>
-            <select
-              name="kategori"
-              id="kategori"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-              value={form.kategori}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Pilih Kategori</option>
-              <option value="Food and Bakery">Food and Bakery</option>
-              <option value="Classic Coffee">Classic Coffee</option>
-              <option value="Non Coffee">Non Coffee</option>
-              <option value="Fruity Series">Fruity Series</option>
-              <option value="Cheese Latte Series">Cheese Latte Series</option>
-              <option value="Cloud Series">Cloud Series</option>
-              <option value="Jujutsu Kaisen Series">
-                Jujutsu Kaisen Series
-              </option>
-              <option value="UPSETDUCK X PISTACHIO SERIES">
-                UPSETDUCK X PISTACHIO SERIES
-              </option>
-              <option value="Pesta Kuliner Banting Harga">
-                Pesta Kuliner Banting Harga
-              </option>
-              <option value="SPECIAL OFFER">SPECIAL OFFER</option>
-              <option value="Flash Sale Makan Harian">
-                Flash Sale Makan Harian
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="harga"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Harga
-            </label>
-            <input
-              type="number"
-              name="harga"
-              id="harga"
-              placeholder="Harga (Rp)"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-              value={form.harga}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="deskripsi"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Deskripsi
-            </label>
-            <textarea
-              name="deskripsi"
-              id="deskripsi"
-              placeholder="Deskripsi Produk"
-              rows="3"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 resize-y"
-              value={form.deskripsi}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="gambar"
-              className="block text-sm font-medium text-gray-700"
-            >
-              URL Gambar
-            </label>
-            <input
-              type="text"
-              name="gambar"
-              id="gambar"
-              placeholder="URL Gambar (Internet URL)"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-              value={form.gambar}
-              onChange={handleChange}
-            />
-            {form.gambar && (
-              <div className="mt-2 text-center">
-                <img
-                  src={form.gambar}
-                  alt="Preview"
-                  className="max-h-24 mx-auto rounded-md object-contain"
-                />
-              </div>
-            )}
-          </div>
-
-          {editingProduct && form.created_at && (
-            <div>
-              <label
-                htmlFor="created_at"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Tanggal Ditambahkan
-              </label>
-              <input
-                name="created_at"
-                id="created_at"
-                value={formatDate(form.created_at)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 cursor-not-allowed"
-                readOnly
-              />
-            </div>
           )}
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            >
+          <div className="flex justify-end gap-3 pt-4">
+            <button type="button" onClick={onClose} className="px-5 py-2 text-gray-500">
               Batal
             </button>
+
             <button
               type="submit"
-              className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-md shadow-md transition-colors"
+              disabled={loading}
+              className="bg-[#004d33] text-white px-5 py-2 rounded-xl hover:bg-green-900 disabled:bg-gray-400"
             >
-              Simpan Produk
+              {loading ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
+
         </form>
       </div>
     </div>
