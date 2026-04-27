@@ -148,12 +148,194 @@
 // export default Outlet;
 
 
+// import { useState, useEffect } from "react";
+// import { supabase } from "../supabase";
+// import OutletForm from "./OutletForm";
+// import Swal from "sweetalert2";
+
+// // Import ikon dari lucide-react
+// import { PlusCircle, MapPin, Edit, Trash2, Store, Info } from 'lucide-react';
+
+// export default function Outlet() {
+//   const [outlets, setOutlets] = useState([]);
+//   const [isFormOpen, setIsFormOpen] = useState(false);
+//   const [editingOutlet, setEditingOutlet] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   const fetchOutlets = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const { data, error } = await supabase
+//         .from("outlet")
+//         .select("*")
+//         .order("created_at", { ascending: false });
+//       if (error) throw error;
+//       setOutlets(data);
+//     } catch (err) {
+//       console.error("Fetch Error:", err.message);
+//       setError("Gagal memuat data outlet. Silakan coba lagi nanti.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchOutlets();
+//   }, []);
+
+//   const handleAddNew = () => {
+//     setEditingOutlet(null);
+//     setIsFormOpen(true);
+//   };
+
+//   const handleEdit = (outlet) => {
+//     setEditingOutlet(outlet);
+//     setIsFormOpen(true);
+//   };
+
+//   const handleDelete = async (id, name) => {
+//     const confirmResult = await Swal.fire({
+//       title: "Yakin ingin hapus?",
+//       text: `Data outlet "${name}" akan dihapus permanen!`,
+//       icon: "warning",
+//       showCancelButton: true,
+//       confirmButtonColor: "#dc2626", // Red-600
+//       cancelButtonColor: "#6b7280", // Gray-500
+//       confirmButtonText: "Ya, hapus!",
+//       cancelButtonText: "Batal",
+//     });
+
+//     if (confirmResult.isConfirmed) {
+//       try {
+//         const { error } = await supabase.from("outlet").delete().eq("id", id);
+//         if (error) throw error;
+//         Swal.fire("Terhapus!", "Outlet berhasil dihapus.", "success");
+//         fetchOutlets();
+//       } catch (err) {
+//         console.error("Delete Error:", err.message);
+//         Swal.fire("Gagal!", `Terjadi kesalahan saat menghapus: ${err.message}`, "error");
+//       }
+//     }
+//   };
+
+//   const handleFormClose = (message) => {
+//     setIsFormOpen(false);
+//     setEditingOutlet(null);
+//     fetchOutlets(); // Refresh data setelah form ditutup
+//     if (message) {
+//       Swal.fire({
+//         title: "Berhasil!",
+//         text: message,
+//         icon: "success",
+//         confirmButtonColor: "#f97316", // Orange-500
+//       });
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 p-6 sm:p-10 font-inter">
+//       <h1 className="text-4xl font-extrabold text-center text-orange-700 mb-8 flex items-center justify-center gap-3">
+//         <Store className="w-10 h-10 text-orange-600" /> LOKASI OUTLET
+//       </h1>
+
+//       {/* Tombol Tambah */}
+//       <div className="text-center mb-10">
+//         <button
+//           onClick={handleAddNew}
+//           className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-semibold shadow-lg transition duration-300 ease-in-out flex items-center justify-center mx-auto"
+//         >
+//           <PlusCircle size={20} className="mr-2" /> Tambah Outlet Baru
+//         </button>
+//       </div>
+
+//       {loading ? (
+//         <div className="flex flex-col justify-center items-center py-10">
+//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-3"></div>
+//           <p className="text-lg text-gray-600">Memuat data outlet...</p>
+//         </div>
+//       ) : error ? (
+//         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center mx-auto max-w-xl">
+//           <strong className="font-bold">Error:</strong>
+//           <span className="block sm:inline"> {error}</span>
+//         </div>
+//       ) : outlets.length === 0 ? (
+//         <div className="text-center text-gray-500 py-10 border-2 border-dashed border-orange-300 rounded-lg p-8 mx-auto max-w-xl">
+//           <Info className="inline-block mb-3 text-orange-400" size={48} />
+//           <p className="text-xl font-medium mb-2">Belum ada data outlet.</p>
+//           <p className="text-md">Klik "Tambah Outlet Baru" untuk menambahkan lokasi.</p>
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+//           {outlets.map((outlet) => (
+//             <div
+//               key={outlet.id}
+//               className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:scale-[1.02] transition duration-300 ease-in-out overflow-hidden border border-gray-100"
+//             >
+//               <div className="w-full h-56 overflow-hidden bg-gray-200 flex items-center justify-center">
+//                 {outlet.image_url ? (
+//                   <img
+//                     src={outlet.image_url}
+//                     alt={outlet.name}
+//                     className="w-full h-full object-cover"
+//                     onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/400x200?text=No+Image"; }}
+//                   />
+//                 ) : (
+//                   <div className="text-gray-400 text-lg">No Image Available</div>
+//                 )}
+//               </div>
+//               <div className="p-6">
+//                 <h2 className="text-2xl font-bold text-gray-800 mb-3">{outlet.name}</h2>
+//                 <div className="flex justify-between items-center mt-4">
+//                   <a
+//                     href={outlet.maps_url}
+//                     target="_blank"
+//                     rel="noopener noreferrer"
+//                     className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-semibold shadow flex items-center gap-2 transition duration-200"
+//                   >
+//                     <MapPin size={18} /> Arahkan ke Lokasi
+//                   </a>
+//                   <div className="flex space-x-3">
+//                     <button
+//                       onClick={() => handleEdit(outlet)}
+//                       className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition duration-200"
+//                       title="Edit Outlet"
+//                     >
+//                       <Edit size={18} />
+//                     </button>
+//                     <button
+//                       onClick={() => handleDelete(outlet.id, outlet.name)}
+//                       className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 transition duration-200"
+//                       title="Hapus Outlet"
+//                     >
+//                       <Trash2 size={18} />
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+
+//       {/* Modal Form */}
+//       {isFormOpen && (
+//         <OutletForm
+//           onClose={handleFormClose}
+//           editingOutlet={editingOutlet}
+//         />
+//       )}
+//     </div>
+//   );
+// }
+
+
+
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import OutletForm from "./OutletForm";
 import Swal from "sweetalert2";
-
-// Import ikon dari lucide-react
 import { PlusCircle, MapPin, Edit, Trash2, Store, Info } from 'lucide-react';
 
 export default function Outlet() {
@@ -174,8 +356,7 @@ export default function Outlet() {
       if (error) throw error;
       setOutlets(data);
     } catch (err) {
-      console.error("Fetch Error:", err.message);
-      setError("Gagal memuat data outlet. Silakan coba lagi nanti.");
+      setError("Gagal memuat data outlet.");
     } finally {
       setLoading(false);
     }
@@ -197,14 +378,13 @@ export default function Outlet() {
 
   const handleDelete = async (id, name) => {
     const confirmResult = await Swal.fire({
-      title: "Yakin ingin hapus?",
-      text: `Data outlet "${name}" akan dihapus permanen!`,
+      title: "Hapus Outlet?",
+      text: `Data "${name}" akan dihapus permanen!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626", // Red-600
-      cancelButtonColor: "#6b7280", // Gray-500
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#94a3b8",
+      confirmButtonText: "Ya, Hapus!",
     });
 
     if (confirmResult.isConfirmed) {
@@ -214,8 +394,7 @@ export default function Outlet() {
         Swal.fire("Terhapus!", "Outlet berhasil dihapus.", "success");
         fetchOutlets();
       } catch (err) {
-        console.error("Delete Error:", err.message);
-        Swal.fire("Gagal!", `Terjadi kesalahan saat menghapus: ${err.message}`, "error");
+        Swal.fire("Gagal!", "Terjadi kesalahan.", "error");
       }
     }
   };
@@ -223,103 +402,77 @@ export default function Outlet() {
   const handleFormClose = (message) => {
     setIsFormOpen(false);
     setEditingOutlet(null);
-    fetchOutlets(); // Refresh data setelah form ditutup
+    fetchOutlets();
     if (message) {
-      Swal.fire({
-        title: "Berhasil!",
-        text: message,
-        icon: "success",
-        confirmButtonColor: "#f97316", // Orange-500
-      });
+      Swal.fire({ title: "Berhasil!", text: message, icon: "success", confirmButtonColor: "#004d33" });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 sm:p-10 font-inter">
-      <h1 className="text-4xl font-extrabold text-center text-orange-700 mb-8 flex items-center justify-center gap-3">
-        <Store className="w-10 h-10 text-orange-600" /> LOKASI OUTLET
-      </h1>
+    <div className="min-h-screen bg-[#FDF8EE] p-6 sm:p-10 text-[#004d33]">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="mb-10 flex flex-col md:flex-row justify-between items-center border-b border-[#004d33]/20 pb-8 gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black italic flex items-center gap-3">
+              <Store className="w-8 h-8" /> LOKASI OUTLET
+            </h1>
+            <p className="opacity-60 font-bold mt-1">Kelola operasional Freshly Cut</p>
+          </div>
+          <button
+            onClick={handleAddNew}
+            className="bg-[#004d33] text-white px-8 py-4 rounded-2xl font-black hover:opacity-90 transition-all flex items-center gap-2 shadow-lg"
+          >
+            <PlusCircle size={20} /> Tambah Outlet
+          </button>
+        </header>
 
-      {/* Tombol Tambah */}
-      <div className="text-center mb-10">
-        <button
-          onClick={handleAddNew}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-semibold shadow-lg transition duration-300 ease-in-out flex items-center justify-center mx-auto"
-        >
-          <PlusCircle size={20} className="mr-2" /> Tambah Outlet Baru
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex flex-col justify-center items-center py-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-3"></div>
-          <p className="text-lg text-gray-600">Memuat data outlet...</p>
-        </div>
-      ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center mx-auto max-w-xl">
-          <strong className="font-bold">Error:</strong>
-          <span className="block sm:inline"> {error}</span>
-        </div>
-      ) : outlets.length === 0 ? (
-        <div className="text-center text-gray-500 py-10 border-2 border-dashed border-orange-300 rounded-lg p-8 mx-auto max-w-xl">
-          <Info className="inline-block mb-3 text-orange-400" size={48} />
-          <p className="text-xl font-medium mb-2">Belum ada data outlet.</p>
-          <p className="text-md">Klik "Tambah Outlet Baru" untuk menambahkan lokasi.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {outlets.map((outlet) => (
-            <div
-              key={outlet.id}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:scale-[1.02] transition duration-300 ease-in-out overflow-hidden border border-gray-100"
-            >
-              <div className="w-full h-56 overflow-hidden bg-gray-200 flex items-center justify-center">
-                {outlet.image_url ? (
-                  <img
-                    src={outlet.image_url}
-                    alt={outlet.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/400x200?text=No+Image"; }}
-                  />
-                ) : (
-                  <div className="text-gray-400 text-lg">No Image Available</div>
-                )}
-              </div>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">{outlet.name}</h2>
-                <div className="flex justify-between items-center mt-4">
+        {/* Content */}
+        {loading ? (
+          <div className="text-center font-black opacity-50 py-10">Memuat data...</div>
+        ) : error ? (
+          <div className="text-center text-red-600 font-bold">{error}</div>
+        ) : outlets.length === 0 ? (
+          <div className="text-center py-20 border-2 border-dashed border-[#004d33]/20 rounded-[2rem] opacity-60">
+            <Info size={48} className="mx-auto mb-4" />
+            <p className="font-bold">Belum ada outlet yang ditambahkan.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {outlets.map((outlet) => (
+              <div key={outlet.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col gap-4">
+                <img
+                  src={outlet.image_url}
+                  alt={outlet.name}
+                  className="w-full h-40 object-cover rounded-2xl"
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/400x200?text=No+Image"; }}
+                />
+                <h3 className="font-black text-xl">{outlet.name}</h3>
+                
+                <div className="mt-auto flex justify-between items-center pt-4 border-t border-gray-50">
                   <a
                     href={outlet.maps_url}
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-semibold shadow flex items-center gap-2 transition duration-200"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-sm font-black text-orange-600 hover:underline"
                   >
-                    <MapPin size={18} /> Arahkan ke Lokasi
+                    <MapPin size={16} /> Buka Maps
                   </a>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleEdit(outlet)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition duration-200"
-                      title="Edit Outlet"
-                    >
-                      <Edit size={18} />
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(outlet)} className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200">
+                      <Edit size={16} className="text-[#004d33]" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(outlet.id, outlet.name)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 transition duration-200"
-                      title="Hapus Outlet"
-                    >
-                      <Trash2 size={18} />
+                    <button onClick={() => handleDelete(outlet.id, outlet.name)} className="p-3 bg-red-50 rounded-xl hover:bg-red-100">
+                      <Trash2 size={16} className="text-red-600" />
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Modal Form */}
       {isFormOpen && (
         <OutletForm
           onClose={handleFormClose}

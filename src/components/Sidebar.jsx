@@ -16,19 +16,19 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import { AiFillSchedule } from "react-icons/ai";
 
 const menuItems = [
-  { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
+  // { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
+  { name: 'Dashboard', icon: <LayoutDashboard />, path: '/laporan' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
   { name: 'Sales', icon: <ShoppingCart />, path: '/sales' },
-  { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
   { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
-  { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
-  { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
-  { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
-  { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
+  // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
+  // { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
+  // { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
+  // { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
   // { name: 'HomeUser', icon: <FaMapLocationDot />, path: '/HomeUser' },
   { name: 'User', icon: <FaUser />, path: '/user' },
-  { name: 'Karyawan', icon: <FaUser />, path: '/karyawan' },
+  // { name: 'Karyawan', icon: <FaUser />, path: '/karyawan' },
 ];
 
 const accountItems = [
