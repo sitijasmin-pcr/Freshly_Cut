@@ -7,7 +7,6 @@ import {
   Search, 
   Plus, 
   Bell,
-  Loader2,
   ChevronRight
 } from "lucide-react";
 // Import Supabase & Context
@@ -20,7 +19,6 @@ export default function MenuUser() {
   
   // States
   const [allMenus, setAllMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [addedItemId, setAddedItemId] = useState(null);
@@ -31,13 +29,10 @@ export default function MenuUser() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true);
         const { data, error } = await supabase.from("produk").select("*");
         if (!error) setAllMenus(data);
       } catch (err) {
         console.error("Error fetching products:", err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchProducts();
@@ -58,32 +53,23 @@ export default function MenuUser() {
     setTimeout(() => setAddedItemId(null), 1000);
   };
 
-  if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-white">
-      <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-      <div className="font-black text-blue-900 text-2xl italic uppercase tracking-tighter">
-        FETCHING FRESHNESS...
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-blue-100">
       {/* --- NAVBAR (Sesuai HomeUser) --- */}
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <Link to="/HomeUser" className="flex items-center gap-2">
-            <img src="/img/Logo.png" alt="Logo" className="h-12" />
+            <img src="src/assets/img/Logo buah segar _Freshly Cut_.png" alt="Logo" className="h-12" />
             <div className="hidden sm:block">
-              <span className="text-xl font-black text-orange-600 block leading-none">TOMORO</span>
-              <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Coffee & More</span>
+              <span className="text-xl font-black text-orange-600 block leading-none">FRESHLY CUT</span>
+              <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Makan Sehat, Tinggal Hap!</span>
             </div>
           </Link>
           <nav className="hidden md:flex gap-10">
-            {['Home', 'Menu', 'Story', 'FAQ', 'Feedback'].map((item) => (
+            {["Home", "Menu", "Story", "FAQ", "Feedback"].map((item) => (
               <Link
                 key={item}
-                to={item === 'Home' ? '/HomeUser' : `/${item}User`}
+                to={item === "Home" ? "/HomeUser" : `/${item}User`}
                 className={`text-sm font-bold uppercase tracking-widest transition-all hover:text-orange-600 ${
                   location.pathname.includes(item) ? "text-orange-600 border-b-2 border-orange-600" : "text-gray-500"
                 }`}
@@ -93,27 +79,20 @@ export default function MenuUser() {
             ))}
           </nav>
           <div className="flex items-center gap-5">
-            <Link to="/ProfileUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600">
-              <UserCircle size={22} />
-            </Link>
+            <Link to="/ProfileUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600"><UserCircle size={22} /></Link>
             <Link to="/CartUser" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-600 relative">
               <ShoppingCart size={22} />
               {cartItems.length > 0 && (
-                <span className="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
-                  {cartItems.length}
-                </span>
+                <span className="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">{cartItems.length}</span>
               )}
             </Link>
             <div className="h-6 w-[1px] bg-gray-200 mx-1"></div>
-            <Link to="/NotificationUser" className="relative p-2 text-gray-600">
-              <Bell size={22} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            </Link>
+            <Link to="/NotificationUser" className="relative p-2 text-gray-600"><Bell size={22} /><span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span></Link>
           </div>
         </div>
       </header>
 
-      {/* --- HERO SECTION (Sesuai HomeUser: Light Blue Background) --- */}
+      {/* --- HERO SECTION --- */}
       <section className="relative py-20 overflow-hidden bg-[#F0F9FF]">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
           <motion.div 
@@ -145,7 +124,6 @@ export default function MenuUser() {
             </div>
           </div>
         </div>
-        {/* Dekorasi blur lembut seperti HomeUser */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px]"></div>
       </section>
 
@@ -168,7 +146,7 @@ export default function MenuUser() {
         </div>
       </nav>
 
-      {/* --- PRODUCT GRID (Tetap dengan Gaya Card Produk Anda) --- */}
+      {/* --- PRODUCT GRID --- */}
       <main className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
           <AnimatePresence mode="popLayout">
@@ -182,7 +160,6 @@ export default function MenuUser() {
                 transition={{ delay: i * 0.05 }}
                 className="group bg-white rounded-[2rem] border-b-8 border-blue-100 hover:border-orange-500 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-2xl flex flex-col h-full"
               >
-                {/* Image Container */}
                 <div className="relative h-48 md:h-64 bg-[#F8FBFF] flex items-center justify-center p-6 overflow-hidden">
                   <div className="absolute w-full h-full bg-blue-100/30 rounded-full scale-0 group-hover:scale-125 transition-transform duration-700"></div>
                   <img 
@@ -197,7 +174,6 @@ export default function MenuUser() {
                   </div>
                 </div>
 
-                {/* Info Container */}
                 <div className="p-5 text-center flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="text-base md:text-xl font-black text-blue-900 uppercase italic leading-none mb-2 line-clamp-2">
@@ -232,14 +208,12 @@ export default function MenuUser() {
         )}
       </main>
 
-      {/* --- FOOTER (Sesuai HomeUser) --- */}
+      {/* --- FOOTER --- */}
       <footer className="bg-white pt-24 pb-12 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 border-b border-gray-100 pb-16 mb-8">
           <div>
-            <img src="/img/Logo.png" alt="Logo" className="h-16 mb-6" />
-            <p className="text-gray-400 text-sm font-medium italic">
-              Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.
-            </p>
+            <img src="src/assets/img\Logo buah segar _Freshly Cut_.png" alt="Logo" className="h-16 mb-6" />
+            <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
           <div>
             <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
@@ -267,9 +241,7 @@ export default function MenuUser() {
             </div>
           </div>
         </div>
-        <p className="text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
-          &copy; 2026 PT KOPI BINTANG INDONESIA - ALL RIGHTS RESERVED
-        </p>
+        <p className="text-center text-[10px] font-black text-black-300 uppercase tracking-[0.5em]">&copy; 2026 FRESHLY CUT - ALL RIGHTS RESERVED</p>
       </footer>
     </div>
   );
