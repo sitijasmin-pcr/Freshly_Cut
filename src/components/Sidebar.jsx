@@ -19,7 +19,7 @@ const menuItems = [
   // { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
   { name: 'Dashboard', icon: <LayoutDashboard />, path: '/laporan' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
-  { name: 'Sales', icon: <ShoppingCart />, path: '/sales' },
+  { name: 'POS', icon: <ShoppingCart />, path: '/sales' },
   { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
   // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   // { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
