@@ -14,48 +14,53 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
     if (editData) {
       setForm({
         nama_barang: editData.nama_barang,
-        harga: editData.harga,
+        harga: editData.harga?.toString() || "",
         total_item: editData.total_item,
         satuan_item: editData.satuan_item,
       });
     }
   }, [editData]);
 
+  // ================= FORMAT RUPIAH =================
+  const formatRupiah = (value) => {
+    if (!value) return "";
+    return `Rp ${Number(value).toLocaleString("id-ID")}`;
+  };
+
+  // ================= HANDLE INPUT =================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "harga") {
-      const clean = value.replace(/[^0-9]/g, "");
+      const clean = value.replace(/\D/g, ""); // hanya angka
       setForm({ ...form, harga: clean });
     } else {
       setForm({ ...form, [name]: value });
     }
   };
 
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     let error;
 
+    const payload = {
+      nama_barang: form.nama_barang,
+      harga: Number(form.harga),
+      total_item: Number(form.total_item),
+      satuan_item: form.satuan_item,
+    };
+
     if (editData) {
       ({ error } = await supabase
         .from("materials")
-        .update({
-          nama_barang: form.nama_barang,
-          harga: Number(form.harga),
-          total_item: Number(form.total_item),
-          satuan_item: form.satuan_item,
-        })
+        .update(payload)
         .eq("id", editData.id));
     } else {
-      ({ error } = await supabase.from("materials").insert([
-        {
-          nama_barang: form.nama_barang,
-          harga: Number(form.harga),
-          total_item: Number(form.total_item),
-          satuan_item: form.satuan_item,
-        },
-      ]));
+      ({ error } = await supabase
+        .from("materials")
+        .insert([payload]));
     }
 
     if (!error) {
@@ -81,6 +86,7 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
 
+        {/* NAMA */}
         <input
           type="text"
           name="nama_barang"
@@ -91,16 +97,18 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
           required
         />
 
+        {/* HARGA (RUPIAH) */}
         <input
           type="text"
           name="harga"
           placeholder="Harga"
-          value={form.harga}
+          value={formatRupiah(form.harga)}
           onChange={handleChange}
           className="w-full p-3 rounded-xl border"
           required
         />
 
+        {/* TOTAL ITEM */}
         <input
           type="number"
           name="total_item"
@@ -111,6 +119,7 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
           required
         />
 
+        {/* SATUAN */}
         <select
           name="satuan_item"
           value={form.satuan_item}
@@ -125,6 +134,7 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
           <option value="bks">bks</option>
         </select>
 
+        {/* BUTTON */}
         <div className="flex justify-end gap-3 pt-4">
           <button type="button" onClick={closeModal}>
             Batal
@@ -134,6 +144,7 @@ const MaterialsForm = ({ closeModal, refreshData, editData }) => {
             Simpan
           </button>
         </div>
+
       </form>
     </>
   );

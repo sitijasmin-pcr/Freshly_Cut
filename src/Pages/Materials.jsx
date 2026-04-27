@@ -21,7 +21,7 @@ const Materials = () => {
     const { data, error } = await supabase
       .from("materials")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
 
     if (!error) setMaterials(data);
     setLoading(false);
@@ -74,7 +74,7 @@ const Materials = () => {
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-black italic text-[#004d33]">
-            Materials Management
+            
           </h1>
 
           <button
