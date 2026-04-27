@@ -9,6 +9,7 @@ import MainLayout from './components/MainLayout';
 import Customer from './Pages/Customer';
 import Faq from './Pages/FAQ';
 import FAQForm from './Pages/FAQForm';
+import ManajemenProduksi from "./Pages/ManajemenProduksi";
 import Produk from './Pages/Produk';
 import Materials from './Pages/Materials';
 import MaterialsForm from './Pages/MaterialsForm';
@@ -44,6 +45,7 @@ import { CartProvider } from "./USERPAGE/CartContext";
 import Login from './Login';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import TentangUser from './USERPAGE/TentangUser';
 
 // --- Auth Context Setup ---
 export const AuthContext = createContext(null);
@@ -184,7 +186,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     console.log(`ProtectedRoute: User role '${userRole}' not allowed for this route. Redirecting.`);
     if (userRole === 'customer') {
-      return <Navigate to="/HomeUser" replace />;
+      return <Navigate to="/home" replace />;
     }
     return <Navigate to="/Login" replace />;
   }
@@ -199,7 +201,9 @@ function App() {
         <Routes>
           <Route path="/Login" element={<Login />} />
           <Route path="/CreateAccount" element={<CreateAccount />} />
-          <Route path="/" element={<Navigate to="Login" replace />} />
+
+          {/* Ini diganti ke halaman home user ketika link web diakses biar langsung ke web company profile */}
+          <Route path="/" element={<Navigate to="/home" replace />} />  
           
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<MainLayout />}>
@@ -208,6 +212,7 @@ function App() {
               <Route path="/faqform" element={<FAQForm />} />
               <Route path="/customer" element={<Customer />} />
               <Route path="/laporan" element={<Penjualan />} />
+              <Route path="/produksi" element={<ManajemenProduksi />} />
               <Route path="/produk" element={<Produk />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/produkTerlaris" element={<ProdukTerlaris />} />
@@ -222,14 +227,15 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
-            <Route path="/HomeUser" element={<HomeUser />} />
-            <Route path="/MenuUser" element={<MenuUser />} />
+            <Route path="/home" element={<HomeUser />} />
+            <Route path="/menu" element={<MenuUser />} />
             <Route path="/CartUser" element={<CartUser />} />
             <Route path="/CheckoutUser" element={<CheckoutUser />} />
             <Route path="/NotificationUser" element={<NotificationUser />} />
             <Route path="/ChatUser" element={<ChatUser />} />
             <Route path="/FAQUser" element={<FAQUser />} />
             <Route path="/ProfInfo" element={<ProfInfo />} />
+            <Route path="/tentang" element={<TentangUser />} />
             <Route path="/FeedbackUser" element={<FeedbackUser />} />
             <Route path="/ProfileUser" element={<ProfileUser />} />
             <Route path="/lokasi" element={<LokasiUser />} />

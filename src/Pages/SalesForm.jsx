@@ -882,474 +882,816 @@
 
 // export default SalesForm;
 
+// import React, { useState, useEffect, useMemo } from 'react';
+// import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
+// import Swal from 'sweetalert2';
+// import {
+//   Search,
+//   SlidersHorizontal,
+//   CircleAlert,
+//   X, // Mengganti XCircle dengan X untuk tombol tutup
+//   Plus,
+//   Minus,
+//   ChevronDown,
+//   ArrowRight,
+//   Info,
+//   Utensils, // Icon for Dine In
+//   ShoppingBag, // Icon for Take Away
+//   Laptop, // Icon for Order Online
+//   User, // Icon for customer name
+//   Warehouse, // Icon for table number
+//   Building, // Icon for customer type (Indoor/Outdoor)
+// } from 'lucide-react';
+
+// const SalesForm = ({ onClose, onSuccess, initialOrderData }) => {
+//   const [products, setProducts] = useState([]);
+//   const [activeCategory, setActiveCategory] = useState('Classic Coffee'); // Default ke Classic Coffee
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [orderList, setOrderList] = useState([]);
+//   const [orderType, setOrderType] = useState('Dine In');
+//   const [customerName, setCustomerName] = useState('');
+//   const [tableNumber, setTableNumber] = useState('');
+//   const [customerType, setCustomerType] = useState('Indoor');
+//   const [loadingProducts, setLoadingProducts] = useState(true);
+//   const [productFetchError, setProductFetchError] = useState(null);
+
+//   const productCategories = [
+//     "Food and Bakery", "Classic Coffee", "Non Coffee", "Fruity Series",
+//     "Cheese Latte Series", "Cloud Series", "Jujutsu Kaisen Series",
+//     "UPSETDUCK X PISTACHIO SERIES", "Pesta Kuliner Banting Harga",
+//     "SPECIAL OFFER", "Flash Sale Makan Harian",
+//   ];
+
+//   useEffect(() => {
+//     const fetchProductsFromSupabase = async () => {
+//       setLoadingProducts(true);
+//       setProductFetchError(null);
+//       try {
+//         const { data, error } = await supabase.from('produk').select('*');
+//         if (error) throw error;
+//         setProducts(data);
+//         if (data.length > 0) {
+//           const defaultCategory = productCategories.includes('Classic Coffee') ? 'Classic Coffee' : data[0].kategori;
+//           setActiveCategory(defaultCategory);
+//         }
+//       } catch (err) {
+//         console.error("Error fetching products:", err.message);
+//         setProductFetchError("Gagal memuat daftar produk. Pastikan tabel 'produk' ada dan Supabase terhubung dengan benar.");
+//       } finally {
+//         setLoadingProducts(false);
+//       }
+//     };
+//     fetchProductsFromSupabase();
+//   }, []);
+
+//   useEffect(() => {
+//     if (initialOrderData) {
+//       setCustomerName(initialOrderData.name || '');
+//       setOrderType(initialOrderData.order_type || 'Dine In');
+//       setTableNumber(initialOrderData.table_number || '');
+//       setCustomerType(initialOrderData.customer_type || 'Indoor');
+//       // If editing an existing order, populate orderList from initialOrderData items
+//       // For a new order form, this should likely be empty
+//       // This logic needs to be adjusted based on how initialOrderData is structured for existing orders
+//       setOrderList([]); // Assuming it's always a new order for now
+//     } else {
+//       setCustomerName('');
+//       setOrderType('Dine In');
+//       setTableNumber('');
+//       setCustomerType('Indoor');
+//       setOrderList([]);
+//     }
+//   }, [initialOrderData]);
+
+//   const subtotal = useMemo(() => orderList.reduce((sum, item) => sum + item.price * item.quantity, 0), [orderList]);
+//   const taxRate = 0.10;
+//   const tax = subtotal * taxRate;
+//   const total = subtotal + tax;
+
+//   const filteredProducts = useMemo(() => {
+//     return products.filter(product =>
+//       product.kategori === activeCategory &&
+//       product.nama.toLowerCase().includes(searchTerm.toLowerCase())
+//     );
+//   }, [products, activeCategory, searchTerm]);
+
+//   const addToOrder = (productToAdd) => {
+//     setOrderList(prevList => {
+//       const existingItem = prevList.find(item => item.id === productToAdd.id);
+//       if (existingItem) {
+//         return prevList.map(item =>
+//           item.id === productToAdd.id
+//             ? { ...item, quantity: item.quantity + 1 }
+//             : item
+//         );
+//       } else {
+//         return [...prevList, {
+//           id: productToAdd.id,
+//           name: productToAdd.nama,
+//           price: productToAdd.harga,
+//           imageUrl: productToAdd.gambar,
+//           quantity: 1,
+//           modifiers: []
+//         }];
+//       }
+//     });
+//   };
+
+//   const updateOrderQuantity = (id, delta) => {
+//     setOrderList(prevList => {
+//       const updatedList = prevList.map(item =>
+//         item.id === id
+//           ? { ...item, quantity: item.quantity + delta }
+//           : item
+//       ).filter(item => item.quantity > 0);
+//       return updatedList;
+//     });
+//   };
+
+//   const removeItem = (id) => {
+//     setOrderList(prevList => prevList.filter(item => item.id !== id));
+//   };
+
+//   const handlePlaceOrder = async () => {
+//     if (orderList.length === 0) {
+//       Swal.fire('Pesanan Kosong', 'Harap tambahkan item ke pesanan terlebih dahulu.', 'warning');
+//       return;
+//     }
+
+//     if (!customerName.trim()) {
+//       Swal.fire('Nama Pelanggan Kosong', 'Harap masukkan nama pelanggan.', 'warning');
+//       return;
+//     }
+
+//     try {
+//       const { data: orderData, error: orderError } = await supabase
+//         .from('orders')
+//         .insert({
+//           customer_name: customerName,
+//           order_type: orderType,
+//           table_number: tableNumber,
+//           customer_type: customerType,
+//           status: 'Processing',
+//           total_amount: total,
+//         })
+//         .select();
+
+//       if (orderError) throw orderError;
+
+//       const newOrderId = orderData[0].id;
+
+//       const orderItemsToInsert = orderList.map(item => ({
+//         order_id: newOrderId,
+//         product_id: item.id,
+//         product_name: item.name,
+//         quantity: item.quantity,
+//         price_per_unit: item.price
+//       }));
+
+//       const { error: orderItemsError } = await supabase
+//         .from('order_items')
+//         .insert(orderItemsToInsert);
+
+//       if (orderItemsError) throw orderItemsError;
+
+//       Swal.fire('Berhasil!', `Pesanan untuk ${customerName} berhasil ditempatkan. Total: Rp ${total.toLocaleString('id-ID')}`, 'success');
+
+//       setOrderList([]);
+//       setCustomerName('');
+//       setTableNumber('');
+//       setCustomerType('Indoor');
+//       onSuccess();
+//       onClose();
+//     } catch (err) {
+//       console.error("Error placing order:", err.message);
+//       Swal.fire('Gagal!', `Terjadi kesalahan saat menempatkan pesanan: ${err.message}. Mohon cek koneksi Supabase Anda.`, 'error');
+//     }
+//   };
+
+//   const today = new Date();
+//   const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+//   const formattedDate = today.toLocaleDateString('id-ID', options);
+
+//   return (
+//        <div className="fixed inset-0 bg-white bg-opacity-90 flex justify-center items-center z-[1000] p-4 font-sans antialiased"> {/* Hapus bg-black bg-opacity-70 */}
+//           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-full h-full flex flex-col relative animate-fade-in-up transform transition-all duration-300 scale-90 opacity-100"> {/* Ubah max-w-6xl menjadi max-w-full dan h-[90vh] menjadi h-full */}
+//             <button
+//               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-light z-20 transition-transform duration-200 hover:rotate-90"
+//               onClick={onClose}
+//               title="Tutup Form"
+//             >
+//               <X size={28} />
+//         </button>
+
+//         {/* Header Section - Orange Theme */}
+//         <div className="flex-none bg-orange-600 text-white p-6 rounded-t-xl flex justify-between items-center">
+//           <h2 className="text-3xl font-extrabold flex items-center">
+//             <span className="mr-3">Form</span> Pesanan Baru
+//           </h2>
+//           <div className="text-lg font-medium opacity-90">
+//             {formattedDate}
+//           </div>
+//         </div>
+
+//         <div className="flex flex-1 p-6 bg-gray-50 overflow-hidden">
+//           {/* Left Panel: Product Selection */}
+//           <div className="w-2/3 bg-white rounded-lg shadow-lg p-6 mr-6 flex flex-col border border-gray-200">
+//             {/* Search and Filter Section */}
+//             <div className="flex items-center justify-between mb-6 gap-4">
+//               <div className="relative flex-1">
+//                 <input
+//                   type="text"
+//                   placeholder="Cari produk..."
+//                   className="w-full p-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200 text-base"
+//                   value={searchTerm}
+//                   onChange={(e) => setSearchTerm(e.target.value)}
+//                 />
+//                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+//               </div>
+//               <button
+//                 className="bg-orange-50 text-orange-700 p-3 rounded-lg hover:bg-orange-100 transition-colors duration-200 flex items-center justify-center shadow-sm"
+//                 title="Filter Produk"
+//               >
+//                 <SlidersHorizontal className="w-5 h-5" />
+//               </button>
+//             </div>
+
+//             {/* Category Tabs */}
+//             <div className="flex space-x-3 overflow-x-auto pb-3 mb-6 custom-scrollbar-horizontal border-b border-gray-200">
+//               {productCategories.map(category => {
+//                 const itemCount = products.filter(p => p.kategori === category).length;
+//                 return (
+//                   <button
+//                     key={category}
+//                     className={`flex-shrink-0 py-2 px-5 rounded-full font-semibold text-sm transition-all duration-200 whitespace-nowrap group
+//                       ${activeCategory === category
+//                         ? 'bg-orange-600 text-white shadow-md'
+//                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+//                       }`}
+//                     onClick={() => setActiveCategory(category)}
+//                   >
+//                     {category} <span className="ml-1 text-xs opacity-75 group-hover:opacity-100 transition-opacity duration-200">({itemCount} item)</span>
+//                   </button>
+//                 );
+//               })}
+//             </div>
+
+//             {/* Product List */}
+//             {loadingProducts ? (
+//               <div className="flex-1 flex items-center justify-center flex-col py-10">
+//                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mb-4"></div>
+//                 <p className="text-xl text-gray-600 font-medium">Memuat produk...</p>
+//               </div>
+//             ) : productFetchError ? (
+//               <div className="flex-1 flex flex-col items-center justify-center text-red-600 text-center bg-red-50 rounded-lg p-6 border border-red-200">
+//                 <CircleAlert className="w-10 h-10 mb-4 text-red-500" />
+//                 <p className="text-lg font-semibold mb-2">Terjadi Kesalahan!</p>
+//                 <p className="text-gray-700">{productFetchError}</p>
+//               </div>
+//             ) : filteredProducts.length === 0 ? (
+//               <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-center bg-gray-100 rounded-lg p-6">
+//                 <Info className="w-10 h-10 mb-4" />
+//                 <p className="text-lg font-semibold mb-2">Tidak Ditemukan</p>
+//                 <p>Tidak ada produk yang cocok di kategori ini atau dengan pencarian Anda.</p>
+//               </div>
+//             ) : (
+//               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+//                 {filteredProducts.map(product => (
+//                   <div
+//                     key={product.id}
+//                     className="bg-white border border-gray-200 rounded-xl shadow-md p-4 flex flex-col items-center text-center cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+//                     onClick={() => addToOrder(product)}
+//                   >
+//                     <img
+//                       src={product.gambar || 'https://via.placeholder.com/150/f97316/FFFFFF?text=No+Image'}
+//                       alt={product.nama}
+//                       className="w-full h-28 object-cover rounded-lg mb-3 shadow-sm"
+//                       onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150/f97316/FFFFFF?text=No+Image'; }}
+//                     />
+//                     <p className="font-bold text-gray-900 text-lg mb-1 leading-tight">{product.nama}</p>
+//                     <p className="text-orange-600 font-extrabold text-xl">Rp {product.harga?.toLocaleString('id-ID')}</p>
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+
+//         {/* Right Panel: Order Summary */}
+// <div className="w-1/3 bg-white rounded-lg shadow-lg p-6 flex flex-col border border-gray-200 max-h-[calc(100vh-160px)] overflow-hidden">
+//   {/* Header */}
+//   <h2 className="text-2xl font-bold text-gray-800 mb-3">Struk Pembelian</h2>
+
+//   {/* Order Type Buttons */}
+//   <div className="grid grid-cols-3 gap-2 bg-gray-100 p-1 rounded-lg mb-3 text-sm font-semibold flex-none">
+//     {['Dine In', 'Take Away', 'Order Online'].map(type => (
+//       <button
+//         key={type}
+//         className={`py-2 px-1 rounded-lg transition-colors duration-200 flex flex-col items-center justify-center
+//           ${orderType === type ? 'bg-orange-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-200'}`}
+//         onClick={() => setOrderType(type)}
+//       >
+//         {type === 'Dine In' && <Utensils size={16} className="mb-1" />}
+//         {type === 'Take Away' && <ShoppingBag size={16} className="mb-1" />}
+//         {type === 'Order Online' && <Laptop size={16} className="mb-1" />}
+//         {type}
+//       </button>
+//     ))}
+//   </div>
+
+//   {/* Customer Info Inputs */}
+//   <div className="space-y-3 flex-none">
+//     {/* Nama */}
+//     <div>
+//       <label htmlFor="customerName" className="block text-xs font-medium text-gray-700 mb-1">
+//         <User size={14} className="inline-block mr-1 text-gray-500" /> Nama Pelanggan
+//       </label>
+//       <input
+//         type="text"
+//         id="customerName"
+//         value={customerName}
+//         onChange={(e) => setCustomerName(e.target.value)}
+//         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+//         placeholder="Cth: John Doe"
+//       />
+//     </div>
+
+//     {/* Meja + Tipe */}
+//     <div className="flex space-x-2">
+//       <div className="flex-1">
+//         <label htmlFor="tableNumber" className="block text-xs font-medium text-gray-700 mb-1">
+//           <Warehouse size={14} className="inline-block mr-1 text-gray-500" /> Meja
+//         </label>
+//         <input
+//           type="text"
+//           id="tableNumber"
+//           value={tableNumber}
+//           onChange={(e) => setTableNumber(e.target.value)}
+//           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+//           placeholder="Cth: Meja 5"
+//         />
+//       </div>
+//       <div className="flex-1 relative">
+//         <label htmlFor="customerType" className="block text-xs font-medium text-gray-700 mb-1">
+//           <Building size={14} className="inline-block mr-1 text-gray-500" /> Tipe Area
+//         </label>
+//         <select
+//           id="customerType"
+//           value={customerType}
+//           onChange={(e) => setCustomerType(e.target.value)}
+//           className="w-full p-2 border border-gray-300 rounded-md appearance-none bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 pr-6 text-sm"
+//         >
+//           <option value="Indoor">Indoor</option>
+//           <option value="Outdoor">Outdoor</option>
+//         </select>
+//         <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+//       </div>
+//     </div>
+//   </div>
+
+//   {/* Order List Scrollable */}
+//   <div className="flex-1 overflow-y-auto mt-3 pr-1 custom-scrollbar border-y border-gray-200 py-3">
+//     {orderList.length === 0 ? (
+//       <div className="text-center text-gray-500 py-6">
+//         <Info size={32} className="mx-auto mb-2" />
+//         <p>Belum ada item dalam pesanan.</p>
+//       </div>
+//     ) : (
+//       orderList.map(item => (
+//         <div key={item.id} className="flex items-center justify-between border-b border-gray-100 py-2 last:border-b-0">
+//           <div className="flex items-center">
+//             <img
+//               src={item.imageUrl || 'https://via.placeholder.com/50/f97316/FFFFFF?text=No+Image'}
+//               alt={item.name}
+//               className="w-10 h-10 object-cover rounded-md mr-2 shadow-sm"
+//               onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/50/f97316/FFFFFF?text=No+Image'; }}
+//             />
+//             <div>
+//               <p className="font-medium text-gray-800 text-sm">{item.name}</p>
+//               <p className="text-xs text-gray-500">Rp {item.price.toLocaleString('id-ID')}</p>
+//             </div>
+//           </div>
+//           <div className="flex items-center space-x-1">
+//             <button
+//               className="bg-gray-200 text-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-gray-300"
+//               onClick={() => updateOrderQuantity(item.id, -1)}
+//             ><Minus size={14} /></button>
+//             <span className="font-bold text-gray-900 text-sm">{item.quantity}</span>
+//             <button
+//               className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-orange-600"
+//               onClick={() => updateOrderQuantity(item.id, 1)}
+//             ><Plus size={14} /></button>
+//             <p className="font-bold text-gray-900 text-sm w-16 text-right">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
+//             <button
+//               className="text-red-500 hover:text-red-700 ml-1"
+//               onClick={() => removeItem(item.id)}
+//             ><X size={16} /></button>
+//           </div>
+//         </div>
+//       ))
+//     )}
+//   </div>
+
+//   {/* Summary + Button */}
+//   <div className="flex-none mt-4 space-y-3">
+//     <div className="flex justify-between text-sm">
+//       <span>Subtotal</span>
+//       <span className="font-semibold">Rp {subtotal.toLocaleString('id-ID')}</span>
+//     </div>
+//     <div className="flex justify-between text-sm">
+//       <span>Pajak ({taxRate * 100}%)</span>
+//       <span className="font-semibold">Rp {tax.toLocaleString('id-ID')}</span>
+//     </div>
+//     <div className="flex justify-between text-lg font-bold text-orange-700 border-t border-dashed border-gray-300 pt-2">
+//       <span>Total</span>
+//       <span>Rp {total.toLocaleString('id-ID')}</span>
+//     </div>
+//     <button
+//       className={`w-full bg-orange-600 text-white py-3 rounded-lg text-base font-bold flex items-center justify-center shadow-md hover:bg-orange-700 transition
+//         ${orderList.length === 0 || !customerName.trim() ? 'opacity-500 cursor-not-allowed' : ''}`}
+//       onClick={handlePlaceOrder}
+//       disabled={orderList.length === 0 || !customerName.trim()}
+//     >
+//       <ArrowRight size={20} className="mr-2" /> Proses Transaksi Rp {total.toLocaleString('id-ID')}
+//     </button>
+//   </div>
+// </div>
+
+//         </div>
+//       </div>
+//       <style>{`
+//         .custom-scrollbar::-webkit-scrollbar {
+//           width: 8px;
+//         }
+//         .custom-scrollbar::-webkit-scrollbar-track {
+//           background: #f1f1f1;
+//           border-radius: 10px;
+//         }
+//         .custom-scrollbar::-webkit-scrollbar-thumb {
+//           background: #ccc; /* Light grey for scrollbar thumb */
+//           border-radius: 10px;
+//         }
+//         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+//           background: #999;
+//         }
+//         .custom-scrollbar-horizontal::-webkit-scrollbar {
+//           height: 8px;
+//         }
+//         .custom-scrollbar-horizontal::-webkit-scrollbar-track {
+//           background: #f1f1f1;
+//           border-radius: 10px;
+//         }
+//         .custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+//           background: #ccc; /* Light grey for scrollbar thumb */
+//           border-radius: 10px;
+//         }
+//         .custom-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+//           background: #999;
+//         }
+//       `}</style>
+//     </div>
+//   );  
+// };
+
+// export default SalesForm;
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
+import { supabase } from '../supabase';
 import Swal from 'sweetalert2';
 import {
-  Search,
-  SlidersHorizontal,
-  CircleAlert,
-  X, // Mengganti XCircle dengan X untuk tombol tutup
-  Plus,
-  Minus,
-  ChevronDown,
-  ArrowRight,
-  Info,
-  Utensils, // Icon for Dine In
-  ShoppingBag, // Icon for Take Away
-  Laptop, // Icon for Order Online
-  User, // Icon for customer name
-  Warehouse, // Icon for table number
-  Building, // Icon for customer type (Indoor/Outdoor)
+  Search,
+  SlidersHorizontal,
+  CircleAlert,
+  X,
+  Plus,
+  Minus,
+  ChevronDown,
+  ArrowRight,
+  Info,
+  Utensils,
+  ShoppingBag,
+  Laptop,
+  User,
+  Warehouse,
+  Building,
 } from 'lucide-react';
 
 const SalesForm = ({ onClose, onSuccess, initialOrderData }) => {
-  const [products, setProducts] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('Classic Coffee'); // Default ke Classic Coffee
-  const [searchTerm, setSearchTerm] = useState('');
-  const [orderList, setOrderList] = useState([]);
-  const [orderType, setOrderType] = useState('Dine In');
-  const [customerName, setCustomerName] = useState('');
-  const [tableNumber, setTableNumber] = useState('');
-  const [customerType, setCustomerType] = useState('Indoor');
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [productFetchError, setProductFetchError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('Classic Coffee');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [orderList, setOrderList] = useState([]);
+  const [orderType, setOrderType] = useState('Dine In');
+  const [customerName, setCustomerName] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
+  const [customerType, setCustomerType] = useState('Indoor');
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productFetchError, setProductFetchError] = useState(null);
 
-  const productCategories = [
-    "Food and Bakery", "Classic Coffee", "Non Coffee", "Fruity Series",
-    "Cheese Latte Series", "Cloud Series", "Jujutsu Kaisen Series",
-    "UPSETDUCK X PISTACHIO SERIES", "Pesta Kuliner Banting Harga",
-    "SPECIAL OFFER", "Flash Sale Makan Harian",
-  ];
+  const productCategories = [
+    "Food and Bakery", "Classic Coffee", "Non Coffee", "Fruity Series",
+    "Cheese Latte Series", "Cloud Series", "Jujutsu Kaisen Series",
+    "UPSETDUCK X PISTACHIO SERIES", "Pesta Kuliner Banting Harga",
+    "SPECIAL OFFER", "Flash Sale Makan Harian",
+  ];
 
-  useEffect(() => {
-    const fetchProductsFromSupabase = async () => {
-      setLoadingProducts(true);
-      setProductFetchError(null);
-      try {
-        const { data, error } = await supabase.from('produk').select('*');
-        if (error) throw error;
-        setProducts(data);
-        if (data.length > 0) {
-          const defaultCategory = productCategories.includes('Classic Coffee') ? 'Classic Coffee' : data[0].kategori;
-          setActiveCategory(defaultCategory);
-        }
-      } catch (err) {
-        console.error("Error fetching products:", err.message);
-        setProductFetchError("Gagal memuat daftar produk. Pastikan tabel 'produk' ada dan Supabase terhubung dengan benar.");
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
-    fetchProductsFromSupabase();
-  }, []);
+  useEffect(() => {
+    const fetchProductsFromSupabase = async () => {
+      setLoadingProducts(true);
+      try {
+        const { data, error } = await supabase.from('produk').select('*');
+        if (error) throw error;
+        setProducts(data);
+        if (data.length > 0) {
+          setActiveCategory('Classic Coffee');
+        }
+      } catch (err) {
+        setProductFetchError("Gagal memuat produk. Cek koneksi Supabase.");
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchProductsFromSupabase();
+  }, []);
 
-  useEffect(() => {
-    if (initialOrderData) {
-      setCustomerName(initialOrderData.name || '');
-      setOrderType(initialOrderData.order_type || 'Dine In');
-      setTableNumber(initialOrderData.table_number || '');
-      setCustomerType(initialOrderData.customer_type || 'Indoor');
-      // If editing an existing order, populate orderList from initialOrderData items
-      // For a new order form, this should likely be empty
-      // This logic needs to be adjusted based on how initialOrderData is structured for existing orders
-      setOrderList([]); // Assuming it's always a new order for now
-    } else {
-      setCustomerName('');
-      setOrderType('Dine In');
-      setTableNumber('');
-      setCustomerType('Indoor');
-      setOrderList([]);
-    }
-  }, [initialOrderData]);
+  useEffect(() => {
+    if (initialOrderData) {
+      setCustomerName(initialOrderData.name || '');
+      setOrderType(initialOrderData.order_type || 'Dine In');
+      setTableNumber(initialOrderData.table_number || '');
+      setCustomerType(initialOrderData.customer_type || 'Indoor');
+    }
+  }, [initialOrderData]);
 
-  const subtotal = useMemo(() => orderList.reduce((sum, item) => sum + item.price * item.quantity, 0), [orderList]);
-  const taxRate = 0.10;
-  const tax = subtotal * taxRate;
-  const total = subtotal + tax;
+  const subtotal = useMemo(() => orderList.reduce((sum, item) => sum + item.price * item.quantity, 0), [orderList]);
+  const taxRate = 0.10;
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
 
-  const filteredProducts = useMemo(() => {
-    return products.filter(product =>
-      product.kategori === activeCategory &&
-      product.nama.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [products, activeCategory, searchTerm]);
+  const filteredProducts = useMemo(() => {
+    return products.filter(product =>
+      product.kategori === activeCategory &&
+      product.nama.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, activeCategory, searchTerm]);
 
-  const addToOrder = (productToAdd) => {
-    setOrderList(prevList => {
-      const existingItem = prevList.find(item => item.id === productToAdd.id);
-      if (existingItem) {
-        return prevList.map(item =>
-          item.id === productToAdd.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prevList, {
-          id: productToAdd.id,
-          name: productToAdd.nama,
-          price: productToAdd.harga,
-          imageUrl: productToAdd.gambar,
-          quantity: 1,
-          modifiers: []
-        }];
-      }
-    });
-  };
+  const addToOrder = (product) => {
+    setOrderList(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+      }
+      return [...prev, { id: product.id, name: product.nama, price: product.harga, imageUrl: product.gambar, quantity: 1 }];
+    });
+  };
 
-  const updateOrderQuantity = (id, delta) => {
-    setOrderList(prevList => {
-      const updatedList = prevList.map(item =>
-        item.id === id
-          ? { ...item, quantity: item.quantity + delta }
-          : item
-      ).filter(item => item.quantity > 0);
-      return updatedList;
-    });
-  };
+  const updateOrderQuantity = (id, delta) => {
+    setOrderList(prev => prev.map(item => item.id === id ? { ...item, quantity: item.quantity + delta } : item).filter(i => i.quantity > 0));
+  };
 
-  const removeItem = (id) => {
-    setOrderList(prevList => prevList.filter(item => item.id !== id));
-  };
+  const handlePlaceOrder = async () => {
+    if (!customerName.trim() || orderList.length === 0) {
+      Swal.fire('Incomplete', 'Mohon isi nama dan pilih menu.', 'warning');
+      return;
+    }
 
-  const handlePlaceOrder = async () => {
-    if (orderList.length === 0) {
-      Swal.fire('Pesanan Kosong', 'Harap tambahkan item ke pesanan terlebih dahulu.', 'warning');
-      return;
-    }
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: customerName,
+          order_type: orderType,
+          table_number: tableNumber,
+          customer_type: customerType,
+          status: 'Processing',
+          total_amount: total,
+        }).select();
 
-    if (!customerName.trim()) {
-      Swal.fire('Nama Pelanggan Kosong', 'Harap masukkan nama pelanggan.', 'warning');
-      return;
-    }
+      if (orderError) throw orderError;
 
-    try {
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: customerName,
-          order_type: orderType,
-          table_number: tableNumber,
-          customer_type: customerType,
-          status: 'Processing',
-          total_amount: total,
-        })
-        .select();
+      const items = orderList.map(item => ({
+        order_id: orderData[0].id,
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        price_per_unit: item.price
+      }));
 
-      if (orderError) throw orderError;
+      await supabase.from('order_items').insert(items);
+      
+      Swal.fire('Sukses!', 'Pesanan berhasil dibuat.', 'success');
+      onSuccess();
+      onClose();
+    } catch (err) {
+      Swal.fire('Error', err.message, 'error');
+    }
+  };
 
-      const newOrderId = orderData[0].id;
+  return (
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex justify-center items-center z-[1000] p-0 md:p-4">
+      <div className="bg-white w-full max-w-[1400px] h-full md:h-[95vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+        
+        {/* Header */}
+        <div className="bg-orange-600 px-8 py-6 flex justify-between items-center text-white">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight">POINT OF SALES</h2>
+            <p className="text-orange-100 text-sm opacity-80">{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-orange-500 rounded-full transition-colors">
+            <X size={28} />
+          </button>
+        </div>
 
-      const orderItemsToInsert = orderList.map(item => ({
-        order_id: newOrderId,
-        product_id: item.id,
-        product_name: item.name,
-        quantity: item.quantity,
-        price_per_unit: item.price
-      }));
+        <div className="flex flex-1 overflow-hidden bg-gray-50">
+          {/* Left: Product Selection */}
+          <div className="flex-1 flex flex-col p-6 overflow-hidden">
+            <div className="flex gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Cari menu favorit..." 
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button className="bg-white p-3 rounded-xl shadow-sm text-gray-600 hover:text-orange-600 transition-colors">
+                <SlidersHorizontal size={20} />
+              </button>
+            </div>
 
-      const { error: orderItemsError } = await supabase
-        .from('order_items')
-        .insert(orderItemsToInsert);
+            {/* Categories */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+              {productCategories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all
+                    ${activeCategory === cat ? 'bg-orange-600 text-white shadow-lg shadow-orange-200' : 'bg-white text-gray-500 hover:bg-gray-100'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
-      if (orderItemsError) throw orderItemsError;
-
-      Swal.fire('Berhasil!', `Pesanan untuk ${customerName} berhasil ditempatkan. Total: Rp ${total.toLocaleString('id-ID')}`, 'success');
-
-      setOrderList([]);
-      setCustomerName('');
-      setTableNumber('');
-      setCustomerType('Indoor');
-      onSuccess();
-      onClose();
-    } catch (err) {
-      console.error("Error placing order:", err.message);
-      Swal.fire('Gagal!', `Terjadi kesalahan saat menempatkan pesanan: ${err.message}. Mohon cek koneksi Supabase Anda.`, 'error');
-    }
-  };
-
-  const today = new Date();
-  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-  const formattedDate = today.toLocaleDateString('id-ID', options);
-
-  return (
-       <div className="fixed inset-0 bg-white bg-opacity-90 flex justify-center items-center z-[1000] p-4 font-sans antialiased"> {/* Hapus bg-black bg-opacity-70 */}
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-full h-full flex flex-col relative animate-fade-in-up transform transition-all duration-300 scale-90 opacity-100"> {/* Ubah max-w-6xl menjadi max-w-full dan h-[90vh] menjadi h-full */}
-            <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-light z-20 transition-transform duration-200 hover:rotate-90"
-              onClick={onClose}
-              title="Tutup Form"
-            >
-              <X size={28} />
-        </button>
-
-        {/* Header Section - Orange Theme */}
-        <div className="flex-none bg-orange-600 text-white p-6 rounded-t-xl flex justify-between items-center">
-          <h2 className="text-3xl font-extrabold flex items-center">
-            <span className="mr-3">Form</span> Pesanan Baru
-          </h2>
-          <div className="text-lg font-medium opacity-90">
-            {formattedDate}
-          </div>
-        </div>
-
-        <div className="flex flex-1 p-6 bg-gray-50 overflow-hidden">
-          {/* Left Panel: Product Selection */}
-          <div className="w-2/3 bg-white rounded-lg shadow-lg p-6 mr-6 flex flex-col border border-gray-200">
-            {/* Search and Filter Section */}
-            <div className="flex items-center justify-between mb-6 gap-4">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="Cari produk..."
-                  className="w-full p-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200 text-base"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              </div>
-              <button
-                className="bg-orange-50 text-orange-700 p-3 rounded-lg hover:bg-orange-100 transition-colors duration-200 flex items-center justify-center shadow-sm"
-                title="Filter Produk"
-              >
-                <SlidersHorizontal className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="flex space-x-3 overflow-x-auto pb-3 mb-6 custom-scrollbar-horizontal border-b border-gray-200">
-              {productCategories.map(category => {
-                const itemCount = products.filter(p => p.kategori === category).length;
-                return (
-                  <button
-                    key={category}
-                    className={`flex-shrink-0 py-2 px-5 rounded-full font-semibold text-sm transition-all duration-200 whitespace-nowrap group
-                      ${activeCategory === category
-                        ? 'bg-orange-600 text-white shadow-md'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    onClick={() => setActiveCategory(category)}
-                  >
-                    {category} <span className="ml-1 text-xs opacity-75 group-hover:opacity-100 transition-opacity duration-200">({itemCount} item)</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Product List */}
-            {loadingProducts ? (
-              <div className="flex-1 flex items-center justify-center flex-col py-10">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mb-4"></div>
-                <p className="text-xl text-gray-600 font-medium">Memuat produk...</p>
-              </div>
-            ) : productFetchError ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-red-600 text-center bg-red-50 rounded-lg p-6 border border-red-200">
-                <CircleAlert className="w-10 h-10 mb-4 text-red-500" />
-                <p className="text-lg font-semibold mb-2">Terjadi Kesalahan!</p>
-                <p className="text-gray-700">{productFetchError}</p>
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-center bg-gray-100 rounded-lg p-6">
-                <Info className="w-10 h-10 mb-4" />
-                <p className="text-lg font-semibold mb-2">Tidak Ditemukan</p>
-                <p>Tidak ada produk yang cocok di kategori ini atau dengan pencarian Anda.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
-                {filteredProducts.map(product => (
-                  <div
-                    key={product.id}
-                    className="bg-white border border-gray-200 rounded-xl shadow-md p-4 flex flex-col items-center text-center cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                    onClick={() => addToOrder(product)}
-                  >
-                    <img
-                      src={product.gambar || 'https://via.placeholder.com/150/f97316/FFFFFF?text=No+Image'}
-                      alt={product.nama}
-                      className="w-full h-28 object-cover rounded-lg mb-3 shadow-sm"
-                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150/f97316/FFFFFF?text=No+Image'; }}
-                    />
-                    <p className="font-bold text-gray-900 text-lg mb-1 leading-tight">{product.nama}</p>
-                    <p className="text-orange-600 font-extrabold text-xl">Rp {product.harga?.toLocaleString('id-ID')}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-        {/* Right Panel: Order Summary */}
-<div className="w-1/3 bg-white rounded-lg shadow-lg p-6 flex flex-col border border-gray-200 max-h-[calc(100vh-160px)] overflow-hidden">
-  {/* Header */}
-  <h2 className="text-2xl font-bold text-gray-800 mb-3">Struk Pembelian</h2>
-
-  {/* Order Type Buttons */}
-  <div className="grid grid-cols-3 gap-2 bg-gray-100 p-1 rounded-lg mb-3 text-sm font-semibold flex-none">
-    {['Dine In', 'Take Away', 'Order Online'].map(type => (
-      <button
-        key={type}
-        className={`py-2 px-1 rounded-lg transition-colors duration-200 flex flex-col items-center justify-center
-          ${orderType === type ? 'bg-orange-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-200'}`}
-        onClick={() => setOrderType(type)}
-      >
-        {type === 'Dine In' && <Utensils size={16} className="mb-1" />}
-        {type === 'Take Away' && <ShoppingBag size={16} className="mb-1" />}
-        {type === 'Order Online' && <Laptop size={16} className="mb-1" />}
-        {type}
-      </button>
-    ))}
-  </div>
-
-  {/* Customer Info Inputs */}
-  <div className="space-y-3 flex-none">
-    {/* Nama */}
-    <div>
-      <label htmlFor="customerName" className="block text-xs font-medium text-gray-700 mb-1">
-        <User size={14} className="inline-block mr-1 text-gray-500" /> Nama Pelanggan
-      </label>
-      <input
-        type="text"
-        id="customerName"
-        value={customerName}
-        onChange={(e) => setCustomerName(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
-        placeholder="Cth: John Doe"
-      />
-    </div>
-
-    {/* Meja + Tipe */}
-    <div className="flex space-x-2">
-      <div className="flex-1">
-        <label htmlFor="tableNumber" className="block text-xs font-medium text-gray-700 mb-1">
-          <Warehouse size={14} className="inline-block mr-1 text-gray-500" /> Meja
-        </label>
-        <input
-          type="text"
-          id="tableNumber"
-          value={tableNumber}
-          onChange={(e) => setTableNumber(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
-          placeholder="Cth: Meja 5"
-        />
-      </div>
-      <div className="flex-1 relative">
-        <label htmlFor="customerType" className="block text-xs font-medium text-gray-700 mb-1">
-          <Building size={14} className="inline-block mr-1 text-gray-500" /> Tipe Area
-        </label>
-        <select
-          id="customerType"
-          value={customerType}
-          onChange={(e) => setCustomerType(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md appearance-none bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 pr-6 text-sm"
-        >
-          <option value="Indoor">Indoor</option>
-          <option value="Outdoor">Outdoor</option>
-        </select>
-        <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
-      </div>
-    </div>
-  </div>
-
-  {/* Order List Scrollable */}
-  <div className="flex-1 overflow-y-auto mt-3 pr-1 custom-scrollbar border-y border-gray-200 py-3">
-    {orderList.length === 0 ? (
-      <div className="text-center text-gray-500 py-6">
-        <Info size={32} className="mx-auto mb-2" />
-        <p>Belum ada item dalam pesanan.</p>
-      </div>
-    ) : (
-      orderList.map(item => (
-        <div key={item.id} className="flex items-center justify-between border-b border-gray-100 py-2 last:border-b-0">
-          <div className="flex items-center">
-            <img
-              src={item.imageUrl || 'https://via.placeholder.com/50/f97316/FFFFFF?text=No+Image'}
-              alt={item.name}
-              className="w-10 h-10 object-cover rounded-md mr-2 shadow-sm"
-              onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/50/f97316/FFFFFF?text=No+Image'; }}
-            />
-            <div>
-              <p className="font-medium text-gray-800 text-sm">{item.name}</p>
-              <p className="text-xs text-gray-500">Rp {item.price.toLocaleString('id-ID')}</p>
+            {/* Product Grid */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              {loadingProducts ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent mb-4"></div>
+                  <p>Menyiapkan Menu...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredProducts.map(product => (
+                    <div 
+                      key={product.id}
+                      onClick={() => addToOrder(product)}
+                      className="bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group border border-transparent hover:border-orange-200"
+                    >
+                      <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-gray-100">
+                        <img 
+                          src={product.gambar || 'https://via.placeholder.com/150'} 
+                          alt={product.nama}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <h3 className="font-bold text-gray-800 line-clamp-1">{product.nama}</h3>
+                      <p className="text-orange-600 font-black text-lg mt-1">Rp {product.harga?.toLocaleString('id-ID')}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <button
-              className="bg-gray-200 text-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-gray-300"
-              onClick={() => updateOrderQuantity(item.id, -1)}
-            ><Minus size={14} /></button>
-            <span className="font-bold text-gray-900 text-sm">{item.quantity}</span>
-            <button
-              className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-orange-600"
-              onClick={() => updateOrderQuantity(item.id, 1)}
-            ><Plus size={14} /></button>
-            <p className="font-bold text-gray-900 text-sm w-16 text-right">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
-            <button
-              className="text-red-500 hover:text-red-700 ml-1"
-              onClick={() => removeItem(item.id)}
-            ><X size={16} /></button>
+
+          {/* Right: Checkout Panel */}
+          <div className="w-[400px] bg-white border-l border-gray-200 flex flex-col shadow-2xl">
+            <div className="p-6 flex-1 flex flex-col overflow-hidden">
+              <h3 className="text-xl font-black text-gray-800 mb-6 flex items-center gap-2">
+                <ShoppingBag className="text-orange-600" /> DETAIL PESANAN
+              </h3>
+
+              {/* Order Type Tabs */}
+              <div className="flex p-1 bg-gray-100 rounded-xl mb-6">
+                {[
+                  { id: 'Dine In', icon: Utensils },
+                  { id: 'Take Away', icon: ShoppingBag },
+                  { id: 'Order Online', icon: Laptop }
+                ].map(type => (
+                  <button
+                    key={type.id}
+                    onClick={() => setOrderType(type.id)}
+                    className={`flex-1 flex flex-col items-center py-2 rounded-lg transition-all
+                      ${orderType === type.id ? 'bg-white shadow-sm text-orange-600' : 'text-gray-400'}`}
+                  >
+                    <type.icon size={18} />
+                    <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">{type.id}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Customer Form */}
+              <div className="space-y-4 mb-6">
+                <div className="relative">
+                  <User className="absolute left-3 top-3 text-gray-400" size={16} />
+                  <input 
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
+                    placeholder="Nama Pelanggan"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <Warehouse className="absolute left-3 top-3 text-gray-400" size={16} />
+                    <input 
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
+                      placeholder="No. Meja"
+                      value={tableNumber}
+                      onChange={(e) => setTableNumber(e.target.value)}
+                    />
+                  </div>
+                  <div className="relative flex-1">
+                    <Building className="absolute left-3 top-3 text-gray-400" size={16} />
+                    <select 
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm appearance-none cursor-pointer"
+                      value={customerType}
+                      onChange={(e) => setCustomerType(e.target.value)}
+                    >
+                      <option value="Indoor">Indoor</option>
+                      <option value="Outdoor">Outdoor</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Item List */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
+                {orderList.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-gray-300 py-10">
+                    <ShoppingBag size={48} strokeWidth={1} />
+                    <p className="mt-2 text-sm">Keranjang masih kosong</p>
+                  </div>
+                ) : (
+                  orderList.map(item => (
+                    <div key={item.id} className="flex gap-3 py-3 border-b border-gray-50 group">
+                      <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                        <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-gray-800 line-clamp-1">{item.name}</h4>
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-orange-600 font-bold text-sm">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
+                          <div className="flex items-center gap-3 bg-gray-100 rounded-full px-2 py-1">
+                            <button onClick={() => updateOrderQuantity(item.id, -1)} className="hover:text-orange-600"><Minus size={14}/></button>
+                            <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                            <button onClick={() => updateOrderQuantity(item.id, 1)} className="hover:text-orange-600"><Plus size={14}/></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Totals */}
+              <div className="pt-6 mt-2 border-t border-gray-100 space-y-3">
+                <div className="flex justify-between text-gray-500 text-sm">
+                  <span>Subtotal</span>
+                  <span className="font-semibold text-gray-800">Rp {subtotal.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between text-gray-500 text-sm">
+                  <span>Pajak (10%)</span>
+                  <span className="font-semibold text-gray-800">Rp {tax.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between text-xl font-black text-gray-900 pt-2">
+                  <span>Total</span>
+                  <span className="text-orange-600">Rp {total.toLocaleString('id-ID')}</span>
+                </div>
+                <button 
+                  disabled={orderList.length === 0}
+                  onClick={handlePlaceOrder}
+                  className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 text-white py-4 rounded-2xl font-black mt-4 flex items-center justify-center gap-2 shadow-lg shadow-orange-100 transition-all active:scale-[0.98]"
+                >
+                  PROSES TRANSAKSI <ArrowRight size={20} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      ))
-    )}
-  </div>
+      </div>
 
-  {/* Summary + Button */}
-  <div className="flex-none mt-4 space-y-3">
-    <div className="flex justify-between text-sm">
-      <span>Subtotal</span>
-      <span className="font-semibold">Rp {subtotal.toLocaleString('id-ID')}</span>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
-    <div className="flex justify-between text-sm">
-      <span>Pajak ({taxRate * 100}%)</span>
-      <span className="font-semibold">Rp {tax.toLocaleString('id-ID')}</span>
-    </div>
-    <div className="flex justify-between text-lg font-bold text-orange-700 border-t border-dashed border-gray-300 pt-2">
-      <span>Total</span>
-      <span>Rp {total.toLocaleString('id-ID')}</span>
-    </div>
-    <button
-      className={`w-full bg-orange-600 text-white py-3 rounded-lg text-base font-bold flex items-center justify-center shadow-md hover:bg-orange-700 transition
-        ${orderList.length === 0 || !customerName.trim() ? 'opacity-500 cursor-not-allowed' : ''}`}
-      onClick={handlePlaceOrder}
-      disabled={orderList.length === 0 || !customerName.trim()}
-    >
-      <ArrowRight size={20} className="mr-2" /> Proses Transaksi Rp {total.toLocaleString('id-ID')}
-    </button>
-  </div>
-</div>
-
-        </div>
-      </div>
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #ccc; /* Light grey for scrollbar thumb */
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #999;
-        }
-        .custom-scrollbar-horizontal::-webkit-scrollbar {
-          height: 8px;
-        }
-        .custom-scrollbar-horizontal::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
-          background: #ccc; /* Light grey for scrollbar thumb */
-          border-radius: 10px;
-        }
-        .custom-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
-          background: #999;
-        }
-      `}</style>
-    </div>
-  );  
+  );
 };
 
 export default SalesForm;

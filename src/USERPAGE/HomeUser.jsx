@@ -558,3 +558,242 @@ export default function HomeUser() {
     </div>
   );
 }
+
+// import React, { useState } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import { useInView } from "react-intersection-observer";
+// import { Link } from "react-router-dom";
+// import {
+//   Instagram,
+//   MessageCircle,
+//   ChevronLeft,
+//   ChevronRight,
+//   CheckCircle2,
+// } from "lucide-react";
+
+// // Import gambar dari folder src/assets/img/
+// import saladBuahImg from "../assets/img/salad_buah.jpg";
+// import cheeseCakeImg from "../assets/img/cheese_cake.jpg";
+// import buahPotongImg from "../assets/img/buah_potong.jpg";
+
+// const menuItems = [
+//   { name: "Salad Buah", img: saladBuahImg },
+//   { name: "Cheese Cake", img: cheeseCakeImg },
+//   { name: "Buah Potong Segar", img: buahPotongImg },
+// ];
+
+// const FadeInOnScroll = ({ children, delay = 0 }) => {
+//   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+//   return (
+//     <motion.div
+//       ref={ref}
+//       initial={{ opacity: 0, y: 30 }}
+//       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+//       transition={{ duration: 0.8, delay }}
+//     >
+//       {children}
+//     </motion.div>
+//   );
+// };
+
+// export default function FreshlyCutHome() {
+//   const [activeHero, setActiveHero] = useState(0);
+
+//   const nextItem = () => setActiveHero((prev) => (prev + 1) % menuItems.length);
+//   const prevItem = () =>
+//     setActiveHero((prev) => (prev - 1 + menuItems.length) % menuItems.length);
+
+//   return (
+//     <div className="font-sans bg-[#FDFBE2] min-h-screen">
+//       {/* --- HEADER --- */}
+//       <header className="px-4 py-6">
+//         <nav className="bg-[#2D5A27] rounded-full max-w-4xl mx-auto py-3 px-8 flex justify-between items-center text-white shadow-lg">
+//           <div className="flex gap-6 text-sm font-medium">
+//             <Link to="/" className="text-yellow-400 font-bold">
+//               Home
+//             </Link>
+//             <Link to="/menu" className="hover:text-yellow-400">
+//               Menu
+//             </Link>
+//           </div>
+//           <img
+//             src="/img/logo-freshly-cut.png"
+//             alt="Logo"
+//             className="h-10 w-10 object-contain"
+//           />
+//           <div className="flex gap-6 text-sm font-medium">
+//             <Link to="/tentang" className="hover:text-yellow-400">
+//               Tentang
+//             </Link>
+//             <Link to="/lokasi" className="hover:text-yellow-400">
+//               Lokasi
+//             </Link>
+//             <Link to="/Login" className="hover:text-yellow-400">
+//               Login
+//             </Link>
+//           </div>
+//         </nav>
+//       </header>
+
+//       {/* --- HERO SECTION --- */}
+//       <section className="relative overflow-hidden px-6 pt-10 pb-20">
+//         <div className="absolute top-0 right-0 w-1/2 h-full bg-[#A3C982] -z-10 rounded-l-[100px] hidden md:block"></div>
+
+//         <div className="max-w-6xl mx-auto text-center">
+//           <p className="text-[#2D5A27] font-medium mb-2">
+//             Welcome To Freshly Cut
+//           </p>
+//           <h1 className="text-5xl md:text-7xl font-serif font-bold text-[#2D5A27] leading-tight mb-12">
+//             {menuItems[activeHero].name}
+//           </h1>
+
+//           <div className="relative flex justify-center items-center gap-4 md:gap-20">
+//             {/* Left Thumbnail */}
+//             <div className="hidden md:block opacity-40 scale-75 blur-sm transition-all duration-500">
+//               <img
+//                 src={
+//                   menuItems[
+//                     (activeHero - 1 + menuItems.length) % menuItems.length
+//                   ].img
+//                 }
+//                 alt="Prev"
+//                 className="w-64 h-64 md:w-80 md:h-80 object-cover rounded-full"
+//               />
+//             </div>
+
+//             {/* Main Carousel */}
+//             <div className="flex items-center gap-4">
+//               <button
+//                 onClick={prevItem}
+//                 className="text-[#A3C982] hover:text-[#2D5A27] transition"
+//               >
+//                 <ChevronLeft size={48} />
+//               </button>
+
+//               <div className="bg-white p-4 rounded-full shadow-2xl border-8 border-white">
+//                 <AnimatePresence mode="wait">
+//                   <motion.img
+//                     key={activeHero}
+//                     initial={{ opacity: 0, scale: 0.8 }}
+//                     animate={{ opacity: 1, scale: 1 }}
+//                     exit={{ opacity: 0, scale: 0.8 }}
+//                     transition={{ duration: 0.3 }}
+//                     src={menuItems[activeHero].img}
+//                     alt={menuItems[activeHero].name}
+//                     className="w-64 h-64 md:w-80 md:h-80 object-cover rounded-full"
+//                   />
+//                 </AnimatePresence>
+//               </div>
+
+//               <button
+//                 onClick={nextItem}
+//                 className="text-[#A3C982] hover:text-[#2D5A27] transition"
+//               >
+//                 <ChevronRight size={48} />
+//               </button>
+//             </div>
+
+//             {/* Right Thumbnail */}
+//             <div className="hidden md:block opacity-40 scale-75 blur-sm transition-all duration-500">
+//               <img
+//                 src={menuItems[(activeHero + 1) % menuItems.length].img}
+//                 alt="Next"
+//                 className="w-64 h-64 md:w-80 md:h-80 object-cover rounded-full"
+//               />
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* --- FEATURES SECTION --- */}
+//       <FadeInOnScroll>
+//         <section className="py-16 px-6 text-center">
+//           <div className="inline-block bg-[#F3B414] text-[#2D5A27] font-bold px-8 py-3 rounded-xl text-2xl mb-12 shadow-md">
+//             Kenapa Freshly Cut?
+//           </div>
+//           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+//             {[
+//               {
+//                 title: "Kesegaran Terjaga",
+//                 desc: "Dipotong langsung saat pesanan masuk atau harian",
+//               },
+//               {
+//                 title: "Higienis",
+//                 desc: "Pencucian food-grade dan standar kebersihan tinggi",
+//               },
+//               {
+//                 title: "Praktis",
+//                 desc: "Kemasan ready-to-go, lengkap dengan alat makan",
+//               },
+//             ].map((feature, i) => (
+//               <div key={i} className="flex flex-col items-center">
+//                 <CheckCircle2 className="text-[#A3C982] w-12 h-12 mb-4" />
+//                 <h3 className="text-xl font-bold text-[#2D5A27] mb-2">
+//                   {feature.title}
+//                 </h3>
+//                 <p className="text-gray-600 text-sm">{feature.desc}</p>
+//               </div>
+//             ))}
+//           </div>
+//         </section>
+//       </FadeInOnScroll>
+
+//       {/* --- MENU SECTION --- */}
+//       <section className="py-16 px-6 bg-white/50">
+//         <div className="max-w-6xl mx-auto">
+//           <div className="flex justify-between items-end mb-10">
+//             <h2 className="text-4xl font-serif font-bold text-[#2D5A27]">
+//               Menu Hari Ini
+//             </h2>
+//             <button className="bg-[#2D5A27] text-white px-6 py-2 rounded-full hover:bg-green-800 transition shadow-md">
+//               Lihat Semua Menu
+//             </button>
+//           </div>
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//             {menuItems.map((item, idx) => (
+//               <FadeInOnScroll key={idx} delay={idx * 0.1}>
+//                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center group hover:shadow-xl transition-all duration-300">
+//                   <div className="overflow-hidden mb-4 rounded-xl">
+//                     <img
+//                       src={item.img}
+//                       alt={item.name}
+//                       className="w-full h-56 object-contain group-hover:scale-110 transition duration-500"
+//                     />
+//                   </div>
+//                   <h3 className="text-xl font-bold text-[#2D5A27]">
+//                     {item.name}
+//                   </h3>
+//                 </div>
+//               </FadeInOnScroll>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+//       {/* --- FOOTER --- */}
+//       <footer className="bg-[#2D5A27] text-white pt-16 pb-6 rounded-t-[50px] mt-20">
+//         <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center">
+//           <div className="flex items-center gap-3 mb-4">
+//             <img src="/img/logo-white.png" alt="Logo" className="h-12" />
+//             <h2 className="text-3xl font-bold">Freshly Cut</h2>
+//           </div>
+//           <p className="max-w-md text-sm text-green-100 mb-8">
+//             Penyedia camilan buah potong & salad buah higienis di lingkungan PCR
+//           </p>
+
+//           <div className="flex gap-6 mb-12">
+//             <a href="#" className="bg-[#F3B414] p-3 rounded-full text-[#2D5A27] hover:scale-110 transition">
+//               <Instagram size={24} />
+//             </a>
+//             <a href="#" className="bg-[#F3B414] p-3 rounded-full text-[#2D5A27] hover:scale-110 transition">
+//               <MessageCircle size={24} />
+//             </a>
+//           </div>
+
+//           <div className="w-full border-t border-green-700 pt-6 text-xs text-green-200">
+//             Copyright © 2026 Freshly Cut.
+//           </div>
+//         </div>
+//       </footer>
+//     </div>
+//   );
+// }

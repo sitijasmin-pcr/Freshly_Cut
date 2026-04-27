@@ -1,358 +1,520 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { supabase } from '../supabase'; // Pastikan path ke supabase client Anda benar
+import { supabase } from "../supabase";
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
   Legend,
+  Area,
+  AreaChart,
 } from "recharts";
-import { FaInfoCircle } from "react-icons/fa";
-import { Package, DollarSign, TrendingUp, BarChart as BarChartIcon, Table } from 'lucide-react'; // Menggunakan ikon dari lucide-react
+
+// ============================================================
+// CATATAN:
+// Halaman ini mengambil data dari tabel `laporan_harian`
+// yang diisi melalui ManajemenProduksi.jsx
+// Kolom yang digunakan:
+//   tanggal, total_modal, total_pendapatan, laba_bersih,
+//   pcs_terjual, hpp_per_pcs, total_hasil_pcs
+// ============================================================
+
+// Custom Tooltip untuk chart
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-xl p-4 text-sm">
+        <p className="font-black text-[#004d33] mb-2">{label}</p>
+        {payload.map((entry, i) => (
+          <div key={i} className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
+            <span className="opacity-60">{entry.name}:</span>
+            <span className="font-bold">
+              {entry.name.includes("Pcs") || entry.name.includes("Terjual")
+                ? `${(entry.value || 0).toLocaleString("id-ID")} pcs`
+                : `Rp ${(entry.value || 0).toLocaleString("id-ID")}`}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 const Penjualan = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [salesData, setSalesData] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState('Current Month'); // State untuk periode yang dipilih
+  const [rawData, setRawData] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState("Last 30 Days");
+  const [activeChart, setActiveChart] = useState("pendapatan");
 
-  // Helper function to get month name
-  const getMonthName = useCallback((year, monthIndex) => {
-    const date = new Date(year, monthIndex, 1);
-    return date.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-  }, []);
+  // Format tanggal untuk label chart (singkat)
+  const formatChartDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
+  };
 
-  // Helper function to generate all months within a range, even if no data
-  const generateMonthlyData = useCallback((orders, numberOfMonths, endDate) => {
-    const dataMap = new Map();
-    let currentMonth = endDate.getMonth();
-    let currentYear = endDate.getFullYear();
+  // Format tanggal untuk tabel (lengkap)
+  const formatFullDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+  };
 
-    // Create placeholders for the last `numberOfMonths`
-    for (let i = 0; i < numberOfMonths; i++) {
-      let displayMonth = currentMonth - i;
-      let displayYear = currentYear;
-
-      if (displayMonth < 0) {
-        displayMonth += 12;
-        displayYear -= 1;
-      }
-
-      const monthKey = `${displayYear}-${(displayMonth + 1).toString().padStart(2, '0')}`;
-      dataMap.set(monthKey, {
-        bulan: getMonthName(displayYear, displayMonth),
-        totalProdukTerjual: 0,
-        totalPendapatan: 0
-      });
-    }
-
-    // Populate with actual order data
-    orders.forEach(order => {
-      const orderDate = new Date(order.created_at);
-      const monthKey = `${orderDate.getFullYear()}-${(orderDate.getMonth() + 1).toString().padStart(2, '0')}`;
-
-      if (dataMap.has(monthKey)) {
-        const currentData = dataMap.get(monthKey);
-        currentData.totalPendapatan += (order.total_amount || 0);
-        order.order_items.forEach(item => {
-          currentData.totalProdukTerjual += (item.quantity || 0);
-        });
-        dataMap.set(monthKey, currentData);
-      }
-    });
-
-    // Sort by month ascending (oldest to newest)
-    const sortedData = Array.from(dataMap.values()).sort((a, b) => {
-      // Parse month name back to a Date object for accurate sorting
-      const dateA = new Date(a.bulan.replace(/(\w+) (\d+)/, '$1 1, $2'));
-      const dateB = new Date(b.bulan.replace(/(\w+) (\d+)/, '$1 1, $2'));
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    return sortedData;
-  }, [getMonthName]);
-
-  const fetchSalesData = useCallback(async (period) => {
+  const fetchData = useCallback(async (period) => {
     setLoading(true);
     setError(null);
 
-    let startDate, endDate;
     const now = new Date();
-    now.setHours(23, 59, 59, 999); // Set to end of day for accurate filtering
-
-    let numberOfMonthsToShow = 1;
+    let startDate;
 
     switch (period) {
-      case 'Current Month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = now;
-        numberOfMonthsToShow = 1;
+      case "Last 7 Days":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 6);
         break;
-      case 'Last Month':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        endDate = now;
-        numberOfMonthsToShow = 2;
+      case "Last 30 Days":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 29);
         break;
-      case 'Last 3 Months':
+      case "Last 3 Months":
         startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-        endDate = now;
-        numberOfMonthsToShow = 3;
         break;
-      case 'Last 6 Months':
+      case "Last 6 Months":
         startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-        endDate = now;
-        numberOfMonthsToShow = 6;
         break;
-      case 'Last 12 Months':
+      case "Last 12 Months":
         startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-        endDate = now;
-        numberOfMonthsToShow = 12;
         break;
       default:
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = now;
-        numberOfMonthsToShow = 1;
-    }
-
-    if (startDate.getTime() > endDate.getTime()) {
-      startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 29);
     }
 
     try {
-      // console.log("Fetching sales data for period:", period); // Debugging
-      // console.log("Start Date:", startDate.toISOString()); // Debugging
-      // console.log("End Date:", endDate.toISOString()); // Debugging
+      const { data, error: dbError } = await supabase
+        .from("laporan_harian")
+        .select("tanggal, total_modal, total_pendapatan, laba_bersih, pcs_terjual, hpp_per_pcs, total_hasil_pcs")
+        .gte("tanggal", startDate.toISOString().split("T")[0])
+        .lte("tanggal", now.toISOString().split("T")[0])
+        .order("tanggal", { ascending: true });
 
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          created_at,
-          total_amount,
-          status,
-          order_items (
-            quantity
-          )
-        `)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString())
-        .eq('status', 'Completed');
-
-      if (ordersError) {
-        console.error("Supabase Error fetching orders:", ordersError);
-        throw ordersError;
-      }
-
-      // console.log("Raw orders fetched from Supabase:", orders); // Debugging
-      // if (orders.length === 0) { // Debugging
-      //     console.warn("No orders found for the selected period with status 'Completed'."); // Debugging
-      // }
-
-      const processedData = generateMonthlyData(orders, numberOfMonthsToShow, now);
-      // console.log("Processed sales data (monthly breakdown):", processedData); // Debugging
-      setSalesData(processedData);
-
+      if (dbError) throw dbError;
+      setRawData(data || []);
     } catch (err) {
-      console.error("Error fetching sales data:", err.message);
-      setError(`Gagal memuat data penjualan. Pesan: ${err.message}. Pastikan koneksi Supabase dan tabel sudah benar.`);
+      console.error(err);
+      setError(`Gagal memuat data: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  }, [generateMonthlyData]);
+  }, []);
 
   useEffect(() => {
-    fetchSalesData(selectedPeriod);
-  }, [fetchSalesData, selectedPeriod]);
+    fetchData(selectedPeriod);
+  }, [fetchData, selectedPeriod]);
 
-  const handlePeriodChange = (event) => {
-    setSelectedPeriod(event.target.value);
-  };
+  // Chart data: group by bulan jika period >= 3 bulan, else per hari
+  const chartData = useMemo(() => {
+    if (!rawData.length) return [];
+    const isMonthly = ["Last 3 Months", "Last 6 Months", "Last 12 Months"].includes(selectedPeriod);
 
-  // Memoized calculations to avoid re-calculating on every render if salesData doesn't change
-  const totalProduk = useMemo(() => salesData.reduce((sum, d) => sum + d.totalProdukTerjual, 0), [salesData]);
-  const totalPendapatan = useMemo(() => salesData.reduce((sum, d) => sum + d.totalPendapatan, 0), [salesData]);
-  const rataRataPendapatan = useMemo(() => totalPendapatan / (salesData.length > 0 ? salesData.length : 1), [totalPendapatan, salesData.length]);
+    if (isMonthly) {
+      const map = new Map();
+      rawData.forEach((item) => {
+        const d = new Date(item.tanggal);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const label = d.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
+        if (!map.has(key)) {
+          map.set(key, { label, total_modal: 0, total_pendapatan: 0, laba_bersih: 0, pcs_terjual: 0 });
+        }
+        const curr = map.get(key);
+        curr.total_modal += parseFloat(item.total_modal) || 0;
+        curr.total_pendapatan += parseFloat(item.total_pendapatan) || 0;
+        curr.laba_bersih += parseFloat(item.laba_bersih) || 0;
+        curr.pcs_terjual += parseInt(item.pcs_terjual) || 0;
+      });
+      return Array.from(map.values());
+    } else {
+      return rawData.map((item) => ({
+        label: formatChartDate(item.tanggal),
+        total_modal: parseFloat(item.total_modal) || 0,
+        total_pendapatan: parseFloat(item.total_pendapatan) || 0,
+        laba_bersih: parseFloat(item.laba_bersih) || 0,
+        pcs_terjual: parseInt(item.pcs_terjual) || 0,
+      }));
+    }
+  }, [rawData, selectedPeriod]);
 
-  const bulanMax = useMemo(() => salesData.length > 0 ? salesData.reduce((a, b) => a.totalPendapatan > b.totalPendapatan ? a : b) : null, [salesData]);
-  const bulanMin = useMemo(() => salesData.length > 0 ? salesData.reduce((a, b) => a.totalPendapatan < b.totalPendapatan ? a : b) : null, [salesData]);
+  const summary = useMemo(() => ({
+    totalModal: rawData.reduce((s, d) => s + (parseFloat(d.total_modal) || 0), 0),
+    totalPendapatan: rawData.reduce((s, d) => s + (parseFloat(d.total_pendapatan) || 0), 0),
+    totalLaba: rawData.reduce((s, d) => s + (parseFloat(d.laba_bersih) || 0), 0),
+    totalTerjual: rawData.reduce((s, d) => s + (parseInt(d.pcs_terjual) || 0), 0),
+    bestDay: rawData.length > 0 ? rawData.reduce((a, b) =>
+      (parseFloat(a.laba_bersih) || 0) > (parseFloat(b.laba_bersih) || 0) ? a : b
+    ) : null,
+    avgPendapatan: rawData.length > 0
+      ? rawData.reduce((s, d) => s + (parseFloat(d.total_pendapatan) || 0), 0) / rawData.length
+      : 0,
+  }), [rawData]);
 
-  const dataDenganPersentase = useMemo(() => {
-    return salesData.map((item, index) => {
-      if (index === 0) return { ...item, perubahan: 0 };
-      const prevMonthRevenue = salesData[index - 1].totalPendapatan;
-      const perubahan = prevMonthRevenue !== 0 ? ((item.totalPendapatan - prevMonthRevenue) / prevMonthRevenue) * 100 : 0;
-      return { ...item, perubahan: parseFloat(perubahan.toFixed(2)) };
-    });
-  }, [salesData]);
+  const formatRp = (val) =>
+    `Rp ${(parseFloat(val) || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
+
+  const chartTabs = [
+    { key: "pendapatan", label: "Pendapatan vs Modal", icon: "💰" },
+    { key: "laba", label: "Laba Bersih", icon: "📈" },
+    { key: "terjual", label: "Produk Terjual", icon: "📦" },
+  ];
+
+  const periodOptions = [
+    { value: "Last 7 Days", label: "7 Hari Terakhir" },
+    { value: "Last 30 Days", label: "30 Hari Terakhir" },
+    { value: "Last 3 Months", label: "3 Bulan Terakhir" },
+    { value: "Last 6 Months", label: "6 Bulan Terakhir" },
+    { value: "Last 12 Months", label: "12 Bulan Terakhir" },
+  ];
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen font-sans">
-      <h1 className="text-3xl font-bold text-center text-orange-700 mb-8">
-        Rangkuman Penjualan
-      </h1>
+    <div className="min-h-screen bg-[#FDF8EE] p-4 md:p-8 text-[#004d33] font-sans">
+      <div className="max-w-7xl mx-auto">
 
-      {/* Filter Periode */}
-      <div className="flex justify-end mb-6">
-        <div className="relative inline-block">
-          <label htmlFor="period-select" className="sr-only">Pilih Periode</label>
-          <select
-            id="period-select"
-            className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-4 pr-10 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 cursor-pointer"
-            value={selectedPeriod}
-            onChange={handlePeriodChange}
-          >
-            <option value="Current Month">Bulan Ini</option>
-            <option value="Last Month">Bulan Lalu</option>
-            <option value="Last 3 Months">3 Bulan Terakhir</option>
-            <option value="Last 6 Months">6 Bulan Terakhir</option>
-            <option value="Last 12 Months">12 Bulan Terakhir</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        {/* Header */}
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#004d33]/20 pb-6">
+          <div>
+            <h1 className="text-3xl font-black italic">
+              Freshly Cut <span className="text-orange-500">Sales</span>
+            </h1>
+            <p className="text-sm opacity-60 font-bold mt-1">Rangkuman & Analisis Penjualan</p>
           </div>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg shadow-md">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mb-4"></div>
-          <p className="text-xl text-gray-600 font-medium">Memuat data penjualan...</p>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg relative text-center mb-6 shadow-md">
-          <strong className="font-bold">Error:</strong>
-          <span className="block sm:inline"> {error}</span>
-          <p className="text-sm mt-2">Coba refresh halaman atau hubungi administrator jika masalah berlanjut.</p>
-        </div>
-      )}
-
-      {/* Konten Utama (Chart, Table, Summary Cards) */}
-      {!loading && !error && (
-        <>
-          {/* Chart */}
-          <div className="bg-white p-6 rounded-lg shadow-xl mb-6">
-            <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
-              <BarChartIcon className="mr-3 text-2xl" /> Grafik Pendapatan Bulanan
-            </h2>
-            <div className="w-full h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                {salesData.length > 0 ? (
-                  <BarChart data={dataDenganPersentase} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="bulan" className="text-sm text-gray-700" />
-                    <YAxis
-                      tickFormatter={(value) => `Rp${(value / 1000000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}jt`}
-                      className="text-sm text-gray-700"
-                    />
-                    <Tooltip
-                      formatter={(value) => `Rp${value.toLocaleString('id-ID')}`}
-                      labelFormatter={(label) => `Bulan: ${label}`}
-                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px', padding: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                      itemStyle={{ color: '#333', padding: '5px 0' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '15px' }} />
-                    <Bar dataKey="totalPendapatan" name="Total Pendapatan" fill="#f97316" radius={[5, 5, 0, 0]} />
-                  </BarChart>
-                ) : (
-                  <div className="flex flex-col justify-center items-center h-full text-gray-500 bg-gray-100 rounded-lg">
-                    <FaInfoCircle className="text-3xl mb-3" />
-                    <p className="text-lg">Tidak ada data penjualan tersedia untuk periode yang dipilih.</p>
-                  </div>
-                )}
-              </ResponsiveContainer>
+          {/* Period Selector */}
+          <div className="relative">
+            <select
+              className="appearance-none bg-white border-2 border-[#004d33]/20 text-[#004d33] py-3 pl-4 pr-10 rounded-2xl font-bold shadow-sm focus:outline-none focus:border-[#004d33]/50 cursor-pointer"
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+            >
+              {periodOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#004d33]">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
             </div>
           </div>
+        </header>
 
-          {/* Tabel Detail Penjualan */}
-          <div className="bg-white p-6 rounded-lg shadow-xl mb-6">
-            <h2 className="text-2xl font-bold text-orange-700 mb-4 flex items-center">
-              <Table className="mr-3 text-2xl" /> Detail Penjualan Bulanan
-            </h2>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-orange-100">
-                  <tr>
-                    <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Bulan</th>
-                    <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-orange-800 uppercase tracking-wider">Produk Terjual</th>
-                    <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-orange-800 uppercase tracking-wider">Pendapatan (Rp)</th>
-                    <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-orange-800 uppercase tracking-wider">Perubahan (%)</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {dataDenganPersentase.length > 0 ? (
-                    dataDenganPersentase.map((item, index) => (
-                      <tr
-                        key={item.bulan}
-                        className={`hover:bg-orange-50 transition-colors duration-150 ease-in-out
-                          ${bulanMax && item.bulan === bulanMax.bulan
-                            ? "bg-green-50"
-                            : bulanMin && item.bulan === bulanMin.bulan
-                              ? "bg-red-50"
-                              : ""
-                          }`}
-                      >
-                        <td className="py-3 px-4 font-medium text-gray-800 whitespace-nowrap">{item.bulan}</td>
-                        <td className="py-3 px-4 text-right text-gray-700">{item.totalProdukTerjual.toLocaleString('id-ID')}</td>
-                        <td className="py-3 px-4 text-right text-orange-600 font-bold whitespace-nowrap">
-                          Rp {item.totalPendapatan.toLocaleString('id-ID')}
-                        </td>
-                        <td className="py-3 px-4 text-right text-sm whitespace-nowrap">
-                          {index === 0 ? (
-                            <span className="text-gray-500">-</span>
-                          ) : (
-                            <span className={item.perubahan >= 0 ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>
-                              {item.perubahan >= 0 ? `+${item.perubahan.toLocaleString('id-ID')}%` : `${item.perubahan.toLocaleString('id-ID')}%`}
-                            </span>
-                          )}
+        {/* Loading */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[2.5rem] shadow-sm">
+            <div className="w-14 h-14 border-4 border-[#004d33] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="font-black opacity-50">Memuat data penjualan...</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-5 rounded-[2rem] mb-6 flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <p className="font-black">Gagal memuat data</p>
+              <p className="text-sm mt-1 opacity-70">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {[
+                {
+                  label: "Total Modal Dikeluarkan",
+                  value: formatRp(summary.totalModal),
+                  icon: "🛒",
+                  bg: "bg-blue-50 border-blue-100",
+                  textColor: "text-blue-700",
+                },
+                {
+                  label: "Total Pendapatan",
+                  value: formatRp(summary.totalPendapatan),
+                  icon: "💰",
+                  bg: "bg-green-50 border-green-100",
+                  textColor: "text-[#004d33]",
+                },
+                {
+                  label: "Total Laba Bersih",
+                  value: formatRp(summary.totalLaba),
+                  icon: summary.totalLaba >= 0 ? "📈" : "📉",
+                  bg: summary.totalLaba >= 0 ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100",
+                  textColor: summary.totalLaba >= 0 ? "text-emerald-700" : "text-red-700",
+                },
+                {
+                  label: "Total Produk Terjual",
+                  value: `${summary.totalTerjual.toLocaleString("id-ID")} pcs`,
+                  icon: "📦",
+                  bg: "bg-orange-50 border-orange-100",
+                  textColor: "text-orange-700",
+                },
+              ].map((card) => (
+                <div key={card.label} className={`${card.bg} border-2 rounded-[1.8rem] p-5 shadow-sm`}>
+                  <span className="text-3xl">{card.icon}</span>
+                  <p className="text-xs font-black uppercase opacity-40 tracking-wider mt-2">{card.label}</p>
+                  <p className={`text-xl font-black mt-1 leading-tight ${card.textColor}`}>{card.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Best Day & Avg */}
+            {summary.bestDay && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-[#004d33] text-white rounded-[2rem] p-6 shadow-lg">
+                  <p className="text-xs font-black uppercase opacity-60 tracking-wider">🏆 Hari Terbaik</p>
+                  <p className="text-2xl font-black mt-2">{formatFullDate(summary.bestDay.tanggal)}</p>
+                  <div className="flex gap-4 mt-3 text-sm">
+                    <div>
+                      <p className="opacity-60">Laba</p>
+                      <p className="font-black text-green-300">{formatRp(summary.bestDay.laba_bersih)}</p>
+                    </div>
+                    <div>
+                      <p className="opacity-60">Pendapatan</p>
+                      <p className="font-black">{formatRp(summary.bestDay.total_pendapatan)}</p>
+                    </div>
+                    <div>
+                      <p className="opacity-60">Terjual</p>
+                      <p className="font-black">{summary.bestDay.pcs_terjual} pcs</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white border-2 border-[#004d33]/10 rounded-[2rem] p-6 shadow-sm">
+                  <p className="text-xs font-black uppercase opacity-40 tracking-wider">📊 Rata-rata Harian</p>
+                  <p className="text-2xl font-black mt-2 text-[#004d33]">{formatRp(summary.avgPendapatan)}</p>
+                  <div className="flex gap-4 mt-3 text-sm">
+                    <div>
+                      <p className="opacity-40 font-semibold">Total Hari</p>
+                      <p className="font-black text-[#004d33]">{rawData.length} hari</p>
+                    </div>
+                    <div>
+                      <p className="opacity-40 font-semibold">Rata-rata Terjual</p>
+                      <p className="font-black text-orange-600">
+                        {rawData.length > 0
+                          ? Math.round(summary.totalTerjual / rawData.length)
+                          : 0}{" "}
+                        pcs/hari
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chart Section */}
+            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 mb-8">
+              {/* Chart Tab Switcher */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 className="text-xl font-black text-[#004d33]">📊 Grafik Penjualan</h2>
+                <div className="flex gap-2 bg-gray-50 p-1.5 rounded-2xl">
+                  {chartTabs.map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveChart(tab.key)}
+                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                        activeChart === tab.key
+                          ? "bg-[#004d33] text-white shadow-md"
+                          : "text-gray-400 hover:text-[#004d33]"
+                      }`}
+                    >
+                      {tab.icon} {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full h-72">
+                {chartData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full opacity-30">
+                    <span className="text-5xl mb-3">📉</span>
+                    <p className="font-black">Belum ada data untuk periode ini</p>
+                    <p className="text-sm">Tambahkan laporan di halaman Manajemen Produksi</p>
+                  </div>
+                ) : activeChart === "pendapatan" ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="gradPendapatan" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#004d33" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#004d33" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="gradModal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.12} />
+                          <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="label" tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }} />
+                      <YAxis
+                        tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                        tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ paddingTop: 12, fontWeight: 700, fontSize: 12 }} />
+                      <Area
+                        type="monotone"
+                        dataKey="total_pendapatan"
+                        name="Pendapatan"
+                        stroke="#004d33"
+                        strokeWidth={2.5}
+                        fill="url(#gradPendapatan)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="total_modal"
+                        name="Modal"
+                        stroke="#f97316"
+                        strokeWidth={2}
+                        fill="url(#gradModal)"
+                        strokeDasharray="4 2"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : activeChart === "laba" ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="label" tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }} />
+                      <YAxis
+                        tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                        tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ paddingTop: 12, fontWeight: 700, fontSize: 12 }} />
+                      <Bar
+                        dataKey="laba_bersih"
+                        name="Laba Bersih"
+                        radius={[6, 6, 0, 0]}
+                        fill="#004d33"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="label" tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }} />
+                      <YAxis tick={{ fontSize: 11, fontWeight: 700, fill: "#004d33" }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ paddingTop: 12, fontWeight: 700, fontSize: 12 }} />
+                      <Bar
+                        dataKey="pcs_terjual"
+                        name="Produk Terjual (pcs)"
+                        radius={[6, 6, 0, 0]}
+                        fill="#f97316"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* Tabel Detail */}
+            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
+              <h2 className="text-xl font-black text-[#004d33] mb-5 flex items-center gap-2">
+                <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-sm">📋</span>
+                Detail Laporan Harian
+              </h2>
+              <div className="overflow-x-auto rounded-2xl border-2 border-gray-50">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-[#004d33]/5">
+                      <th className="text-left px-5 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Tanggal</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Modal</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Terjual</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">HPP/pcs</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Pendapatan</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Laba Bersih</th>
+                      <th className="text-right px-4 py-3 font-black text-xs uppercase tracking-wider text-[#004d33]">Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {rawData.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center opacity-30">
+                          <span className="text-3xl">📭</span>
+                          <p className="font-black mt-2">Belum ada data untuk periode ini</p>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="py-6 text-center text-gray-500 bg-gray-50">
-                        Tidak ada data penjualan untuk ditampilkan.
-                      </td>
-                    </tr>
+                    ) : (
+                      [...rawData].reverse().map((item, idx) => {
+                        const pendapatan = parseFloat(item.total_pendapatan) || 0;
+                        const laba = parseFloat(item.laba_bersih) || 0;
+                        const margin = pendapatan > 0 ? (laba / pendapatan) * 100 : 0;
+                        return (
+                          <tr
+                            key={idx}
+                            className="hover:bg-green-50/30 transition-colors"
+                          >
+                            <td className="px-5 py-3 font-bold text-[#004d33]">{formatFullDate(item.tanggal)}</td>
+                            <td className="px-4 py-3 text-right font-mono text-gray-600">{formatRp(item.total_modal)}</td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-lg font-black text-xs">
+                                {(parseInt(item.pcs_terjual) || 0).toLocaleString("id-ID")} pcs
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right font-mono text-gray-500">{formatRp(item.hpp_per_pcs)}</td>
+                            <td className="px-4 py-3 text-right font-bold font-mono text-[#004d33]">{formatRp(item.total_pendapatan)}</td>
+                            <td className="px-4 py-3 text-right">
+                              <span className={`font-black font-mono ${laba >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                {formatRp(laba)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className={`text-xs font-black px-2 py-1 rounded-lg ${
+                                margin >= 20
+                                  ? "bg-green-100 text-green-700"
+                                  : margin >= 10
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-600"
+                              }`}>
+                                {margin.toFixed(1)}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                  {rawData.length > 0 && (
+                    <tfoot>
+                      <tr className="bg-[#004d33] text-white">
+                        <td className="px-5 py-3 font-black text-sm">TOTAL ({rawData.length} hari)</td>
+                        <td className="px-4 py-3 text-right font-black font-mono text-sm">{formatRp(summary.totalModal)}</td>
+                        <td className="px-4 py-3 text-right font-black text-sm">{summary.totalTerjual.toLocaleString("id-ID")} pcs</td>
+                        <td className="px-4 py-3 text-right font-black text-sm">-</td>
+                        <td className="px-4 py-3 text-right font-black font-mono text-sm">{formatRp(summary.totalPendapatan)}</td>
+                        <td className="px-4 py-3 text-right font-black font-mono text-sm">{formatRp(summary.totalLaba)}</td>
+                        <td className="px-4 py-3 text-right font-black text-sm">
+                          {summary.totalPendapatan > 0
+                            ? `${((summary.totalLaba / summary.totalPendapatan) * 100).toFixed(1)}%`
+                            : "-"}
+                        </td>
+                      </tr>
+                    </tfoot>
                   )}
-                </tbody>
-              </table>
+                </table>
+              </div>
             </div>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center border-b-4 border-orange-500 hover:shadow-2xl transition-shadow duration-300">
-              <Package className="text-orange-600 w-12 h-12 mb-3" />
-              <span className="text-gray-800 text-4xl font-extrabold">
-                {totalProduk.toLocaleString('id-ID')}
-              </span>
-              <p className="mt-2 text-gray-600 font-semibold text-lg">Total Produk Terjual</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center border-b-4 border-orange-500 hover:shadow-2xl transition-shadow duration-300">
-              <DollarSign className="text-orange-600 w-12 h-12 mb-3" />
-              <span className="text-gray-800 text-4xl font-extrabold">
-                Rp {totalPendapatan.toLocaleString('id-ID')}
-              </span>
-              <p className="mt-2 text-gray-600 font-semibold text-lg">Total Pendapatan</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center border-b-4 border-orange-500 hover:shadow-2xl transition-shadow duration-300">
-              <TrendingUp className="text-orange-600 w-12 h-12 mb-3" />
-              <span className="text-gray-800 text-4xl font-extrabold">
-                Rp {rataRataPendapatan.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-              </span>
-              <p className="mt-2 text-gray-600 font-semibold text-lg">Rata-rata Pendapatan Bulanan</p>
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

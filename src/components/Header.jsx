@@ -396,7 +396,7 @@ const Header = () => {
       {/* Left Side: Greeting and Current Page */}
       <div>
         <p className="text-sm text-gray-600 font-medium mb-1">
-          {greeting}, Admin!
+          {greeting}, Admin Freshly!
         </p>
         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
           {currentPageName}
