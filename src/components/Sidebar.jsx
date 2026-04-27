@@ -1,3 +1,4 @@
+import { TbToolsKitchen2 } from "react-icons/tb";
 import { BsPeopleFill } from "react-icons/bs";
 import {
   LayoutDashboard,
@@ -7,7 +8,6 @@ import {
   Settings,
   LogIn,
   UserPlus,
-  User,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaQuestionCircle, FaUser } from "react-icons/fa";
@@ -16,19 +16,26 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import { AiFillSchedule } from "react-icons/ai";
 
 const menuItems = [
-  // { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
-  { name: 'Dashboard', icon: <LayoutDashboard />, path: '/laporan' },
+  { name: 'Dashboard', icon: <LayoutDashboard />, path: '/dashboard' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
+<<<<<<< HEAD
   { name: 'POS', icon: <ShoppingCart />, path: '/sales' },
   { name: 'Produksi & Modal', icon: <BarChart2 />, path: '/produksi' },
   // { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
   { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
   // { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
   // { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
+=======
+  { name: 'Materials', icon: <TbToolsKitchen2 />, path: '/materials' },
+  { name: 'Sales', icon: <ShoppingCart />, path: '/sales' },
+  { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
+  { name: 'Customer', icon: <BsPeopleFill />, path: '/customer' },
+  { name: 'Shift', icon: <AiFillSchedule />, path: '/shift' },
+  { name: 'FAQ', icon: <FaQuestionCircle />, path: '/faq' },
+  { name: 'Feedback', icon: <MdFeedback />, path: '/feedback' },
+>>>>>>> 7c454f8b4197f7cb1b4f287cd38d9b3a8d758e35
   { name: 'Outlet', icon: <FaMapLocationDot />, path: '/branch' },
-  // { name: 'HomeUser', icon: <FaMapLocationDot />, path: '/HomeUser' },
   { name: 'User', icon: <FaUser />, path: '/user' },
-  // { name: 'Karyawan', icon: <FaUser />, path: '/karyawan' },
 ];
 
 const accountItems = [
@@ -44,20 +51,23 @@ const Sidebar = () => {
   return (
     <aside className="bg-white w-64 min-h-screen shadow-lg px-4 py-6 hidden md:block">
       <div className="text-xl font-bold mb-8 text-orange-700">
-        <img className="px-8" src="https://images.seeklogo.com/logo-png/51/1/tomoro-coffee-logo-png_seeklogo-513701.png" alt="Tomoro Coffee Logo" />
+        <img
+          className="px-8"
+          src="https://images.seeklogo.com/logo-png/51/1/tomoro-coffee-logo-png_seeklogo-513701.png"
+          alt="Logo"
+        />
       </div>
+
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            // Tambahkan kelas border-l-4 dan border-orange-500 untuk penanda aktif
-            // Sesuaikan padding-left (pl) agar tidak bergeser jika border ditambahkan
-            className={`
-              flex items-center gap-3 px-3 py-2 rounded-lg transition
-              ${isActive(item.path)
-                ? 'bg-orange-100 text-orange-800 font-semibold border-l-4 border-orange-500 pl-2' // Item aktif: background lebih terang, border kiri
-                : 'text-gray-700 hover:bg-orange-50' // Item tidak aktif: hover dengan background sangat terang
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition
+              ${
+                isActive(item.path)
+                  ? 'bg-orange-100 text-orange-800 font-semibold border-l-4 border-orange-500 pl-2'
+                  : 'text-gray-700 hover:bg-orange-50'
               }
             `}
           >
@@ -65,10 +75,9 @@ const Sidebar = () => {
             {item.name}
           </Link>
         ))}
-
       </nav>
     </aside>
   );
 };
 
-export default Sidebar;
+export default Sidebar; 

@@ -154,7 +154,7 @@ export default function OutletForm({ onClose, editingOutlet }) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.maps_url || !form.image_url) {
