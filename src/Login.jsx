@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from './App'; 
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
-import logo from "../assets/FreshlyLogo.png";
+import logo from "./assets/FreshlyLogo.png";
 
 const Login = () => {
   const [email, setEmail] = useState('');
