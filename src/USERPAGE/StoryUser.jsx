@@ -168,7 +168,7 @@ export default function StoryUser() {
         <AnimatedSection title="Jaringan Kami" icon={MapPin} delay={0.3}>
           <div className="rounded-2xl overflow-hidden border">
             <iframe
-              src="http://maps.google.com/maps?q=indonesia&output=embed"
+              src="https://www.google.com/maps?q=indonesia&output=embed"
               width="100%"
               height="350"
               loading="lazy"
