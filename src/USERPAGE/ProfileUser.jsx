@@ -110,7 +110,7 @@ export default function ProfileUser() {
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <Link to="/HomeUser" className="flex items-center gap-2">
-            <img src="src/assets/img/Logo buah segar _Freshly Cut_.png" alt="Logo" className="h-12" />
+            <img src="src/assets/FreshlyLogo.png" alt="Logo" className="h-12" />
             <div className="hidden sm:block">
               <span className="text-xl font-black text-orange-600 block leading-none">FRESHLY CUT</span>
               <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Makan Sehat, Tinggal Hap!</span>

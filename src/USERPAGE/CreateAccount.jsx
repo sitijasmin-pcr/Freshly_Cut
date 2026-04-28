@@ -68,7 +68,7 @@ export default function CreateAccount() {
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-8">
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-50 mb-4">
-            <img src="src/assets/img/Logo buah segar _Freshly Cut_.png" alt="Logo" className="h-16 object-contain" />
+            <img src="src/assets/FreshlyLogo.png" alt="Logo" className="h-16 object-contain" />
           </div>
           <h2 className="text-3xl font-black text-green-800 tracking-tight">Buat Akun</h2>
           <p className="text-gray-400 text-sm mt-1 font-medium">Lengkapi profil Anda untuk bergabung</p>
