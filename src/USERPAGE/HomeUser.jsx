@@ -17,6 +17,7 @@ import { supabase } from "../supabase";
 import { useCart } from "./CartContext";
 
 import logo from "../assets/FreshlyLogo.png";
+import hero from "../assets/img/image 15.png";
 
 const FadeInOnScroll = ({ children, delay = 0 }) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -126,7 +127,7 @@ export default function HomeUser() {
           </motion.div>
           <motion.div className="relative" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }}>
             <div className="absolute inset-0 bg-green-400/20 rounded-full blur-[120px]"></div>
-            <img src="src/assets/img/image 15.png" alt="Hero" className="relative z-10 w-full max-w-lg mx-auto drop-shadow-2xl animate-float" />
+            <img src={hero} alt="Hero" className="relative z-10 w-full max-w-lg mx-auto drop-shadow-2xl animate-float" />
           </motion.div>
         </div>
       </section>
