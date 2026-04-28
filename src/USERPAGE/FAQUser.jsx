@@ -71,27 +71,27 @@ export default function FAQUser() {
       {/* --- HERO FAQ --- */}
       <section className="bg-gradient-to-b from-[#F0F9FF] to-white py-24 px-6 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div
+          {/* <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200 text-white"
+            className="w-20 h-20 bg-green-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200 text-white"
           >
             <HelpCircle size={40} strokeWidth={2.5} />
-          </motion.div>
+          </motion.div> */}
           <motion.h1 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl md:text-6xl font-black text-blue-900 mb-6 italic tracking-tighter uppercase"
+            className="text-5xl md:text-6xl font-black text-green-900 mb-6 italic tracking-tighter uppercase"
           >
             Ada <span className="text-orange-600 text-6xl md:text-7xl">Pertanyaan?</span>
           </motion.h1>
-          <p className="text-blue-800/60 font-bold text-lg uppercase tracking-widest">
+          <p className="text-green-800/60 font-bold text-lg uppercase tracking-widest">
             Kami siap membantu kebutuhan nutrisimu
           </p>
         </div>
         
         <div className="absolute top-10 -left-10 w-40 h-40 bg-orange-100 rounded-full blur-[80px] opacity-60"></div>
-        <div className="absolute bottom-0 -right-10 w-60 h-60 bg-blue-100 rounded-full blur-[100px] opacity-60"></div>
+        <div className="absolute bottom-0 -right-10 w-60 h-60 bg-green-100 rounded-full blur-[100px] opacity-60"></div>
       </section>
 
       {/* --- FAQ ACCORDION --- */}
@@ -111,7 +111,7 @@ export default function FAQUser() {
                 transition={{ delay: index * 0.1 }}
                 className={`group rounded-[2.5rem] transition-all duration-300 border-2 ${
                   openIndex === index 
-                  ? "bg-white border-blue-600 shadow-2xl shadow-blue-100" 
+                  ? "bg-white border-green-600 shadow-2xl shadow-green-100" 
                   : "bg-gray-50 border-transparent hover:border-gray-200"
                 }`}
               >
@@ -120,12 +120,12 @@ export default function FAQUser() {
                   className="w-full flex justify-between items-center p-7 text-left focus:outline-none"
                 >
                   <span className={`text-lg font-black italic tracking-tight uppercase ${
-                    openIndex === index ? "text-blue-600" : "text-blue-900"
+                    openIndex === index ? "text-green-600" : "text-green-900"
                   }`}>
                     {faq.question}
                   </span>
                   <div className={`p-2 rounded-2xl transition-all duration-300 ${
-                    openIndex === index ? "bg-blue-600 text-white rotate-180" : "bg-white text-blue-900 shadow-sm"
+                    openIndex === index ? "bg-green-600 text-white rotate-180" : "bg-white text-green-900 shadow-sm"
                   }`}>
                     <ChevronDown size={24} strokeWidth={3} />
                   </div>
@@ -139,7 +139,7 @@ export default function FAQUser() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-8 pb-8 text-blue-800/70 font-bold leading-relaxed border-t border-blue-50 pt-4 mx-4">
+                      <div className="px-8 pb-8 text-green-800/70 font-bold leading-relaxed border-t border-green-50 pt-4 mx-4">
                         {faq.answer}
                       </div>
                     </motion.div>
@@ -151,12 +151,12 @@ export default function FAQUser() {
         )}
 
         {/* Contact CTA */}
-        <div className="mt-20 text-center bg-blue-900 rounded-[3.5rem] p-12 text-white relative overflow-hidden">
+        <div className="mt-20 text-center bg-green-900 rounded-[3.5rem] p-12 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10">
                 <MessageCircle size={120} />
             </div>
             <h3 className="text-3xl font-black italic mb-4 uppercase tracking-tighter">Masih punya pertanyaan?</h3>
-            <p className="text-blue-200 font-bold mb-8 uppercase text-xs tracking-widest">Hubungi tim support kami yang ramah</p>
+            <p className="text-green-200 font-bold mb-8 uppercase text-xs tracking-widest">Hubungi tim support kami yang ramah</p>
             <a 
               href="mailto:support@freshlycut.com" 
               className="inline-block bg-orange-600 hover:bg-orange-500 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition-all hover:-translate-y-1 active:scale-95"
@@ -174,7 +174,7 @@ export default function FAQUser() {
             <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/HomeUser" className="hover:text-orange-600 transition-colors">Home</Link></li>
               <li><Link to="/MenuUser" className="hover:text-orange-600 transition-colors">Our Menu</Link></li>
@@ -182,17 +182,17 @@ export default function FAQUser() {
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/FAQUser" className="hover:text-orange-600 transition-colors">General FAQ</Link></li>
               <li><Link to="/FeedbackUser" className="hover:text-orange-600 transition-colors">Feedback</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
             <div className="flex gap-4">
               {["instagram", "tiktok", "facebook"].map((social) => (
-                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-green-600 hover:text-white transition-all shadow-sm">
                   <i className={`fab fa-${social}`}></i>
                 </a>
               ))}

@@ -100,13 +100,13 @@ export default function MenuUser() {
             animate={{ opacity: 1, x: 0 }} 
             transition={{ duration: 1 }}
           >
-            <span className="inline-block px-4 py-1 bg-blue-600 text-white text-xs font-black rounded-full mb-4 tracking-widest uppercase italic">
+            <span className="inline-block px-4 py-1 bg-green-600 text-white text-xs font-black rounded-full mb-4 tracking-widest uppercase italic">
               Our Full Menu
             </span>
-            <h1 className="text-6xl md:text-7xl font-black leading-[0.9] mb-6 text-blue-900">
+            <h1 className="text-6xl md:text-7xl font-black leading-[0.9] mb-6 text-green-900">
               EXPLORE <br /> <span className="text-orange-600 italic uppercase">OUR TASTE.</span>
             </h1>
-            <p className="text-lg text-blue-800/70 mb-8 max-w-md font-medium">
+            <p className="text-lg text-green-800/70 mb-8 max-w-md font-medium">
               Temukan berbagai pilihan menu terbaik kami yang siap menyegarkan harimu kapan saja.
             </p>
           </motion.div>
@@ -118,13 +118,13 @@ export default function MenuUser() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-5 px-8 rounded-full border-none shadow-xl shadow-blue-100 font-bold text-lg focus:ring-4 focus:ring-orange-400 outline-none transition-all"
+                className="w-full py-5 px-8 rounded-full border-none shadow-xl shadow-blue-100 font-bold text-lg focus:ring-4 focus:ring-green-400 outline-none transition-all"
               />
-              <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-blue-600" />
+              <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-green-600" />
             </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px]"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-400/10 rounded-full blur-[100px]"></div>
       </section>
 
       {/* --- CATEGORY NAVIGATION --- */}
@@ -136,8 +136,8 @@ export default function MenuUser() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                 selectedCategory === cat
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "bg-transparent text-gray-400 hover:text-blue-600 hover:bg-gray-50"
+                  ? "bg-green-600 text-white shadow-lg"
+                  : "bg-transparent text-gray-400 hover:text-green-600 hover:bg-gray-50"
               }`}
             >
               {cat}
@@ -158,17 +158,17 @@ export default function MenuUser() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: i * 0.05 }}
-                className="group bg-white rounded-[2rem] border-b-8 border-blue-100 hover:border-orange-500 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-2xl flex flex-col h-full"
+                className="group bg-white rounded-[2rem] border-b-8 border-green-100 hover:border-green-500 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-2xl flex flex-col h-full"
               >
                 <div className="relative h-48 md:h-64 bg-[#F8FBFF] flex items-center justify-center p-6 overflow-hidden">
-                  <div className="absolute w-full h-full bg-blue-100/30 rounded-full scale-0 group-hover:scale-125 transition-transform duration-700"></div>
+                  <div className="absolute w-full h-full bg-green-100/30 rounded-full scale-0 group-hover:scale-125 transition-transform duration-700"></div>
                   <img 
                     src={item.gambar || "/img/default-product.png"} 
                     alt={item.nama}
                     className="h-full object-contain z-10 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500"
                   />
                   <div className="absolute top-4 left-4 z-20">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter">
+                    <span className="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter">
                       {item.kategori}
                     </span>
                   </div>
@@ -176,7 +176,7 @@ export default function MenuUser() {
 
                 <div className="p-5 text-center flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-base md:text-xl font-black text-blue-900 uppercase italic leading-none mb-2 line-clamp-2">
+                    <h3 className="text-base md:text-xl font-black text-green-900 uppercase italic leading-none mb-2 line-clamp-2">
                       {item.nama}
                     </h3>
                     <p className="text-orange-500 font-black text-lg md:text-2xl mb-4 tracking-tighter">
@@ -188,7 +188,7 @@ export default function MenuUser() {
                     className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 ${
                       addedItemId === item.id
                         ? "bg-green-500 text-white"
-                        : "bg-blue-600 hover:bg-orange-500 text-white"
+                        : "bg-green-600 hover:bg-green-500 text-white"
                     }`}
                   >
                     {addedItemId === item.id ? "ADDED! ✓" : <><Plus size={16} strokeWidth={3} /> ORDER NOW</>}
@@ -216,7 +216,7 @@ export default function MenuUser() {
             <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/HomeUser" className="hover:text-orange-600 transition-colors">Home</Link></li>
               <li><Link to="/MenuUser" className="hover:text-orange-600 transition-colors">Our Menu</Link></li>
@@ -224,17 +224,17 @@ export default function MenuUser() {
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/FAQUser" className="hover:text-orange-600 transition-colors">General FAQ</Link></li>
               <li><Link to="/FeedbackUser" className="hover:text-orange-600 transition-colors">Feedback</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
             <div className="flex gap-4">
               {["instagram", "tiktok", "facebook"].map((social) => (
-                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-green-600 hover:text-white transition-all shadow-sm">
                   <i className={`fab fa-${social}`}></i>
                 </a>
               ))}

@@ -100,13 +100,13 @@ export default function FeedbackUser() {
       {/* --- HERO SECTION --- */}
       <section className="bg-gradient-to-b from-[#F0F9FF] to-white py-24 px-6 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200 text-white">
+          {/* <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200 text-white">
             <MessageSquare size={40} />
-          </motion.div>
-          <h1 className="text-5xl md:text-6xl font-black text-blue-900 mb-6 italic tracking-tighter uppercase">
+          </motion.div> */}
+          <h1 className="text-5xl md:text-6xl font-black text-green-900 mb-6 italic tracking-tighter uppercase">
             BERI KAMI <span className="text-orange-600">MASUKAN</span>
           </h1>
-          <p className="text-blue-800/60 font-bold text-lg uppercase tracking-widest">
+          <p className="text-green-800/60 font-bold text-lg uppercase tracking-widest">
             Pendapatmu membuat Freshly Cut lebih baik lagi
           </p>
         </div>
@@ -116,7 +116,7 @@ export default function FeedbackUser() {
       <main className="flex-grow flex items-center justify-center px-6 pb-24 -mt-10 relative z-20">
         <motion.div 
           initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          className="bg-white rounded-[3.5rem] shadow-2xl shadow-blue-100 p-8 md:p-12 w-full max-w-2xl border border-blue-50"
+          className="bg-white rounded-[3.5rem] shadow-2xl shadow-green-100 p-8 md:p-12 w-full max-w-2xl border border-green-50"
         >
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -126,8 +126,8 @@ export default function FeedbackUser() {
 
             <Textarea label="Pesan atau Saran" placeholder="Bagaimana pengalamanmu hari ini?" value={feedback} onChange={(e) => setFeedback(e.target.value)} required />
 
-            <div className="bg-blue-50 rounded-[2rem] p-8 text-center border-2 border-dashed border-blue-200">
-              <label className="block text-xs font-black uppercase tracking-widest text-blue-900 mb-4">Rating Pengalaman</label>
+            <div className="bg-green-50 rounded-[2rem] p-8 text-center border-2 border-dashed border-green-200">
+              <label className="block text-xs font-black uppercase tracking-widest text-green-900 mb-4">Rating Pengalaman</label>
               <div className="flex justify-center gap-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <motion.div key={star} whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
@@ -145,7 +145,7 @@ export default function FeedbackUser() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 transition-all shadow-xl shadow-blue-200 active:scale-95 disabled:bg-gray-300"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 transition-all shadow-xl shadow-green-200 active:scale-95 disabled:bg-gray-300"
             >
               {isSubmitting ? "Mengirim..." : (
                 <>
@@ -165,7 +165,7 @@ export default function FeedbackUser() {
             <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Explore</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/HomeUser" className="hover:text-orange-600 transition-colors">Home</Link></li>
               <li><Link to="/MenuUser" className="hover:text-orange-600 transition-colors">Our Menu</Link></li>
@@ -173,17 +173,17 @@ export default function FeedbackUser() {
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Support</h4>
             <ul className="space-y-3 text-sm font-bold text-gray-500 uppercase tracking-tighter">
               <li><Link to="/FAQUser" className="hover:text-orange-600 transition-colors">General FAQ</Link></li>
               <li><Link to="/FeedbackUser" className="hover:text-orange-600 transition-colors">Feedback</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-black text-blue-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
+            <h4 className="font-black text-green-900 mb-6 uppercase tracking-widest text-xs italic">Social</h4>
             <div className="flex gap-4">
               {["instagram", "tiktok", "facebook"].map((social) => (
-                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                <a key={social} href="#" className="w-12 h-12 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:bg-green-600 hover:text-white transition-all shadow-sm">
                   <i className={`fab fa-${social}`}></i>
                 </a>
               ))}
@@ -199,12 +199,12 @@ export default function FeedbackUser() {
 // Tambahkan komponen Input dan Textarea di bawah export default atau di file terpisah agar rapi
 const Input = ({ label, name, type = "text", ...props }) => (
   <div className="w-full">
-    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-900 mb-2 ml-4">
+    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-green-900 mb-2 ml-4">
       {label} {props.required && <span className="text-orange-600">*</span>}
     </label>
     <input
       type={type}
-      className="w-full px-6 py-4 bg-white border-2 border-blue-50 rounded-[2rem] text-sm font-bold text-gray-700 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all placeholder:text-gray-300 shadow-sm"
+      className="w-full px-6 py-4 bg-white border-2 border-green-50 rounded-[2rem] text-sm font-bold text-gray-700 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-50 transition-all placeholder:text-gray-300 shadow-sm"
       {...props}
     />
   </div>
@@ -212,12 +212,12 @@ const Input = ({ label, name, type = "text", ...props }) => (
 
 const Textarea = ({ label, ...props }) => (
   <div className="w-full">
-    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-900 mb-2 ml-4">
+    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-green-900 mb-2 ml-4">
       {label} {props.required && <span className="text-orange-600">*</span>}
     </label>
     <textarea
       rows="4"
-      className="w-full px-6 py-4 bg-white border-2 border-blue-50 rounded-[2.5rem] text-sm font-bold text-gray-700 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all placeholder:text-gray-300 shadow-sm resize-none"
+      className="w-full px-6 py-4 bg-white border-2 border-green-50 rounded-[2.5rem] text-sm font-bold text-gray-700 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-50 transition-all placeholder:text-gray-300 shadow-sm resize-none"
       {...props}
     />
   </div>

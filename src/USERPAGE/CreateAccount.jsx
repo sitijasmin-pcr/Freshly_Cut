@@ -1,170 +1,15 @@
-// // src/CreateAccount.jsx
-// import React, { useState } from 'react';
-// import { Link, useNavigate } from 'react-router-dom';
-// import Swal from 'sweetalert2';
-// import { supabase } from '../supabase';
-// import { Eye, EyeOff } from 'lucide-react';
-
-// export default function CreateAccount() {
-//   const [nama, setNama] = useState('');
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [showPassword, setShowPassword] = useState(false);
-
-//   const navigate = useNavigate();
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setIsSubmitting(true);
-
-//     if (!nama || !email || !password) {
-//       Swal.fire("Peringatan", "Nama, Email, dan Password tidak boleh kosong!", "warning");
-//       setIsSubmitting(false);
-//       return;
-//     }
-
-//     if (password.length < 6) {
-//       Swal.fire("Peringatan", "Password minimal harus 6 karakter.", "warning");
-//       setIsSubmitting(false);
-//       return;
-//     }
-
-//     try {
-//       const { error } = await supabase
-//         .from('users')
-//         .insert([
-//           {
-//             nama: nama,
-//             email: email,
-//             pass: password,
-//             role: 'customer',
-//           },
-//         ]);
-
-//       if (error) {
-//         console.error("Error creating account:", error.message);
-//         let errorMessage = "Gagal membuat akun. Silakan coba lagi.";
-//         if (error.code === '23505') {
-//           errorMessage = "Email sudah terdaftar. Silakan gunakan email lain atau login.";
-//         }
-//         Swal.fire("Error", errorMessage, "error");
-//       } else {
-//         Swal.fire(
-//           "Berhasil!",
-//           "Akun Anda berhasil dibuat sebagai Customer. Silakan login.",
-//           "success"
-//         ).then(() => {
-//           navigate('/Login');
-//         });
-//       }
-//     } catch (error) {
-//       console.error("Unexpected error:", error.message);
-//       Swal.fire("Error", "Terjadi kesalahan yang tidak terduga.", "error");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-//       <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md">
-//         <div className="text-center mb-8">
-//           <img src="/img/Logo.png" alt="Logo Tomoro Coffee" className="h-16 mx-auto mb-4" />
-//           <h1 className="text-3xl font-extrabold text-orange-700 mb-2">Buat Akun Baru</h1>
-//           <p className="text-gray-600">Daftar sekarang untuk mulai berinteraksi dengan Tomoro Coffee!</p>
-//         </div>
-
-//         <form onSubmit={handleSubmit} className="space-y-5">
-//           <div>
-//             <label htmlFor="nama" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-//             <input
-//               type="text"
-//               id="nama"
-//               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
-//               placeholder="Masukkan nama lengkap Anda"
-//               value={nama}
-//               onChange={(e) => setNama(e.target.value)}
-//               required
-//             />
-//           </div>
-
-//           <div>
-//             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-//             <input
-//               type="email"
-//               id="email"
-//               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
-//               placeholder="email@contoh.com"
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//               required
-//             />
-//           </div>
-
-//           <div className="relative">
-//             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-//             <input
-//               type={showPassword ? "text" : "password"}
-//               id="password"
-//               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 pr-10"
-//               placeholder="Minimal 6 karakter"
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//               required
-//             />
-//             <button
-//               type="button"
-//               onClick={() => setShowPassword(!showPassword)}
-//               className="absolute inset-y-0 right-0 pr-3 flex items-center pt-6 text-gray-500 hover:text-gray-700"
-//             >
-//               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-//             </button>
-//           </div>
-
-//           <button
-//             type="submit"
-//             className="w-full py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-md hover:bg-orange-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-//             disabled={isSubmitting}
-//           >
-//             {isSubmitting ? (
-//               <>
-//                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-//                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-//                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//                 </svg>
-//                 Mendaftar...
-//               </>
-//             ) : (
-//               "Daftar Akun"
-//             )}
-//           </button>
-//         </form>
-
-//         <p className="mt-6 text-center text-gray-600 text-sm">
-//           Sudah punya akun?{" "}
-//           <Link to="/Login" className="text-orange-600 hover:text-orange-800 font-medium">
-//             Login di sini
-//           </Link>
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { supabase } from '../supabase';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, MapPin, Image as ImageIcon, ArrowRight } from 'lucide-react';
 
 export default function CreateAccount() {
   const [nama, setNama] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [alamat, setAlamat] = useState(''); // State baru
-  const [profilePicture, setProfilePicture] = useState(''); // State baru
+  const [alamat, setAlamat] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -189,23 +34,18 @@ export default function CreateAccount() {
     try {
       const { error } = await supabase
         .from('users')
-        .insert([
-          {
-            nama: nama,
-            email: email,
-            pass: password,
-            address: alamat,            // Field baru
-            Profile_Picture: profilePicture, // Field baru
-            role: 'customer',
-          },
-        ]);
+        .insert([{
+          nama: nama,
+          email: email,
+          pass: password,
+          address: alamat,
+          Profile_Picture: profilePicture,
+          role: 'customer',
+        }]);
 
       if (error) {
-        console.error("Error creating account:", error.message);
         let errorMessage = "Gagal membuat akun.";
-        if (error.code === '23505') {
-          errorMessage = "Email sudah terdaftar.";
-        }
+        if (error.code === '23505') errorMessage = "Email sudah terdaftar.";
         Swal.fire("Error", errorMessage, "error");
       } else {
         Swal.fire("Berhasil!", "Akun berhasil dibuat. Silakan login.", "success")
@@ -219,55 +59,84 @@ export default function CreateAccount() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-extrabold text-orange-700">Buat Akun</h1>
-          <p className="text-gray-600 text-sm mt-1">Lengkapi profil Anda</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 relative overflow-hidden font-sans antialiased">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-orange-100 rounded-full blur-3xl opacity-50"></div>
+      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-30"></div>
+
+      <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100 relative z-10 animate-in fade-in zoom-in duration-500">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-50 mb-4">
+            <img src="src/assets/img/Logo buah segar _Freshly Cut_.png" alt="Logo" className="h-16 object-contain" />
+          </div>
+          <h2 className="text-3xl font-black text-green-800 tracking-tight">Buat Akun</h2>
+          <p className="text-gray-400 text-sm mt-1 font-medium">Lengkapi profil Anda untuk bergabung</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Input Nama */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Nama Lengkap */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-            <input type="text" className="w-full p-2 border rounded-lg" value={nama} onChange={(e) => setNama(e.target.value)} required />
+            <label className="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wider">Nama Lengkap</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input type="text" className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all duration-200 text-gray-700 shadow-sm" placeholder="John Doe" value={nama} onChange={(e) => setNama(e.target.value)} required />
+            </div>
           </div>
 
-          {/* Input Email */}
+          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" className="w-full p-2 border rounded-lg" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label className="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wider">Alamat Email</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input type="email" className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all duration-200 text-gray-700 shadow-sm" placeholder="email@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
           </div>
 
-          {/* Input Password */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input type={showPassword ? "text" : "password"} className="w-full p-2 border rounded-lg" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-8 text-gray-500">
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          {/* Input Alamat */}
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Alamat</label>
-            <textarea className="w-full p-2 border rounded-lg" rows="2" value={alamat} onChange={(e) => setAlamat(e.target.value)} required />
+            <label className="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wider">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input type={showPassword ? "text" : "password"} className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all duration-200 text-gray-700 shadow-sm" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
-          {/* Input URL Gambar */}
+          {/* Alamat */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Link Foto Profil (Opsional)</label>
-            <input type="url" className="w-full p-2 border rounded-lg" placeholder="https://contoh.com/gambar.jpg" value={profilePicture} onChange={(e) => setProfilePicture(e.target.value)} />
+            <label className="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wider">Alamat</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-4 text-gray-400" size={18} />
+              <textarea className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all duration-200 text-gray-700 shadow-sm" rows="2" placeholder="Jl. Contoh No. 123" value={alamat} onChange={(e) => setAlamat(e.target.value)} required />
+            </div>
           </div>
 
-          <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700">
-            {isSubmitting ? "Mendaftar..." : "Daftar Akun"}
+          {/* Profile Picture */}
+          <div>
+            <label className="block text-gray-700 text-xs font-bold mb-2 uppercase tracking-wider">Link Foto Profil (Opsional)</label>
+            <div className="relative">
+              <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input type="url" className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white outline-none transition-all duration-200 text-gray-700 shadow-sm" placeholder="https://..." value={profilePicture} onChange={(e) => setProfilePicture(e.target.value)} />
+            </div>
+          </div>
+
+          <button type="submit" disabled={isSubmitting} className="w-full bg-green-800 hover:bg-green-900 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-orange-100 transition-all active:scale-[0.98] group mt-4">
+            {isSubmitting ? "Memproses..." : "DAFTAR SEKARANG"}
+            {!isSubmitting && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm">
-          Sudah punya akun? <Link to="/Login" className="text-orange-600 font-bold">Login</Link>
-        </p>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-gray-500 text-sm">
+            Sudah punya akun?{' '}
+            <Link to="/Login" className="font-bold text-green-600 hover:text-green-700 transition-colors underline-offset-4 hover:underline">
+              Login Disini
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

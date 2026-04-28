@@ -47,6 +47,7 @@ import Login from './Login';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import TentangUser from './USERPAGE/TentangUser';
+import PaymentUser from './USERPAGE/PaymentUser';
 
 // --- Auth Context Setup ---
 export const AuthContext = createContext(null);
@@ -240,8 +241,11 @@ function App() {
             <Route path="/tentang" element={<TentangUser />} />
             <Route path="/FeedbackUser" element={<FeedbackUser />} />
             <Route path="/ProfileUser" element={<ProfileUser />} />
+            <Route path="/PaymentUser" element={<PaymentUser />} />
+
             <Route path="/lokasi" element={<LokasiUser />} />
-            <Route path="/order-information" element={<OrderInformation />} />
+            {/* <Route path="/order-information" element={<OrderInformation />} /> */}
+            <Route path="/order-information/:orderId" element={<OrderInformation />} />
           </Route>
 
           <Route path="*" element={<div className="min-h-screen flex items-center justify-center text-2xl font-bold text-gray-700">404 Not Found</div>} />
