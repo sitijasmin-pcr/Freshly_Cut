@@ -17,7 +17,7 @@ import { MdFeedback } from "react-icons/md";
 
 
 // 🔥 IMPORT LOGO (PASTIKAN PATH BENAR)
-import FreshlyLogo from "../assets/FreshlyLogo.png";
+import logo from "../assets/FreshlyLogo.png";
 
 const menuItems = [
   { name: 'Dashboard', icon: <BarChart2 />, path: '/laporan' },
@@ -55,7 +55,7 @@ const Sidebar = () => {
       <div className="mb-8 flex flex-col items-center">
         <img 
           className="w-24" 
-          src="src/assets/FreshlyLogo.png" 
+          src={logo}
           alt="Freshly Logo" 
         />
         <h1 className="mt-2 text-lg font-bold italic text-green-700 tracking-wide drop-shadow-sm">

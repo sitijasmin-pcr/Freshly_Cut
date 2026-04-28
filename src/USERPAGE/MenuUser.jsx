@@ -13,6 +13,8 @@ import {
 import { supabase } from "../supabase";
 import { useCart } from "./CartContext";
 
+import logo from "../assets/FreshlyLogo.png";
+
 export default function MenuUser() {
   const { addToCart, cartItems } = useCart();
   const location = useLocation();

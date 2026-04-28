@@ -5,6 +5,8 @@ import { Trash2, Plus, Minus, UserCircle, ShoppingCart, Bell } from "lucide-reac
 import { useCart } from "./CartContext";
 import { supabase } from "../supabase";
 
+import logo from "../assets/FreshlyLogo.png";
+
 const CartUser = () => {
   const location = useLocation();
   const { cartItems, updateQuantity, removeItem } = useCart();
@@ -50,7 +52,7 @@ const CartUser = () => {
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <Link to="/HomeUser" className="flex items-center gap-2">
-            <img src="src/assets/FreshlyLogo.png" alt="Logo" className="h-12" />
+            <img src={logo} alt="Logo" className="h-12" />
             <div className="hidden sm:block">
               <span className="text-xl font-black text-orange-600 block leading-none">FRESHLY CUT</span>
               <span className="text-[10px] tracking-[0.3em] text-gray-400 uppercase">Makan Sehat, Tinggal Hap!</span>

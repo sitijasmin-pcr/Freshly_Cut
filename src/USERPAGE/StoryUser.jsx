@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useCart } from "./CartContext";
 
+import logo from "../assets/FreshlyLogo.png";
+
 // Section reusable (disamakan style MenuUser)
 const AnimatedSection = ({ children, title, icon: Icon, delay = 0 }) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -56,7 +58,7 @@ export default function StoryUser() {
 
           <Link to="/HomeUser" className="flex items-center gap-2">
             <img
-              src="src/assets/FreshlyLogo.png"
+              src={logo}
               alt="Logo"
               className="h-12"
             />
@@ -198,7 +200,7 @@ export default function StoryUser() {
       <footer className="bg-white pt-24 pb-12 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 border-b border-gray-100 pb-16 mb-8">
           <div>
-            <img src="src/assets/FreshlyLogo.png" alt="Logo" className="h-16 mb-6" />
+            <img src={logo} alt="Logo" className="h-16 mb-6" />
             <p className="text-gray-400 text-sm font-medium italic">Empowering everyone to enjoy a high-quality cup of coffee. Freshness guaranteed.</p>
           </div>
           <div>
